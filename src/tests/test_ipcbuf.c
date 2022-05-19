@@ -31,7 +31,7 @@ int main (int argc, char** argv)
   uint64_t max_length = 0;
   uint64_t min_length = MAXINT;
 
-  unsigned ntest = 1024 * 16;
+  unsigned ntest = 16;
   unsigned itest = 0;
   unsigned twice = 0;
   

@@ -220,7 +220,11 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
 #ifdef _DEBUG
         fprintf (stderr, "ipcio_close: bufs_opened=%u, close_block_write(%lu)\n", ipc->bufs_opened, bufsz);
 #endif
-        ipcio_close_block_write(ipc, bufsz);
+        if (ipcio_close_block_write(ipc, bufsz) < 0)
+        {
+          fprintf (stderr, "ipcio_close: failed to close an open buffer bufs_opened=%u\n", ipc->bufs_opened);
+          return -1;
+        }
       }
 
       if (ipcbuf_enable_eod ((ipcbuf_t*)ipc) < 0) {
