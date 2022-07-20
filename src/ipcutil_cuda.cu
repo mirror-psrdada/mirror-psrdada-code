@@ -25,7 +25,7 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
   cudaError_t error;
 
 #ifdef _DEBUG
-  fprintf (stderr, "ipc_alloc_cuda: shmget(key=%x size=%ld, flag=%x\n", 
+  fprintf (stderr, "ipc_alloc_cuda: shmget(key=%x size=%ld, flag=%x)\n",
            key, handle_size, flag);
 #endif
 
@@ -60,8 +60,17 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
   fprintf (stderr, "ipc_alloc_cuda: selecting device %d\n", device_id);
 #endif
 
-  cudaSetDevice (device_id);
+  error = cudaSetDevice (device_id);
+  if (error != cudaSuccess)
+  {
+    fprintf (stderr, "failed to select cuda device %s: %s\n",
+             device_id, cudaGetErrorString (error));
+    return 0;
+  }
 
+#ifdef _DEBUG
+  fprintf (stderr, "ipc_alloc_cuda: selected device %d\n", device_id);
+#endif
   // if we are wanting to create a shared memory segment of size bytes
   if (flag & IPC_CREAT)
   {
@@ -91,6 +100,9 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
   }
   else
   {
+#ifdef _DEBUG
+    fprintf (stderr, "ipc_alloc_cuda: cudaIpcOpenMemHandle()\n");
+#endif
     // get a pointer to existing device memory using handlePtr
     error = cudaIpcOpenMemHandle (&devPtr, *handlePtr, cudaIpcMemLazyEnablePeerAccess);
     if (error != cudaSuccess)
