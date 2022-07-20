@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define STRLEN 4096
+#define STRLEN 131072
 
 static char* whitespace = " \t\n";
 
