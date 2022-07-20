@@ -38,7 +38,7 @@ typedef struct {
 
 } dada_dbgpu_t;
 
-#define DADA_DBGPU_INIT { PINNED, 0, 0, 0, 0, 0, 0 }
+#define DADA_DBGPU_INIT { PINNED, 0, 0, 0, 0, 0, 0, 0 }
 
 int dbgpu_init (dada_dbgpu_t* ctx, multilog_t* log);
 int dbgpu_open (dada_client_t* client);
@@ -141,17 +141,20 @@ int main(int argc, char** argv)
     return EXIT_FAILURE;
 
   client = dada_client_create ();
+  client->log = log;
 
+  if (dbgpu.verbose)
+    multilog(client->log, LOG_INFO, "main: initialising\n");
   dbgpu_init (&dbgpu, log);
 
   // ensure that we register the DADA DB buffers as Cuda Host memory
+  if (dbgpu.verbose)
+    multilog(client->log, LOG_INFO, "main: registering ring buffer memory with GPU driver\n");
   if (dada_cuda_dbregister(hdu) < 0)
   {
     fprintf (stderr, "failed to register DADA buffers as pinned memory\n");
     return EXIT_FAILURE;
   }
-
-  client->log = log;
 
   client->data_block        = hdu->data_block;
   client->header_block      = hdu->header_block;
@@ -164,6 +167,8 @@ int main(int argc, char** argv)
 
   client->context = &dbgpu;
 
+  if (dbgpu.verbose)
+    multilog(client->log, LOG_INFO, "main: starting main data acquisition loop\n");
   while (!client->quit)
   {
     if (dbgpu.verbose)
@@ -196,6 +201,8 @@ int main(int argc, char** argv)
   if (dbgpu.verbose)
     multilog(client->log, LOG_INFO, "main: dada_hdu_disconnect()\n");
 
+  if (dbgpu.verbose)
+    multilog(client->log, LOG_INFO, "main: unregistering ring buffer memory with GPU driver\n");
   if (dada_cuda_dbunregister (hdu) < 0)
   {
     multilog (client->log, LOG_ERR, "failed to unregister DADA DB buffers\n");
