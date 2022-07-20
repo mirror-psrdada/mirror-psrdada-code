@@ -613,8 +613,8 @@ char * ipcio_open_block_write (ipcio_t *ipc, uint64_t *block_id)
 
   if (ipc->bufs_opened >= ipc->bufs_opened_max)
   {
-    fprintf (stderr, "ipcio_open_block_write: cannot open more than %"
-             PRIu64" bufs\n", ipc->bufs_opened_max);
+    fprintf (stderr, "ipcio_open_block_write: cannot open more than %u bufs\n",
+             ipc->bufs_opened_max);
     return 0;
   }
 

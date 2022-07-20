@@ -118,7 +118,7 @@ int main ()
   /* open the command/control port */
   command_parse_serve (server, 2021);
 
-  while (!test.state != TEST_QUIT) {
+  while (test.state != TEST_QUIT) {
 
     switch (test.state) {
     case TEST_FLOAT:

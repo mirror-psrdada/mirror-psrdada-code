@@ -328,7 +328,7 @@ int open_next_contiguous_file (dada_client_t* client)
 int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
 {
   unsigned ifile = 0;
-  int fd, ret;
+  int fd;
   uint64_t prev_obs_offset, prev_file_size;
   uint64_t curr_obs_offset, curr_file_size;
 
@@ -346,7 +346,7 @@ int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
     fd = open (diskdb->filenames[0], O_RDONLY);
     if (fd)
     {
-      ret = read (fd, header, hdr_size);
+      read (fd, header, hdr_size);
 
       if (ascii_header_get (header, "UTC_START", "%s", prev_utc_start) != 1)
       {
@@ -382,7 +382,7 @@ int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
     fd = open (diskdb->filenames[ifile], O_RDONLY);
     if (fd)
     {
-      ret = read (fd, header, hdr_size);
+      read (fd, header, hdr_size);
       close (fd);
 
       if (ascii_header_get (header, "UTC_START", "%s", curr_utc_start) != 1)
@@ -438,7 +438,7 @@ int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
   free (curr_utc_start);
   free (header);
 
-  return 0;
+  return rval;
 }
 
 int main (int argc, char **argv)

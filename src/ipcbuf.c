@@ -382,10 +382,18 @@ int ipcbuf_disconnect (ipcbuf_t* id)
     }
   }
 
-  if (id->buffer) free (id->buffer); id->buffer = 0;
-  if (id->shm_addr) free (id->shm_addr); id->shm_addr = 0;
-  if (id->shmid) free (id->shmid); id->shmid = 0;
-  if (id->semid_data) free (id->semid_data); id->semid_data = 0;
+  if (id->buffer)
+    free (id->buffer);
+  id->buffer = 0;
+  if (id->shm_addr)
+    free (id->shm_addr);
+  id->shm_addr = 0;
+  if (id->shmid)
+    free (id->shmid);
+  id->shmid = 0;
+  if (id->semid_data)
+    free (id->semid_data);
+  id->semid_data = 0;
 
   if (id->sync && shmdt (id->sync) < 0)
     perror ("ipcbuf_disconnect: shmdt(sync)");
@@ -443,9 +451,15 @@ int ipcbuf_destroy (ipcbuf_t* id)
 
   }
 
-  if (id->buffer) free (id->buffer); id->buffer = 0;
-  if (id->shmid) free (id->shmid); id->shmid = 0;
-  if (id->semid_data) free (id->semid_data); id->semid_data = 0;
+  if (id->buffer)
+    free (id->buffer);
+  id->buffer = 0;
+  if (id->shmid)
+    free (id->shmid);
+  id->shmid = 0;
+  if (id->semid_data)
+    free (id->semid_data);
+  id->semid_data = 0;
 
 #ifdef _DEBUG
   fprintf (stderr, "ipcbuf_destroy: syncid=%d\n", id->syncid);

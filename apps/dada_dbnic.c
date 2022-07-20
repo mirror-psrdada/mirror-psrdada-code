@@ -473,6 +473,8 @@ int main (int argc, char **argv)
 
   client->context = &dbnic;
 
+  if (verbose)
+    fprintf(stderr, "starting main loop\n");
   while (!client->quit)
   {
     if (dada_client_read (client) < 0)

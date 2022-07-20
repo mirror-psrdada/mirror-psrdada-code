@@ -80,8 +80,8 @@ int main (int argc, char **argv)
   uint64_t max_read_data, max_full_data, min_cleared_data;
   uint64_t max_read_header, max_full_header, min_cleared_header;
 
-  uint64_t bufs_read_data, bufs_written_data;
-  uint64_t bufs_read_header, bufs_written_header;
+  uint64_t bufs_written_data;
+  uint64_t bufs_written_header;
 
   int n_readers = -1;
   int iread = 0;
@@ -92,7 +92,6 @@ int main (int argc, char **argv)
 
   n_readers = db->sync->n_readers;
           
-  uint64_t nhbufs = ipcbuf_get_nbufs (hb);
   uint64_t ndbufs = ipcbuf_get_nbufs (db);
 
   uint64_t read_data[n_readers];

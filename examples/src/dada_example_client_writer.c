@@ -73,6 +73,7 @@ int example_dada_client_writer_open (dada_client_t* client)
     return (EXIT_FAILURE);
   }
   ctx->header_written = 0;
+  return 0;
 }
 
 

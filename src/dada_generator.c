@@ -123,7 +123,6 @@ void fill_gaussian_float (float *data, int length, double mean, double stddev)
 {
   unsigned i=0;
   double sample;
-  int sample_int;
   for (i=0; i<length; i++)
   {
     sample = rand_normal(mean, stddev);

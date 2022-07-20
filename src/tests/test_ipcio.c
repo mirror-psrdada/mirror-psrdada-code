@@ -60,8 +60,7 @@ int main (int argc, char** argv)
   char verbose = 0;
 
 
-  int debug = 0;
-  while ((arg = getopt(argc, argv, "b:dhn:k:v")) != -1) {
+  while ((arg = getopt(argc, argv, "b:hn:k:v")) != -1) {
 
     switch (arg)  {
 
@@ -70,7 +69,6 @@ int main (int argc, char** argv)
 	       "test_ipcio [options]\n"
 	       " -b block_size  Set the size of each block in ring buffer \n"
 	       " -n nblock      Set the number of blocks in ring buffer \n"
-	       " -d             Debug mode \n"
 	       " -k key         Key to shared memory \n"
 	       " -v             Verbose mode\n"
 	       );
@@ -81,10 +79,6 @@ int main (int argc, char** argv)
 	fprintf (stderr, "test_ipcio could not parse -b %s", optarg);
 	return -1;
       }
-      break;
-
-    case 'd':
-      debug = 1;
       break;
 
     case 'n':
