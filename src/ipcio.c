@@ -16,6 +16,8 @@ void ipcio_init (ipcio_t* ipc)
   ipc -> bytes = 0;
   ipc -> rdwrt = 0;
   ipc -> curbuf = 0;
+  ipc -> curbufsz = 0;
+  ipc -> rdwrt = 0;
 
   ipc -> marked_filled = 0;
 
