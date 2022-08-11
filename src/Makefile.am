@@ -34,7 +34,7 @@ include_HEADERS = ascii_header.h multilog.h sock.h monitor.h \
   stopwatch.h mach_gettime.h
 
 AM_CPPFLAGS =
-libpsrdada_la_LIBADD = 
+libpsrdada_la_LIBADD = -lm
 
 if HAVE_LIBRT
   libpsrdada_la_LIBADD += -lrt
@@ -80,5 +80,7 @@ include_HEADERS += \
 
 AM_CPPFLAGS += @RDMACM_CFLAGS@
 libpsrdada_la_LIBADD += @RDMACM_LIBS@
+
+libpsrdada_la_LDFLAGS = -version-info $(PSRDADA_SO_VERSION)
 
 endif

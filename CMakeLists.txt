@@ -1,26 +1,39 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.13.4)
 
 file(STRINGS version.txt PSRDada_VERSION)
-message(STATUS "Building PSRDada version ${PSRDada_VERSION}")
 
 # Project configuration, specifying version, languages,
 project(PSRDada LANGUAGES C VERSION ${PSRDada_VERSION})
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if(DEFINED ENV{PSRHOME})
+    SET(CMAKE_INSTALL_PREFIX $ENV{PSRHOME})
+  endif(DEFINED ENV{PSRHOME})
+ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
+message(STATUS "Building PSRDada ${PSRDada_VERSION} into ${CMAKE_INSTALL_PREFIX}")
+
+set(CMAKE_PROJECT_HOMEPAGE_URL http://psrdada.sourceforge.net/)
+set(CMAKE_PROJECT_DESCRIPTION "PSRDADA: Distributed Data Acquisition")
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(dependencies)
 include(CTest)
 
-#find_dependencies()
-
-#find_package(CUDAToolkit)
-#find_package(rdmacm)
-#find_package(HWLOC)
+find_dependencies()
+find_package(CUDAToolkit)
+find_package(rdmacm)
+find_package(HWLOC)
 
 if (RDMACM_FOUND)
   set(HAVE_RDMACM on)
 endif()
+
 if (CUDAToolkit_FOUND)
+  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES "35;50;72")
+  endif()
   enable_language(CUDA)
   set(HAVE_CUDA on)
 endif()
@@ -34,6 +47,13 @@ configure_file(cmake_config.h.in config.h)
 
 add_subdirectory(src)
 add_subdirectory(apps)
+add_subdirectory(Management)
+
+# ---------------------------------------------------------------------------------------
+# Install
+# ---------------------------------------------------------------------------------------
+
+set(export_dest_dir "${CMAKE_INSTALL_PREFIX}/cmake/psrdada")
 
 # Install cmake config + version + target files
 include(CMakePackageConfigHelpers)
@@ -49,21 +69,18 @@ write_basic_package_version_file(
     AnyNewerVersion
 )
 
-#install(FILES
-#  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PSRDadaConfig.cmake
-#  ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PSRDadaVersion.cmake
-#  DESTINATION
-#    share/ska-pst-recv/cmake
-#  COMPONENT
-#    dev
-#)
+install(
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PSRDadaConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PSRDadaVersion.cmake
+  DESTINATION
+    "${export_dest_dir}"
+)
 
 #install(EXPORT PSRDadaTargets
 #  FILE
 #    PSRDadaTargets.cmake
 #  DESTINATION
 #    share/ska/pst/recv/cmake
-#  COMPONENT
-#    dev
 #)
 
