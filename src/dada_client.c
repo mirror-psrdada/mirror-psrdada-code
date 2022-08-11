@@ -15,8 +15,6 @@
 #include <cuda_runtime.h>
 #endif
 
-// #define _DEBUG 1
-
 /*! Create a new DADA client main loop */
 dada_client_t* dada_client_create ()
 {
@@ -282,7 +280,7 @@ int64_t dada_client_io_loop_block (dada_client_t* client)
         {
           if (client->direction == dada_client_reader)
           {
-            err = cudaMemcpy (buffer, local_buffer, bytes, cudaMemcpyDeviceToHost);
+            err = cudaMemcpy (local_buffer, buffer, bytes, cudaMemcpyDeviceToHost);
             if (err != cudaSuccess)
             {
               multilog (log, LOG_ERR, "io_loop_block: cudaMemcpy failed: %s\n",
