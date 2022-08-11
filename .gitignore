@@ -1,3 +1,6 @@
+# Temporary/backup files
+*~
+
 # Object files
 *.o
 *.ko
