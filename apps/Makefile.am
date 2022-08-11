@@ -51,6 +51,7 @@ EXTRA_DIST = ipcrme
 
 if HAVE_HWLOC
 
+AM_CFLAGS += @HWLOC_CFLAGS@
 LDADD += @HWLOC_LIBS@ 
 
 endif

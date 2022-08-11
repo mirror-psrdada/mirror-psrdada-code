@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#include <sys/select.h>
 
 #ifndef __USE_XOPEN
 #define __USE_XOPEN

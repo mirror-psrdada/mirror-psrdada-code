@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <values.h>
+#include <limits.h>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -30,7 +30,7 @@ int main (int argc, char** argv)
 
   uint64_t length = 0;
   uint64_t max_length = 0;
-  uint64_t min_length = MAXINT;
+  uint64_t min_length = INT_MAX;
 
   unsigned ntest = 1024 * 16;
   unsigned itest = 0;
@@ -45,7 +45,7 @@ int main (int argc, char** argv)
   uint64_t offset = 0;
 
   uint64_t max_offset = 0;
-  uint64_t min_offset = MAXINT;
+  uint64_t min_offset = INT_MAX;
 
   uint64_t raise_sod = 0;
   uint64_t raise_eod = 0;

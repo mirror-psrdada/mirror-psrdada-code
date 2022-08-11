@@ -34,7 +34,11 @@ include_HEADERS = ascii_header.h multilog.h sock.h monitor.h \
   stopwatch.h mach_gettime.h
 
 AM_CPPFLAGS =
-libpsrdada_la_LIBADD = -lrt
+libpsrdada_la_LIBADD = 
+
+if HAVE_LIBRT
+  libpsrdada_la_LIBADD += -lrt
+endif
 
 if HAVE_HWLOC
 
