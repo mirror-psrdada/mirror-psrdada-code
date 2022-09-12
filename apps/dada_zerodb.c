@@ -12,7 +12,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <assert.h>
-#include <emmintrin.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -83,24 +82,10 @@ int64_t transfer_data (dada_client_t* client, void* data, uint64_t data_size)
     return data_size;
   }
 
-#define MEMSET
-#ifdef MEMSET
   bzero (data, data_size);
-  //memset (data, 0, data_size);
-#else
-  const unsigned nblock = data_size / (sizeof(__m128i));
-  __m128i zero = {0};
-  __m128i * p = (__m128i *) data;
-
-  unsigned i;
-  for (i=0; i<nblock; i++)
-  {
-    _mm_stream_si128(&p[i], zero);
-  }
 
 #ifdef _DEBUG 
   multilog (client->log, LOG_INFO, "transfer_data: copied %"PRIu64" bytes\n", bytes_copied);
-#endif
 #endif
 
   return (int64_t) data_size;
