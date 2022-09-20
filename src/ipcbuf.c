@@ -80,7 +80,7 @@ int ipcsync_get (ipcbuf_t* id, key_t key, uint64_t nbufs, int flag)
 #endif
 
   id->shmkey = (key_t*) (id->count + nbufs);
-  id->state = 0;
+  id->state = IPCBUF_DISCON;
   id->viewbuf = 0;
 
   return 0;
@@ -498,10 +498,11 @@ int ipcbuf_lock_write (ipcbuf_t* id)
   /* WCHANGE is a special state that means the process will change into the
      WRITING state on the first call to get_next_write */
 
-  if (id->sync->w_state == 0)
+  if (id->sync->w_state == IPCBUF_DISCON)
     id->state = IPCBUF_WCHANGE;
   else
     id->state = IPCBUF_WRITING;
+  id->sync->w_state = id->state;
 
   id->xfer = id->sync->w_xfer % IPCBUF_XFERS;
 
@@ -528,6 +529,7 @@ int ipcbuf_unlock_write (ipcbuf_t* id)
   }
 
   id->state = IPCBUF_VIEWER;
+  id->sync->w_state = IPCBUF_DISCON;
 
   return 0;
 }
@@ -548,6 +550,7 @@ int ipcbuf_enable_eod (ipcbuf_t* id)
   }
 
   id->state = IPCBUF_WCHANGE;
+  id->sync->w_state = IPCBUF_WCHANGE;
 
   return 0;
 }
@@ -562,6 +565,7 @@ int ipcbuf_disable_sod (ipcbuf_t* id)
   }
 
   id->state = IPCBUF_WRITER;
+  id->sync->w_state = IPCBUF_WRITER;
 
   return 0;
 }
@@ -896,7 +900,7 @@ int ipcbuf_mark_filled (ipcbuf_t* id, uint64_t nbytes)
     id->xfer = sync->w_xfer % IPCBUF_XFERS;
 
     id->state = IPCBUF_WRITER;
-    id->sync->w_state = 0;
+    id->sync->w_state = IPCBUF_WRITER;
 
     // corner case where EOD occured on first byte of the block
     if (nbytes == 0)
@@ -1043,6 +1047,7 @@ int ipcbuf_lock_read (ipcbuf_t* id)
     id->state = IPCBUF_READER;
   else
     id->state = IPCBUF_READING;
+  id->sync->r_states[id->iread] = id->state;
 
   id->xfer = id->sync->r_xfers[id->iread] % IPCBUF_XFERS;
 
@@ -1096,15 +1101,14 @@ int ipcbuf_unlock_read (ipcbuf_t* id)
   }
 
   id->state = IPCBUF_VIEWER;
-#ifdef _DEBUG
-  int iread = id->iread;
-#endif
-  id->iread = -1;
+  id->sync->r_states[id->iread] = IPCBUF_DISCON;
 
 #ifdef _DEBUG
     fprintf (stderr, "ipcbuf_unlock_read[%d]: id->sync->r_states[%d]=%d\n",
-                     iread, iread, id->sync->r_states[iread]);
+                     id->iread, id->iread, id->sync->r_states[id->iread]);
 #endif
+  id->iread = -1;
+
 
   return 0;
 }
@@ -1330,7 +1334,6 @@ int64_t ipcbuf_tell_read (ipcbuf_t* id)
 
 int ipcbuf_mark_cleared (ipcbuf_t* id)
 {
-  ipcsync_t* sync = 0;
   int iread = id->iread;
 
   if (!id)
@@ -1345,8 +1348,6 @@ int ipcbuf_mark_cleared (ipcbuf_t* id)
     return -1;
   }
 
-  sync = id->sync;
-
 #ifdef _DEBUG
   fprintf (stderr, "ipcbuf_mark_cleared: increment CLEAR=%d\n",
                    semctl (id->semid_data[iread], IPCBUF_CLEAR, GETVAL));
@@ -1356,7 +1357,7 @@ int ipcbuf_mark_cleared (ipcbuf_t* id)
   if (ipc_semop (id->semid_data[iread], IPCBUF_CLEAR, 1, 0) < 0)
     return -1;
 
-  if (sync->eod[id->xfer] && sync->r_bufs[iread] == sync->e_buf[id->xfer])
+  if (id->sync->eod[id->xfer] && id->sync->r_bufs[iread] == id->sync->e_buf[id->xfer])
   {
 #ifdef _DEBUG
     fprintf (stderr, "ipcbuf_mark_cleared: increment EODACK=%d; CLEAR=%d\n",
@@ -1365,10 +1366,10 @@ int ipcbuf_mark_cleared (ipcbuf_t* id)
 #endif
 
     id->state = IPCBUF_RSTOP;
-    id->sync->r_states[iread] = IPCBUF_DISCON;
+    id->sync->r_states[iread] = IPCBUF_RSTOP;
 
-    sync->r_xfers[iread] ++;
-    id->xfer = sync->r_xfers[iread] % IPCBUF_XFERS;
+    id->sync->r_xfers[iread] ++;
+    id->xfer = id->sync->r_xfers[iread] % IPCBUF_XFERS;
 
     if (ipc_semop (id->semid_data[iread], IPCBUF_EODACK, 1, 0) < 0) {
       fprintf (stderr, "ipcbuf_mark_cleared: error incrementing EODACK\n");
@@ -1379,9 +1380,9 @@ int ipcbuf_mark_cleared (ipcbuf_t* id)
   {
 #ifdef _DEBUG
     fprintf (stderr, "ipcbuf_mark_cleared: increment r_buf=%"PRIu64"\n",
-             sync->r_bufs[iread]);
+             id->sync->r_bufs[iread]);
 #endif
-    sync->r_bufs[iread] ++;
+    id->sync->r_bufs[iread] ++;
   }
 
   return 0;
@@ -1390,7 +1391,6 @@ int ipcbuf_mark_cleared (ipcbuf_t* id)
 int ipcbuf_reset (ipcbuf_t* id)
 {
   uint64_t ibuf = 0;
-  int iread = 0;
   uint64_t nbufs = ipcbuf_get_nbufs (id);
   ipcsync_t* sync = id->sync;
   unsigned ix = 0;
@@ -1399,6 +1399,7 @@ int ipcbuf_reset (ipcbuf_t* id)
   if (id->state == IPCBUF_RSTOP)
   {
     id->state = IPCBUF_READER;
+    id->sync->r_states[id->iread] = IPCBUF_READER;
     return 0;
   }
 
@@ -1416,7 +1417,7 @@ int ipcbuf_reset (ipcbuf_t* id)
   {
     while (id->count[ibuf])
     {
-      for (iread = 0; iread < sync->n_readers; iread++)
+      for (int iread = 0; iread < sync->n_readers; iread++)
       {
 #ifdef _DEBUG
         fprintf (stderr, "ipcbuf_reset: decrement CLEAR=%d\n",
@@ -1435,7 +1436,7 @@ int ipcbuf_reset (ipcbuf_t* id)
     }
   }
 
-  for (iread = 0; iread < sync->n_readers; iread++)
+  for (int iread = 0; iread < sync->n_readers; iread++)
   {
 #ifdef _DEBUG
     fprintf (stderr, "ipcbuf_reset: decrement SODACK=%d\n",
@@ -1826,6 +1827,11 @@ int ipcbuf_get_reader_conn_iread (ipcbuf_t* id, int iread)
     }
     return reader_conn;
   }
+}
+
+int ipcbuf_get_write_semaphore_count (ipcbuf_t* id)
+{
+  return semctl (id->semid_connect, IPCBUF_WRITE, GETVAL);
 }
 
 int ipcbuf_get_read_semaphore_count (ipcbuf_t* id)

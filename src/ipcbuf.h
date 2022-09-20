@@ -247,15 +247,16 @@ extern "C" {
   uint64_t ipcbuf_get_eodack (ipcbuf_t* id);
   uint64_t ipcbuf_get_eodack_iread (ipcbuf_t* id, int iread);
 
-  /*! Return the number of readers in */
+  /*! Return the number of readers */
   int ipcbuf_get_nreaders(ipcbuf_t* id);
 
   /*! Return whether reader connected, 0 == connected */
   int ipcbuf_get_reader_conn (ipcbuf_t* id);
   int ipcbuf_get_reader_conn_iread (ipcbuf_t* id, int iread);
 
-  /*! Return the current read semaphore count */
+  /*! Return the current read/write semaphore connection count */
   int ipcbuf_get_read_semaphore_count (ipcbuf_t* id);
+  int ipcbuf_get_write_semaphore_count (ipcbuf_t* id);
 
   /*! Useful utility */
   void* shm_alloc (key_t key, size_t size, int flag, int* id);
