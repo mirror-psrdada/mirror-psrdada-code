@@ -291,17 +291,17 @@ int ipcbuf_create_work (ipcbuf_t* id, key_t key, uint64_t nbufs, uint64_t bufsz,
   {
     if (ipc_semop (id->semid_data[iread], IPCBUF_SODACK, IPCBUF_XFERS, 0) < 0)
     {
-      fprintf (stderr, "ipcbuf_create: error incrementing IPCBUF_SODACK for reader %lu\n", iread);
+      fprintf (stderr, "ipcbuf_create: error incrementing IPCBUF_SODACK for reader %"PRIu64"\n", iread);
       return -1;
     }
     if (ipc_semop (id->semid_data[iread], IPCBUF_EODACK, IPCBUF_XFERS, 0) < 0)
     {
-      fprintf (stderr, "ipcbuf_create: error incrementing IPCBUF_EODACK for reader %lu\n", iread);
+      fprintf (stderr, "ipcbuf_create: error incrementing IPCBUF_EODACK for reader %"PRIu64"\n", iread);
       return -1;
     }
     if (ipc_semop (id->semid_data[iread], IPCBUF_READER_CONN, 1, 0) < 0)
     {
-      fprintf (stderr, "ipcbuf_create: error incrementing IPCBUF_READER_CONN for reader %lu\n", iread);
+      fprintf (stderr, "ipcbuf_create: error incrementing IPCBUF_READER_CONN for reader %"PRIu64"\n", iread);
       return -1;
     }
   }

@@ -197,7 +197,7 @@ int main (int argc, char **argv)
 
     else if (!key)
     {
-      fprintf (stdout, current_header);
+      fprintf (stdout, "%s", current_header);
     }
 
     if (verbose)

@@ -105,7 +105,7 @@ static void* command_parser (void * arg)
   while ((!feof (parser->output)) && (!server->quit)) {
 
     if (server->prompt)
-      fprintf (parser->output, server->prompt);
+      fprintf (parser->output, "%s", server->prompt);
 
     if (!fgets (buffer, 4096, parser->input) || feof (parser->input))
       break;
@@ -116,10 +116,10 @@ static void* command_parser (void * arg)
       break;
 
     if (ret < 0 && server->fail)
-      fprintf (parser->output, server->fail);
+      fprintf (parser->output, "%s", server->fail);
 
     if (ret >= 0 && server->ok)
-      fprintf (parser->output, server->ok);
+      fprintf (parser->output, "%s", server->ok);
 
   }
 

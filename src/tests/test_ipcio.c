@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <values.h>
+#include <stdint.h>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -18,11 +18,7 @@ int main (int argc, char** argv)
   int   arg;
 
   uint64_t nbufs = 16;
-#ifdef _SC_PAGE_SIZE
-  uint64_t bufsz = sysconf (_SC_PAGE_SIZE);
-#else
-  uint64_t bufsz = 1000000;
-#endif
+  uint64_t bufsz = getpagesize();
 
   uint64_t n64 = bufsz/sizeof(uint64_t);
   uint64_t i64 = 0;
@@ -30,7 +26,7 @@ int main (int argc, char** argv)
 
   uint64_t length = 0;
   uint64_t max_length = 0;
-  uint64_t min_length = MAXINT;
+  uint64_t min_length = UINT64_MAX;
 
   unsigned ntest = 1024 * 16;
   unsigned itest = 0;
@@ -45,7 +41,7 @@ int main (int argc, char** argv)
   uint64_t offset = 0;
 
   uint64_t max_offset = 0;
-  uint64_t min_offset = MAXINT;
+  uint64_t min_offset = UINT64_MAX;
 
   uint64_t raise_sod = 0;
   uint64_t raise_eod = 0;
