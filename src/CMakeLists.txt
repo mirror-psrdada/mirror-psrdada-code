@@ -160,6 +160,7 @@ install(
 install(
     FILES
         ${public_headers}
+        ${optional_public_headers}
     DESTINATION
         include
 )
