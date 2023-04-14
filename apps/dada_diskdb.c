@@ -610,6 +610,9 @@ int main (int argc, char **argv)
 	  return -1;
   }
 
+  if (dada_hdu_unlock_write (hdu) < 0)
+    return EXIT_FAILURE;
+
   if (dada_hdu_disconnect (hdu) < 0)
     return EXIT_FAILURE;
 
