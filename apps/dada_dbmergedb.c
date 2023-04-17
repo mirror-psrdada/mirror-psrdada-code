@@ -173,7 +173,7 @@ int dbmergedb_init (dada_dbmergedb_t * ctx)
   // check that the input block sizes are half that of the output block size
   if (ctx->pola.bufsz + ctx->polb.bufsz != ctx->output.bufsz)
   {
-    multilog (ctx->log, LOG_ERR, "pola [%llu] + polb [%llu] bufsz did not equal output [%llu] bufsz\n", ctx->pola.bufsz, ctx->polb.bufsz, ctx->output.bufsz);
+    multilog (ctx->log, LOG_ERR, "pola [%lu] + polb [%lu] bufsz did not equal output [%lu] bufsz\n", ctx->pola.bufsz, ctx->polb.bufsz, ctx->output.bufsz);
     return -1;
   }
 
@@ -232,25 +232,25 @@ int dbmergedb_open (dada_client_t* client)
     multilog (ctx->log, LOG_WARNING, "Could not write MICROSECONDS=%lf to header\n", micro_seconds);
 
   uint64_t obs_offset = 0;
-  if (ascii_header_set (client->header, "OBS_OFFSET", "%llu", obs_offset) < 0)
-    multilog (ctx->log, LOG_WARNING, "Could not write OBS_OFFSET=%llu to header\n", obs_offset);
+  if (ascii_header_set (client->header, "OBS_OFFSET", "%lu", obs_offset) < 0)
+    multilog (ctx->log, LOG_WARNING, "Could not write OBS_OFFSET=%lu to header\n", obs_offset);
 
   unsigned npol = 2;
   if (ascii_header_set (client->header, "NPOL", "%u", npol) < 0)
     multilog (ctx->log, LOG_WARNING, "Could not write NPOL=%u to header\n", npol);
 
   uint64_t bytes_per_second;
-  if (ascii_header_get (client->header, "BYTES_PER_SECOND", "%llu", &bytes_per_second) != 1)
+  if (ascii_header_get (client->header, "BYTES_PER_SECOND", "%lu", &bytes_per_second) != 1)
     multilog (ctx->log, LOG_WARNING, "Could not read BYTES_PER_SECOND from header\n");
   bytes_per_second *= npol;
-  if (ascii_header_set (client->header, "BYTES_PER_SECOND", "%llu", bytes_per_second) < 0)
-    multilog (ctx->log, LOG_WARNING, "Could not write BYTES_PER_SECOND=%llu"" to header\n", bytes_per_second);
+  if (ascii_header_set (client->header, "BYTES_PER_SECOND", "%lu", bytes_per_second) < 0)
+    multilog (ctx->log, LOG_WARNING, "Could not write BYTES_PER_SECOND=%lu"" to header\n", bytes_per_second);
 
-  if (ascii_header_get (client->header, "RESOLUTION", "%llu", &(ctx->resolution)) != 1)
+  if (ascii_header_get (client->header, "RESOLUTION", "%lu", &(ctx->resolution)) != 1)
     multilog (ctx->log, LOG_WARNING, "Could not read RESOLUTION from header\n");
   ctx->resolution *= npol;
-  if (ascii_header_set (client->header, "RESOLUTION", "%llu", ctx->resolution) < 0)
-    multilog (ctx->log, LOG_WARNING, "Could not write RESOLUTION=%llu"" to header\n", ctx->resolution);
+  if (ascii_header_set (client->header, "RESOLUTION", "%lu", ctx->resolution) < 0)
+    multilog (ctx->log, LOG_WARNING, "Could not write RESOLUTION=%lu"" to header\n", ctx->resolution);
 
   //client->transfer_bytes = transfer_size; 
   client->optimal_bytes = 64*1024*1024;
@@ -300,7 +300,7 @@ int64_t dbmergedb_write_block (dada_client_t* client, void* data, uint64_t data_
   multilog_t * log = client->log;
 
   if (ctx->verbose > 1)
-    multilog (log, LOG_INFO, "write_block: data_size=%llu"", block_id=%llu\n",
+    multilog (log, LOG_INFO, "write_block: data_size=%lu"", block_id=%lu\n",
                 data_size, block_id);
 
   // the number of output chunks
@@ -436,7 +436,7 @@ int64_t dbmergedb_write_block (dada_client_t* client, void* data, uint64_t data_
   }
 
   if (ctx->verbose > 1)
-    multilog (log, LOG_INFO, "write_block: read %llu, wrote %llu bytes\n", data_size, data_size);
+    multilog (log, LOG_INFO, "write_block: read %lu, wrote %lu bytes\n", data_size, data_size);
 
   return data_size;
 }
@@ -468,7 +468,7 @@ void input_thread (void * arg)
   // allocate aligned memory for the header
   if (posix_memalign ( (void **) &(db->header), 512, header_size) < 0)
   {
-    fprintf (stderr, "input[%x]: failed to allocate %llu bytes for header\n", db->key, header_size);
+    fprintf (stderr, "input[%x]: failed to allocate %lu bytes for header\n", db->key, header_size);
     db->error = 1;
     return ;
   }
@@ -503,7 +503,7 @@ void input_thread (void * arg)
   db->utc_start.tv_psec = (uint64_t) (micro_seconds * 1e6);
 
   uint64_t obs_offset;
-  if (ascii_header_get (header, "OBS_OFFSET", "%llu", &obs_offset) != 1)
+  if (ascii_header_get (header, "OBS_OFFSET", "%lu", &obs_offset) != 1)
   {     
     fprintf (stderr, "input[%x]: header did not contain OBS_OFFSET\n", db->key);
     db->error = 1;
@@ -563,7 +563,7 @@ void input_thread (void * arg)
   uint64_t tsamp_psec = (uint64_t) (tsamp * 1e6);
 
   uint64_t psecs_obs_offset = (obs_offset / bytes_per_sample) * tsamp_psec;
-  fprintf (stderr, "input[%x]: adding %llu samples offset to utc_start\n", db->key, (obs_offset / bytes_per_sample));
+  fprintf (stderr, "input[%x]: adding %lu samples offset to utc_start\n", db->key, (obs_offset / bytes_per_sample));
 
   add_to_dadatime (&(db->utc_start), psecs_obs_offset);
 
@@ -585,10 +585,10 @@ void input_thread (void * arg)
       if (ipcio_percent_full (db->hdu->data_block) > db->max_percent_full)
       {
         db->curr_buf = ipcio_open_block_read (db->hdu->data_block, &(db->bytes), &(db->block_id));
-        fprintf (stderr, "input[%x]: block %5.2f full [limit=%5.2f], clearing block %llu\n", db->key,
+        fprintf (stderr, "input[%x]: block %5.2f full [limit=%5.2f], clearing block %lu\n", db->key,
                  ipcio_percent_full (db->hdu->data_block), db->max_percent_full, db->block_id);
         ipcio_close_block_read (db->hdu->data_block, db->bufsz);
-        fprintf (stderr, "input[%x]: adding %llu psec to utc_start\n", db->key, psecs_per_buffer);
+        fprintf (stderr, "input[%x]: adding %lu psec to utc_start\n", db->key, psecs_per_buffer);
         add_to_dadatime (&(db->utc_start), psecs_per_buffer);
       }
       pthread_mutex_unlock (db->mutex);
@@ -601,7 +601,7 @@ void input_thread (void * arg)
       // must consume some data to align with other pol
       int64_t nsamp_diff = sample_difference (db->utc_start, db->other_pol->utc_start, tsamp_psec); 
 
-      fprintf (stderr, "input[%x]: other pol started, sample diff=%lld\n", db->key, nsamp_diff);
+      fprintf (stderr, "input[%x]: other pol started, sample diff=%ld\n", db->key, nsamp_diff);
 
       if (nsamp_diff == 0)
       {
@@ -611,15 +611,15 @@ void input_thread (void * arg)
       // if this thread started before the other, wait for the other thread
       else if (nsamp_diff > 0)
       {
-        fprintf (stderr, "input[%x]: THIS= %ld %llu\n", db->key, db->utc_start.tv_sec, db->utc_start.tv_psec);
-        fprintf (stderr, "input[%x]: THAT= %ld %llu\n", db->key, db->other_pol->utc_start.tv_sec, db->other_pol->utc_start.tv_psec);
-        fprintf (stderr, "input[%x]: nsamp_diff=%llu\n", db->key, nsamp_diff);
+        fprintf (stderr, "input[%x]: THIS= %ld %lu\n", db->key, db->utc_start.tv_sec, db->utc_start.tv_psec);
+        fprintf (stderr, "input[%x]: THAT= %ld %lu\n", db->key, db->other_pol->utc_start.tv_sec, db->other_pol->utc_start.tv_psec);
+        fprintf (stderr, "input[%x]: nsamp_diff=%ld\n", db->key, nsamp_diff);
 
         // round the difference to the nearest integer byte
         uint64_t bytes_to_read = (uint64_t) nsamp_diff * bytes_per_sample;
         double   time_offset = (double) bytes_to_read / (double) bytes_per_second;
 
-        fprintf (stderr, "input[%x]: bytes_to_read=%llu time_offset=%lf\n", db->key, bytes_to_read, time_offset);
+        fprintf (stderr, "input[%x]: bytes_to_read=%lu time_offset=%lf\n", db->key, bytes_to_read, time_offset);
 
         if (bytes_to_read % resolution != 0)
         {
@@ -670,7 +670,7 @@ void input_thread (void * arg)
         }
 
         uint64_t psec_to_add = nsamp_diff * tsamp_psec;
-        fprintf (stderr, "input[%x]: adding %llu psecs to utc_start\n", db->key, psec_to_add);
+        fprintf (stderr, "input[%x]: adding %lu psecs to utc_start\n", db->key, psec_to_add);
         add_to_dadatime (&(db->utc_start), psec_to_add);
         pthread_mutex_unlock (db->mutex);
         usleep (1000000);
@@ -685,7 +685,7 @@ void input_thread (void * arg)
       }
     }
   }
-  fprintf (stderr, "input[%x]: aligned %ld %llu\n", db->key, db->utc_start.tv_sec, db->utc_start.tv_psec);
+  fprintf (stderr, "input[%x]: aligned %ld %lu\n", db->key, db->utc_start.tv_sec, db->utc_start.tv_psec);
       
   return; 
 }

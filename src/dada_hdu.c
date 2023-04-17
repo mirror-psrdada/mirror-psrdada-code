@@ -84,6 +84,7 @@ int dada_hdu_connect (dada_hdu_t* hdu)
   if (ipcio_connect (hdu->data_block, hdu->data_block_key) < 0)
   {
     multilog (hdu->log, LOG_ERR, "Failed to connect to Data Block\n");
+    ipcbuf_disconnect (hdu->header_block);
     free (hdu->header_block);
     hdu->header_block = 0;
     free (hdu->data_block);
@@ -93,7 +94,6 @@ int dada_hdu_connect (dada_hdu_t* hdu)
 
   return 0;
 }
-
 
 /*! Disconnect the DADA Header plus Data Unit */
 int dada_hdu_disconnect (dada_hdu_t* hdu)

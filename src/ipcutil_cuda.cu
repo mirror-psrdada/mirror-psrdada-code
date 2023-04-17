@@ -63,7 +63,7 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
   error = cudaSetDevice (device_id);
   if (error != cudaSuccess)
   {
-    fprintf (stderr, "failed to select cuda device %s: %s\n",
+    fprintf (stderr, "failed to select cuda device %d: %s\n",
              device_id, cudaGetErrorString (error));
     return 0;
   }

@@ -172,7 +172,6 @@ int ipcbuf_get (ipcbuf_t* id, int flag, int n_readers)
   return retval;
 }
 
-
 /* *************************************************************** */
 /*!
   Creates a new ring buffer in shared memory
@@ -342,7 +341,6 @@ int ipcbuf_connect (ipcbuf_t* id, key_t key)
   id->state = IPCBUF_VIEWER;
   return 0;
 }
-
 
 int ipcbuf_disconnect (ipcbuf_t* id)
 {
