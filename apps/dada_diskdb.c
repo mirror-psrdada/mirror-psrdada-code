@@ -24,6 +24,7 @@ void usage()
 {
   fprintf (stdout,
 	   "dada_diskdb [options]\n"
+     " -c   number of shared memory connection attempts to try [default 0]\n"
      " -h   print this help text\n"
      " -k   hexadecimal shared memory key  [default: %x]\n"
      " -f   file to write to the ring buffer \n"
@@ -477,6 +478,9 @@ int main (int argc, char **argv)
   /* Zero copy flag */
   char zero_copy = 0;
 
+  /* connection attempts */
+  int connection_attempts = 0;
+
   /* hexadecimal shared memory key */
   key_t dada_key = DADA_DEFAULT_BLOCK_KEY;
 
@@ -487,8 +491,16 @@ int main (int argc, char **argv)
 
   n_files = 0;
 
-  while ((arg=getopt(argc,argv,"hk:df:o:vsz")) != -1)
+  while ((arg=getopt(argc,argv,"c:hk:df:o:vsz")) != -1)
     switch (arg) {
+
+    case 'c':
+      if (sscanf (optarg, "%d", &connection_attempts) != 1)
+      {
+        fprintf (stderr,"dada_diskdb: could not parse connection_attempts from %s\n",optarg);
+        return -1;
+      }
+      break;
 
     case 'h':
       usage();
@@ -560,8 +572,16 @@ int main (int argc, char **argv)
 
   dada_hdu_set_key(hdu, dada_key);
 
-  if (dada_hdu_connect (hdu) < 0)
-    return EXIT_FAILURE;
+  int connected = dada_hdu_connect (hdu);
+  while (connected < 0)
+  {
+    connection_attempts--;
+    if (connection_attempts < 0)
+      return EXIT_FAILURE;
+    multilog (log, LOG_WARNING, "Failed to connect to HDU %d attempts remaining\n", connection_attempts);
+    sleep(1);
+    connected = dada_hdu_connect (hdu);
+  }
 
   if (dada_hdu_lock_write (hdu) < 0)
     return EXIT_FAILURE;

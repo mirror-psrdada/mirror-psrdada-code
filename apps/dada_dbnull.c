@@ -40,6 +40,7 @@ void usage()
 {
   fprintf (stdout,
      "dada_dbnull [options]\n"
+     " -c secs    timeout for connecting to data block [default 0]\n"
      " -k key     connect to key data block\n"
      " -l         copy contents into a local memory buffer\n"
      " -v         be verbose\n"
@@ -76,12 +77,12 @@ int sock_open_function (dada_client_t* client)
   if (ctx->check_xfers)
   {
     int64_t obs_xfer = 0;
-    if (ascii_header_get (header, "OBS_XFER", "%"PRIi64, &obs_xfer) != 1) 
+    if (ascii_header_get (header, "OBS_XFER", "%"PRIi64, &obs_xfer) != 1)
     {
       multilog (log, LOG_WARNING, "header with no OBS_XFER, assuming END of XFERS\n");
       obs_xfer = -1;
     }
-    
+
     if (obs_xfer == -1)
     {
       if (ctx->verbose)
@@ -100,7 +101,7 @@ int sock_open_function (dada_client_t* client)
 
     char utc_start[64];
     if (ascii_header_get (header, "UTC_START", "%s", utc_start) != 1)
-    {     
+    {
       multilog (log, LOG_WARNING, "header with no UTC_START\n");
     }
 
@@ -150,7 +151,7 @@ int sock_close_function (dada_client_t* client, uint64_t bytes_written)
 }
 
 /*! Pointer to the function that transfers data to/from the target */
-int64_t sock_send_function (dada_client_t* client, 
+int64_t sock_send_function (dada_client_t* client,
 			    void* data, uint64_t data_size)
 {
   return data_size;
@@ -219,17 +220,24 @@ int main (int argc, char **argv)
   /* zero copy direct block access */
   char zero_copy = 0;
 
+  /* data block connection attempts */
+  int connection_attempts = 0;
+
   int arg = 0;
 
   char local_copy = 0;
 
-  while ((arg=getopt(argc,argv,"dlN:vk:o:O:qsSx:X:z")) != -1)
+  while ((arg=getopt(argc,argv,"c:dlN:vk:o:O:qsSx:X:z")) != -1)
     switch (arg) {
-      
+
+    case 'c':
+      connection_attempts = atoi(optarg);
+      break;
+
     case 'd':
       daemon=1;
       break;
-      
+
     case 'v':
       verbose=1;
       break;
@@ -282,7 +290,7 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-      
+
     }
 
   log = multilog_open ("dada_dbnull", daemon);
@@ -298,8 +306,15 @@ int main (int argc, char **argv)
 
   dada_hdu_set_key(hdu, dada_key);
 
-  if (dada_hdu_connect (hdu) < 0)
-    return EXIT_FAILURE;
+  int connected = dada_hdu_connect (hdu);
+  while (connected < 0)
+  {
+    connection_attempts--;
+    if (connection_attempts < 0)
+      return EXIT_FAILURE;
+    sleep(1);
+    connected = dada_hdu_connect (hdu);
+  }
 
   if (dada_hdu_lock_read (hdu) < 0)
     return EXIT_FAILURE;
@@ -335,9 +350,9 @@ int main (int argc, char **argv)
   client->optimal_bytes  = optimal_mbytes * byte_base;
   client->quiet          = quiet;
 
-  while (!client->quit) 
+  while (!client->quit)
   {
-    
+
     if (dada_client_read (client) < 0)
       multilog (log, LOG_ERR, "Error during transfer\n");
 

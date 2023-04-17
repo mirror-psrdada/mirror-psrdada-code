@@ -26,6 +26,7 @@ void usage()
   fprintf (stdout,
            "dada_dbdisk [options]\n"
            " -b <core>  bind process to CPU core\n"
+           " -c   number of shared memory connection attempts to try [default 0]\n"
            " -k         hexadecimal shared memory key  [default: %x]\n"
            " -D <path>  add a disk to which data will be written\n"
            " -o         use O_DIRECT flag to bypass kernel buffering\n"
@@ -387,6 +388,9 @@ int main (int argc, char **argv)
   /* hexadecimal shared memory key */
   key_t dada_key = DADA_DEFAULT_BLOCK_KEY;
 
+  /* connection attempts */
+  int connection_attempts = 0;
+
   int arg = 0;
 
   uint64_t optimal_bytes = 0;
@@ -395,11 +399,19 @@ int main (int argc, char **argv)
 
   dbdisk.array = disk_array_create ();
 
-  while ((arg=getopt(argc,argv,"b:k:dD:ot:vWsz")) != -1)
+  while ((arg=getopt(argc,argv,"b:c:k:dD:ot:vWsz")) != -1)
     switch (arg) {
 
     case 'b':
       cpu_core = atoi (optarg);
+      break;
+
+    case 'c':
+      if (sscanf (optarg, "%d", &connection_attempts) != 1)
+      {
+        fprintf (stderr,"dada_diskdb: could not parse connection_attempts from %s\n",optarg);
+        return -1;
+      }
       break;
 
     case 'k':
@@ -468,8 +480,16 @@ int main (int argc, char **argv)
 
   dada_hdu_set_key(hdu, dada_key);
 
-  if (dada_hdu_connect (hdu) < 0)
-    return EXIT_FAILURE;
+  int connected = dada_hdu_connect (hdu);
+  while (connected < 0)
+  {
+    connection_attempts--;
+    if (connection_attempts < 0)
+      return EXIT_FAILURE;
+    multilog (log, LOG_WARNING, "Failed to connect to HDU %d attempts remaining\n", connection_attempts);
+    sleep(1);
+    connected = dada_hdu_connect (hdu);
+  }
 
   if (dada_hdu_lock_read (hdu) < 0)
     return EXIT_FAILURE;
