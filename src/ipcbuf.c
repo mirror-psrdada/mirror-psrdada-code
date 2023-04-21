@@ -439,9 +439,22 @@ int ipcbuf_destroy (ipcbuf_t* id)
 
 #ifdef HAVE_CUDA
     if (id->sync->on_device_id >= 0)
+    {
+      // free the CUDA memory allocation stored in id->buffer[ibuf]
       ipc_dealloc_cuda (id->buffer[ibuf], id->sync->on_device_id);
+
+      // detach from the shared memory segment stored in id->shd_addr[ibuf]
+      if (id->shm_addr[ibuf] && shmdt (id->shm_addr[ibuf]) < 0)
+        perror ("ipcbuf_destroy: shmdt(buffer)");
+    }
+    else
 #endif
-    if (id->buffer)
+    {
+      // detach from the shared memory segment stored in id->buffer
+      if (id->buffer[ibuf] && shmdt (id->buffer[ibuf]) < 0)
+        perror ("ipcbuf_destroy: shmdt(buffer)");
+    }
+    if (id->buffer[ibuf])
       id->buffer[ibuf] = 0;
 
     if (id->shmid[ibuf]>-1 && shmctl (id->shmid[ibuf], IPC_RMID, 0) < 0)
@@ -463,6 +476,8 @@ int ipcbuf_destroy (ipcbuf_t* id)
   fprintf (stderr, "ipcbuf_destroy: syncid=%d\n", id->syncid);
 #endif
 
+  if (id->sync && shmdt (id->sync) < 0)
+    perror ("ipcbuf_destroy: shmdt(sync)");
   if (id->syncid>-1 && shmctl (id->syncid, IPC_RMID, 0) < 0)
     perror ("ipcbuf_destroy: sync shmctl");
 
