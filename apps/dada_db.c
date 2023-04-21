@@ -292,11 +292,23 @@ int main (int argc, char** argv)
   if (destroy || persist) 
   {
     if (!persist)
-      ipcbuf_connect (&data_block, dada_key);
+    {
+      if (ipcbuf_connect (&data_block, dada_key) < 0)
+      {
+        fprintf (stderr, "Could not connect to DADA data block\n");
+        return 1;
+      }
+    }
     ipcbuf_destroy (&data_block);
 
     if (!persist)
-      ipcbuf_connect (&header, dada_key + 1);
+    {
+      if (ipcbuf_connect (&header, dada_key + 1) < 0)
+      {
+        fprintf (stderr, "Could not connect to DADA header block\n");
+        return 1;
+      }
+    }
     ipcbuf_destroy (&header);
 
     fprintf (stderr, "Destroyed DADA data and header blocks\n");
