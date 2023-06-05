@@ -117,6 +117,13 @@ install(
         bin
 )
 
+install(
+    PROGRAMS
+        ipcrme
+    DESTINATION
+        bin
+)
+
 if ((RDMACM_FOUND) AND (IBVERBS_FOUND))
     add_executable(dada_dbib dada_dbib.c)
     add_executable(dada_dbud dada_dbud.c)
