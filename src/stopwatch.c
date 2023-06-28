@@ -179,7 +179,7 @@ void DelayTimer(const stopwatch_t *stopWatch, double delay)
 {
     struct timespec now;
     unsigned long delta = 0;
-    unsigned long end = (unsigned long) delay * 1e9;
+    unsigned long end = (unsigned long) (delay * 1e9);
     
     if (FALSE == stopWatch->isRunning)
       return ;
