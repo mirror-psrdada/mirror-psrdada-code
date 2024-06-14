@@ -155,7 +155,7 @@ int ipcbuf_get (ipcbuf_t* id, int flag, int n_readers)
     else
 #endif
     {
-      id->buffer[ibuf] = ipc_alloc (id->shmkey[ibuf], sync->bufsz, 
+      id->buffer[ibuf] = ipc_alloc (id->shmkey[ibuf], sync->bufsz,
             flag, id->shmid + ibuf);
       id->shm_addr[ibuf] = id->buffer[ibuf];
     }
@@ -187,7 +187,7 @@ static int key_increment  = 0x00010000;
 
 int ipcbuf_create (ipcbuf_t* id, key_t key, uint64_t nbufs, uint64_t bufsz, unsigned n_readers)
 {
-  return ipcbuf_create_work (id, key, nbufs, bufsz, n_readers, -1); 
+  return ipcbuf_create_work (id, key, nbufs, bufsz, n_readers, -1);
 }
 
 int ipcbuf_create_work (ipcbuf_t* id, key_t key, uint64_t nbufs, uint64_t bufsz, unsigned n_readers, int device_id)
@@ -363,7 +363,7 @@ int ipcbuf_disconnect (ipcbuf_t* id)
     {
       if (id->buffer[ibuf])
       {
-        if (ipc_disconnect_cuda (id->buffer[ibuf])< 0)  
+        if (ipc_disconnect_cuda (id->buffer[ibuf])< 0)
           fprintf (stderr, "ipc_disconnect_cuda failed on buffer[%lu]\n", ibuf);
       }
       if (id->shm_addr[ibuf] && shmdt (id->shm_addr[ibuf]) < 0)
@@ -371,7 +371,7 @@ int ipcbuf_disconnect (ipcbuf_t* id)
         fprintf (stderr, "ipcbuf_disconnect: shmdt(shm_addr[%lu]) failed\n", ibuf);
         perror ("ipcbuf_disconnect: shmdt(buffer)");
       }
-    } 
+    }
     else
 #endif
     {
@@ -398,7 +398,7 @@ int ipcbuf_disconnect (ipcbuf_t* id)
 
   id->sync = 0;
 
-  id->state = IPCBUF_DISCON; 
+  id->state = IPCBUF_DISCON;
   id->iread = -1;
 
   return 0;
@@ -551,7 +551,7 @@ char ipcbuf_is_writing (ipcbuf_t* id)
 {
   return id->state == IPCBUF_WRITING;
 }
- 
+
 
 int ipcbuf_enable_eod (ipcbuf_t* id)
 {
@@ -591,13 +591,13 @@ uint64_t ipcbuf_get_sod_minbuf (ipcbuf_t* id)
    * to the first buffer we clocked data onto */
   uint64_t new_bufs_written = sync->w_buf_next - id->soclock_buf;
 
-  if (new_bufs_written < sync->nbufs) 
+  if (new_bufs_written < sync->nbufs)
     return id->soclock_buf;
   else
     return sync->w_buf_next - sync->nbufs + 1;
 }
 
-  /* start buf should be the buffer to begin on, and should be aware 
+  /* start buf should be the buffer to begin on, and should be aware
    * of previously filled bufs, filled within the same observation
    * or from a previous observation */
 
@@ -621,7 +621,7 @@ int ipcbuf_enable_sod (ipcbuf_t* id, uint64_t start_buf, uint64_t start_byte)
                    start_buf, sync->w_buf_curr, sync->w_buf_next);
 #endif
 
-  /* start_buf must be less than or equal to the number of buffers 
+  /* start_buf must be less than or equal to the number of buffers
    * written, or partially written */
   if (start_buf > sync->w_buf_next)
   {
@@ -670,7 +670,7 @@ int ipcbuf_enable_sod (ipcbuf_t* id, uint64_t start_buf, uint64_t start_byte)
 
   /* changed by AJ to fix a bug where a reader is still reading this xfer
    * and the writer wants to start writing to it... */
-  if (sync->w_buf_curr == 0) 
+  if (sync->w_buf_curr == 0)
     sync->eod [id->xfer] = 0;
 
 #ifdef _DEBUG
@@ -709,7 +709,7 @@ int ipcbuf_enable_sod (ipcbuf_t* id, uint64_t start_buf, uint64_t start_byte)
 
 #ifdef _DEBUG
     fprintf (stderr, "ipcbuf_enable_sod: increment FULL[%d]=%d by %"PRIu64"\n",
-        iread, 
+        iread,
         semctl (id->semid_data[iread], IPCBUF_FULL, GETVAL), new_bufs);
 #endif
 
@@ -891,7 +891,7 @@ int ipcbuf_mark_filled (ipcbuf_t* id, uint64_t nbytes)
       fprintf (stderr, "ipcbuf_mark_filled: decrement EODACK=%d\n",
                        semctl (id->semid_data[iread], IPCBUF_EODACK, GETVAL));
 #endif
-    
+
       if (ipc_semop (id->semid_data[iread], IPCBUF_EODACK, -1, 0) < 0)
       {
         fprintf (stderr, "ipcbuf_mark_filled: error decrementing EODACK\n");
@@ -1051,7 +1051,7 @@ int ipcbuf_lock_read (ipcbuf_t* id)
     return -1;
   }
 
-  // To facilitate a reader connecting to an XFER that already has 
+  // To facilitate a reader connecting to an XFER that already has
   // start of data raised.
 #ifdef _DEBUG
   fprintf (stderr, "ipcbuf_lock_read: r_states[%d]=%d\n", id->iread, id->sync->r_states[id->iread]);
@@ -1162,7 +1162,7 @@ char* ipcbuf_get_next_read_work (ipcbuf_t* id, uint64_t* bytes, int flag)
 #ifdef _DEBUG
       fprintf (stderr, "ipcbuf_get_next_read: xfer=%"PRIu64
 	       " start buf=%"PRIu64" byte=%"PRIu64"\n", sync->r_xfers[iread],
-	       sync->s_buf[id->xfer], 
+	       sync->s_buf[id->xfer],
 	       sync->s_byte[id->xfer]);
 #endif
 
@@ -1244,7 +1244,7 @@ char* ipcbuf_get_next_read_work (ipcbuf_t* id, uint64_t* bytes, int flag)
     {
 #ifdef _DEBUG
       fprintf (stderr, "ipcbuf_get_next_read: sync->eod[%d]=%d sync->r_bufs[%d]=%"PRIu64" sync->e_buf[%d]=%"PRIu64"\n",
-                        id->xfer, sync->eod[id->xfer], iread, sync->r_bufs[iread], id->xfer, sync->e_buf[id->xfer]); 
+                        id->xfer, sync->eod[id->xfer], iread, sync->r_bufs[iread], id->xfer, sync->e_buf[id->xfer]);
 #endif
 
       // AJ added: sync->r_bufs[iread] to ensure that a buffer has been read by a reader
@@ -1275,7 +1275,7 @@ char* ipcbuf_get_next_read_work (ipcbuf_t* id, uint64_t* bytes, int flag)
     {
 #ifdef _DEBUG
       fprintf (stderr, "ipcbuf_get_next_read xfer=%d EOD=true and r_buf="
-                       "%"PRIu64" == e_buf=%"PRIu64"\n", (int)id->xfer, 
+                       "%"PRIu64" == e_buf=%"PRIu64"\n", (int)id->xfer,
                        sync->r_bufs[iread], sync->e_buf[id->xfer]);
 #endif
       *bytes = sync->e_byte[id->xfer] - start_byte;
@@ -1298,9 +1298,101 @@ char* ipcbuf_get_next_read (ipcbuf_t* id, uint64_t* bytes)
   return ipcbuf_get_next_read_work (id, bytes, 0);
 }
 
-char* ipcbuf_get_next_readable (ipcbuf_t* id, uint64_t* bytes)
+char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes)
 {
-  return ipcbuf_get_next_read_work (id, bytes, SEM_UNDO);
+  uint64_t bufnum = 0;
+  uint64_t start_byte = 0;
+
+  if (ipcbuf_eod(id))
+    return NULL;
+
+  // only supports viewers
+  if (id->state != IPCBUF_VIEWER)
+  {
+    fprintf(stderr, "ipcbuf_get_next_readable: was not a viewer\n");
+    return NULL;
+  }
+
+  ipcsync_t* sync = id->sync;
+  int iread = 0;
+
+#ifdef _DEBUG
+  fprintf(stderr, "ipcbuf_get_next_readable: start viewing xfer=%"PRIu64
+                  " start buf=%"PRIu64" byte=%"PRIu64"\n", sync->r_xfers[iread],
+                  sync->s_buf[id->xfer], sync->s_byte[id->xfer]);
+#endif
+
+  id->xfer = sync->r_xfers[iread] % IPCBUF_XFERS;
+
+#ifdef _DEBUG
+      fprintf (stderr, "ipcbuf_get_next_readable: xfer=%"PRIu64
+	       " start buf=%"PRIu64" byte=%"PRIu64"\n", sync->r_xfers[iread],
+	       sync->s_buf[id->xfer],
+	       sync->s_byte[id->xfer]);
+#endif
+
+  id->state = IPCBUF_VIEWING;
+
+  id->viewbuf = sync->s_buf[id->xfer];
+  start_byte = sync->s_byte[id->xfer];
+
+  // the viewbuf is the current r_buf, lowest of all readers
+  id->viewbuf = sync->r_bufs[iread];
+  for (iread=1; iread<id->sync->n_readers; iread++)
+  {
+    if (sync->r_bufs[iread] < id->viewbuf)
+    {
+      id->viewbuf = sync->r_bufs[iread];
+    }
+  }
+
+#ifdef _DEBUG
+  fprintf(stderr, "ipcbuf_get_next_readable: id->viewbuf=%lu sync->w_buf_curr=%lu\n", id->viewbuf, sync->w_buf_curr);
+#endif
+
+  // Viewers wait until w_buf_curr is incremented without semaphore operations beyond the current viewbuf
+  while (sync->w_buf_curr <= id->viewbuf)
+  {
+#ifdef _DEBUG
+    fprintf(stderr, "ipcbuf_get_next_readable: sync->w_buf_curr=%lu sync->eod[%d]=%d sync->r_bufs[%d]=%"PRIu64" sync->e_buf[%d]=%"PRIu64"\n",
+                    sync->w_buf_curr, id->xfer, sync->eod[id->xfer], iread, sync->r_bufs[iread], id->xfer, sync->e_buf[id->xfer]);
+#endif
+
+    // AJ added: sync->r_bufs[iread] to ensure that a buffer has been read by a reader
+    if (sync->eod[id->xfer] && sync->r_bufs[iread] && sync->r_bufs[iread] == sync->e_buf[id->xfer])
+    {
+      id->state = IPCBUF_VSTOP;
+      break;
+    }
+
+    float_sleep(0.1);
+  }
+
+  bufnum = id->viewbuf % sync->nbufs;
+
+  // compute the number of bytes available
+  if (bytes)
+  {
+    // if EOD is true for the XFER and the read buffer is equal to the end buffer,
+    if (sync->eod[id->xfer] && sync->r_bufs[iread] == sync->e_buf[id->xfer])
+    {
+#ifdef _DEBUG
+      fprintf(stderr, "ipcbuf_get_next_readable xfer=%d EOD=true and r_buf="
+                      "%"PRIu64" == e_buf=%"PRIu64"\n", (int)id->xfer,
+                      sync->r_bufs[iread], sync->e_buf[id->xfer]);
+#endif
+      *bytes = sync->e_byte[id->xfer] - start_byte;
+    }
+    else
+      *bytes = sync->bufsz - start_byte;
+  }
+
+#ifdef _DEBUG
+  fprintf (stderr, "ipcbuf_get_next_readable: returning ptr=%p + %lu bytes=%lu\n",
+           (void *) (id->buffer[bufnum]), start_byte, *bytes);
+#endif
+
+  return id->buffer[bufnum] + start_byte;
 }
 
 uint64_t ipcbuf_tell (ipcbuf_t* id, uint64_t bufnum)
@@ -1308,7 +1400,7 @@ uint64_t ipcbuf_tell (ipcbuf_t* id, uint64_t bufnum)
   ipcsync_t* sync = id->sync;
 
 #ifdef _DEBUG
-  fprintf (stderr, 
+  fprintf (stderr,
            "ipcbuf_tell: bufnum=%"PRIu64" xfer=%"PRIu64", s_buf=%"PRIu64" s_byte=%"PRIu64"\n",
            bufnum, id->xfer, sync->s_buf[id->xfer], sync->s_byte[id->xfer]);
 #endif
@@ -1855,7 +1947,7 @@ int ipcbuf_get_read_semaphore_count (ipcbuf_t* id)
 /* Sets the buffer at which clocking began.  */
 uint64_t ipcbuf_set_soclock_buf (ipcbuf_t* id)
 {
-  if (id->sync->w_xfer > 0) 
+  if (id->sync->w_xfer > 0)
     id->soclock_buf = id->sync->e_buf[(id->sync->w_xfer-1) % IPCBUF_XFERS] + 1;
   else
     id->soclock_buf = 0;

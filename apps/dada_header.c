@@ -25,7 +25,6 @@ void usage()
   fprintf (stdout,
      "dada_header [options]\n"
      " -k         hexadecimal shared memory key  [default: %x]\n"
-     " -p         read header block as a passive viewer \n"
      " -t tag     unused command line option\n"
      " -v         be verbose\n",DADA_DEFAULT_BLOCK_KEY);
 }
@@ -42,9 +41,6 @@ int main (int argc, char **argv)
   /* Flag set in verbose mode */
   char verbose = 0;
 
-  /* Open as a passive viewer */
-  char passive = 0;
-
  /* dada key for SHM */
   key_t dada_key = DADA_DEFAULT_BLOCK_KEY;
 
@@ -53,13 +49,9 @@ int main (int argc, char **argv)
   /* TODO the amount to conduct a busy sleep inbetween clearing each sub
    * block */
 
-  while ((arg=getopt(argc,argv,"pvk:t:")) != -1)
+  while ((arg=getopt(argc,argv,"k:t:v")) != -1)
     switch (arg)
     {
-    case 'p':
-      passive = 1;
-      break;
-
     case 'v':
       verbose=1;
       break;
@@ -99,27 +91,13 @@ int main (int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  if (!passive)
+  if (verbose)
+    fprintf (stderr, "dada_hdu_open_view\n");
+  if (dada_hdu_open_view(hdu) < 0)
   {
-    if (verbose)
-      fprintf(stderr, "dada_hdu_lock_read()\n");
-    if (dada_hdu_lock_read(hdu) < 0)
-    {
-      fprintf(stderr, "Could not lock Header Block for reading\n");
-      return EXIT_FAILURE;
-    }
+    fprintf(stderr, "Could not lock Header Block for viewing\n");
+    return EXIT_FAILURE;
   }
-  else
-  {
-    if (verbose)
-      fprintf (stderr, "dada_hdu_open_view\n");
-    if (dada_hdu_open_view(hdu) < 0)
-    {
-      fprintf(stderr, "Could not lock Header Block for viewing\n");
-      return EXIT_FAILURE;
-    }
-  }
-
 
   uint64_t header_size = 0;
   char* header = 0;
@@ -132,7 +110,6 @@ int main (int argc, char **argv)
   if (!header)
   {
     fprintf(stderr, "Could not get next header\n");
-    dada_hdu_unlock_read (hdu);
     dada_hdu_disconnect (hdu);
     return EXIT_FAILURE;
   }
@@ -152,19 +129,6 @@ int main (int argc, char **argv)
     fprintf(stderr,"HEADER END\n");
   }
 
-  return 0;
-
-  if (!passive)
-  {
-    if (verbose)
-      fprintf (stderr, "dada_hdu_unlock_read()\n");
-    if (dada_hdu_unlock_read (hdu) < 0)
-    {
-      fprintf (stdout, "EXIT    UNLOCK_READ_FAILED\n");
-      return EXIT_FAILURE;
-    }
-  }
-  
   if (dada_hdu_disconnect (hdu) < 0)
   {
     fprintf (stdout, "EXIT    HDU_DISCONNECT_FAILED\n");
