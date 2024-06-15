@@ -46,7 +46,7 @@ int main (int argc, char **argv)
 
   int arg = 0;
 
-  /* TODO the amount to conduct a busy sleep inbetween clearing each sub
+  /* TODO the amount to conduct a busy sleep in between clearing each sub
    * block */
 
   while ((arg=getopt(argc,argv,"k:t:v")) != -1)
@@ -105,8 +105,10 @@ int main (int argc, char **argv)
   if (verbose) 
     fprintf(stderr,"Waiting for next filled header\n");
 
+  char interrupt = 0;
+
   /* Wait for the next valid header sub-block */
-  header = ipcbuf_get_next_readable (hdu->header_block, &header_size);
+  header = ipcbuf_get_next_readable (hdu->header_block, &header_size, &interrupt);
   if (!header)
   {
     fprintf(stderr, "Could not get next header\n");

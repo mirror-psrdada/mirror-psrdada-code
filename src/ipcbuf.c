@@ -1298,7 +1298,7 @@ char* ipcbuf_get_next_read (ipcbuf_t* id, uint64_t* bytes)
   return ipcbuf_get_next_read_work (id, bytes, 0);
 }
 
-char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes)
+char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes, char *interrupt)
 {
   uint64_t bufnum = 0;
   uint64_t start_byte = 0;
@@ -1331,8 +1331,6 @@ char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes)
 	       sync->s_byte[id->xfer]);
 #endif
 
-  id->state = IPCBUF_VIEWING;
-
   id->viewbuf = sync->s_buf[id->xfer];
   start_byte = sync->s_byte[id->xfer];
 
@@ -1358,16 +1356,15 @@ char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes)
                     sync->w_buf_curr, id->xfer, sync->eod[id->xfer], iread, sync->r_bufs[iread], id->xfer, sync->e_buf[id->xfer]);
 #endif
 
-    // AJ added: sync->r_bufs[iread] to ensure that a buffer has been read by a reader
-    if (sync->eod[id->xfer] && sync->r_bufs[iread] && sync->r_bufs[iread] == sync->e_buf[id->xfer])
+    if (*interrupt)
     {
-      id->state = IPCBUF_VSTOP;
-      break;
+      return NULL;
     }
 
     float_sleep(0.1);
   }
 
+  id->state = IPCBUF_VIEWING;
   bufnum = id->viewbuf % sync->nbufs;
 
   // compute the number of bytes available
@@ -1377,7 +1374,7 @@ char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes)
     if (sync->eod[id->xfer] && sync->r_bufs[iread] == sync->e_buf[id->xfer])
     {
 #ifdef _DEBUG
-      fprintf(stderr, "ipcbuf_get_next_readable xfer=%d EOD=true and r_buf="
+      fprintf(stderr, "ipcbuf_get_next_readable: xfer=%d EOD=true and r_buf="
                       "%"PRIu64" == e_buf=%"PRIu64"\n", (int)id->xfer,
                       sync->r_bufs[iread], sync->e_buf[id->xfer]);
 #endif

@@ -179,7 +179,7 @@ extern "C" {
   int64_t ipcbuf_tell_read (ipcbuf_t* id);
 
   /*! Gets the next full buffer, but does not modify any aspect of the ring buffer */
-  char *ipcbuf_get_next_readable (ipcbuf_t* id, uint64_t* bytes);
+  char *ipcbuf_get_next_readable (ipcbuf_t* id, uint64_t* bytes, char* interrupt);
 
   /*! Declare that the last buffer to be returned by
     ipcbuf_get_next_read has been cleared and can be recycled.  The
@@ -196,14 +196,14 @@ extern "C" {
   /*! Test if the current buffer is the last buffer containing data */
   int ipcbuf_eod (ipcbuf_t*);
 
-  /*! Return the number of bufferswritten to the ring buffer */
+  /*! Return the number of buffers written to the ring buffer */
   uint64_t ipcbuf_get_write_count (ipcbuf_t*);
   uint64_t ipcbuf_get_write_index (ipcbuf_t* id);
 
   uint64_t ipcbuf_get_write_byte_xfer (ipcbuf_t* id);
   uint64_t ipcbuf_get_write_count_xfer (ipcbuf_t* id);
 
-  /*! Return the number of buffersread from the ring buffer */
+  /*! Return the number of buffers read from the ring buffer */
   uint64_t ipcbuf_get_read_count (ipcbuf_t*);
   uint64_t ipcbuf_get_read_count_iread (ipcbuf_t* id, unsigned iread);
 
