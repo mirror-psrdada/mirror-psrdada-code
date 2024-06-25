@@ -1307,7 +1307,7 @@ char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes, char *interrupt)
     return NULL;
 
   // only supports viewers
-  if (id->state != IPCBUF_VIEWER)
+  if (id->state != IPCBUF_VIEWER && id->state != IPCBUF_VIEWING)
   {
     fprintf(stderr, "ipcbuf_get_next_readable: was not a viewer\n");
     return NULL;
