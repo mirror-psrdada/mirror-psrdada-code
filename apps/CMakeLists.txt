@@ -1,15 +1,6 @@
 
 # executables to build
 
-#file( GLOB APP_SOURCES *.c )
-#foreach( testsourcefile ${APP_SOURCES} )
-#    # I used a simple string replace, to cut off .cpp.
-#    string( REPLACE ".cpp" "" testname ${testsourcefile} )
-#    add_executable( ${testname} ${testsourcefile} )
-#    # Make sure YourLib is linked to each app
-#    target_link_libraries( ${testname} YourLib )
-#endforeach( testsourcefile ${APP_SOURCES} )
-
 add_executable(dada_db dada_db.c)
 add_executable(dada_dbcopydb dada_dbcopydb.c)
 add_executable(dada_dbdisk dada_dbdisk.c)
@@ -25,6 +16,7 @@ add_executable(dada_dbnum dada_dbnum.c)
 add_executable(dada_dboverflow dada_dboverflow.c)
 add_executable(dada_dbrecover dada_dbrecover.c)
 add_executable(dada_dbscrubber dada_dbscrubber.c)
+add_executable(dada_dbwait dada_dbwait.c)
 add_executable(dada_dbxferinfo dada_dbxferinfo.c)
 add_executable(dada_diskdb dada_diskdb.c)
 add_executable(dada_edit dada_edit.c)
@@ -59,6 +51,7 @@ target_link_libraries(dada_dbnum PUBLIC psrdada)
 target_link_libraries(dada_dboverflow PUBLIC psrdada)
 target_link_libraries(dada_dbrecover PUBLIC psrdada)
 target_link_libraries(dada_dbscrubber PUBLIC psrdada)
+target_link_libraries(dada_dbwait PUBLIC psrdada)
 target_link_libraries(dada_dbxferinfo PUBLIC psrdada)
 target_link_libraries(dada_diskdb PUBLIC psrdada)
 target_link_libraries(dada_edit PUBLIC psrdada)
@@ -95,6 +88,7 @@ install(
         dada_dboverflow
         dada_dbrecover
         dada_dbscrubber
+        dada_dbwait
         dada_dbxferinfo
         dada_diskdb
         dada_edit
