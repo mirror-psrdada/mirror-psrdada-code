@@ -1,5 +1,14 @@
-/* To enable the use of O_DIRECT */
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
+// To enable the use of O_DIRECT
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 #include "disk_array.h"
 #include "config.h"
@@ -27,8 +36,6 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-
-// #define _DEBUG 1
 
 /*! Create a new disk array */
 disk_array_t* disk_array_create ()
@@ -130,7 +137,7 @@ int disk_array_add (disk_array_t* array, char* path)
     diff = memcmp(&(buf.st_dev), &(array->disks[idisk].device), sizeof(dev_t));
     if (!diff) {
       fprintf (stderr, "disk_array_add: %s is on same device as %s\n",
-	       path, array->disks[idisk].path);
+               path, array->disks[idisk].path);
       pthread_mutex_unlock (&(array->mutex));
       return -1;
     }
@@ -171,7 +178,7 @@ uint64_t get_available (const char* filename)
 
   if (statfs (filename, &info) < 0) {
     fprintf (stderr, "get_available error statfs(%s): %s",
-	     filename, strerror(errno));
+            filename, strerror(errno));
     return 0;
   }
   
@@ -199,7 +206,7 @@ uint64_t disk_array_get_available (disk_array_t* array)
 
 /*! Open a file on the disk array, return the open file descriptor */
 int disk_array_open (disk_array_t* array, char* filename, uint64_t filesize,
-		     uint64_t* optimal_buffer_size, int add_flags)
+                     uint64_t* optimal_buffer_size, int add_flags)
 {
   static char* fullname = 0;
   unsigned idisk;
@@ -236,7 +243,7 @@ int disk_array_open (disk_array_t* array, char* filename, uint64_t filesize,
       fd = open (fullname, flags, perms);
 
       if (optimal_buffer_size)
-	*optimal_buffer_size = array->disks[idisk].f_bsize;
+        *optimal_buffer_size = array->disks[idisk].f_bsize;
 
       break;
     }
@@ -278,7 +285,3 @@ int disk_array_reopen (disk_array_t* array, int curr_fd, char* filename)
   return fd;
 
 }
-
-
-
-

@@ -20,6 +20,7 @@ add_executable(dada_dbwait dada_dbwait.c)
 add_executable(dada_dbxferinfo dada_dbxferinfo.c)
 add_executable(dada_diskdb dada_diskdb.c)
 add_executable(dada_edit dada_edit.c)
+add_executable(dada_emptydb dada_emptydb.c)
 add_executable(dada_header dada_header.c)
 add_executable(dada_install_header dada_install_header.c)
 add_executable(dada_junkdb dada_junkdb.c)
@@ -55,6 +56,7 @@ target_link_libraries(dada_dbwait PUBLIC psrdada)
 target_link_libraries(dada_dbxferinfo PUBLIC psrdada)
 target_link_libraries(dada_diskdb PUBLIC psrdada)
 target_link_libraries(dada_edit PUBLIC psrdada)
+target_link_libraries(dada_emptydb PUBLIC psrdada)
 target_link_libraries(dada_header PUBLIC psrdada)
 target_link_libraries(dada_install_header PUBLIC psrdada)
 target_link_libraries(dada_junkdb PUBLIC psrdada)
@@ -92,6 +94,7 @@ install(
         dada_dbxferinfo
         dada_diskdb
         dada_edit
+        dada_emptydb
         dada_header
         dada_install_header
         dada_junkdb

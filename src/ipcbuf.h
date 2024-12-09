@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #ifndef __DADA_IPCBUF_H
 #define __DADA_IPCBUF_H
 
@@ -159,6 +166,14 @@ extern "C" {
 
   /*! Return true if process is the data writer */
   char ipcbuf_is_writer (ipcbuf_t*);
+  
+  /**
+   * @brief Return true if the ipcbuf is in wchange state.
+   * 
+   * @param id ipcbuf to inspect
+   * @return char 1 if ipcbuf is in wchange state, 0 otherwise
+   */
+  char ipcbuf_is_wchange (ipcbuf_t* id);
 
   /* ////////////////////////////////////////////////////////////////////
      

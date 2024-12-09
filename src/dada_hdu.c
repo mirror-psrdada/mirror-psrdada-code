@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 #include "ascii_header.h"
@@ -5,8 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
-// #define _DEBUG
 
 /*! Create a new DADA Header plus Data Unit */
 dada_hdu_t* dada_hdu_create (multilog_t* log)
@@ -168,16 +173,13 @@ int dada_hdu_unlock_read (dada_hdu_t* hdu)
     return -1;
   }
 
-  if (ipcio_is_open(hdu->data_block))
-  {
 #ifdef _DEBUG
-    fprintf (stderr, "dada_hdu_unlock_read: ipcio_close (hdu->data_block)\n");
+  fprintf (stderr, "dada_hdu_unlock_read: ipcio_close (hdu->data_block)\n");
 #endif
-    if (ipcio_close (hdu->data_block) < 0)
-    {
-      multilog (hdu->log, LOG_ERR, "Could not unlock Data Block read\n");
-      return -1;
-    }
+  if (ipcio_close (hdu->data_block) < 0)
+  {
+    multilog (hdu->log, LOG_ERR, "Could not unlock Data Block read\n");
+    return -1;
   }
 
   if (hdu->header)

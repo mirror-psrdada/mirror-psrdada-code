@@ -21,6 +21,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include(dependencies)
 include(CTest)
 
+set(CMAKE_C_EXTENSIONS ON)
+add_compile_definitions(_GNU_SOURCE)
+
 find_dependencies()
 find_package(CUDAToolkit)
 find_package(rdmacm)

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #ifndef __DADA_HDU_H
 #define __DADA_HDU_H
 
@@ -10,6 +17,8 @@
 
 #include "multilog.h"
 #include "ipcio.h"
+
+#include <sys/types.h>  // for key_t
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,16 +35,16 @@ extern "C" {
     /*! The Header Block interface */
     ipcbuf_t* header_block;
 
-    /* The header */
+    /*! The header */
     char* header;
 
-    /* The size of the header */
+    /*! The size of the header */
     uint64_t header_size;
 
-    /* The Data Block key */
+    /*! The Data Block key */
     key_t data_block_key;
 
-    /* The Header Block key */
+    /*! The Header Block key */
     key_t header_block_key;
 
   } dada_hdu_t;
@@ -89,4 +98,4 @@ extern "C" {
 	   }
 #endif
 
-#endif
+#endif // __DADA_HDU_H

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #ifndef __DADA_IPCIO_H
 #define __DADA_IPCIO_H
 
@@ -51,7 +58,19 @@ extern "C" {
   /*! disconnect from an already connected ipcio_t struct */
   int ipcio_disconnect (ipcio_t* ipc);
 
-  /*! start reading/writing to an ipcbuf */
+  /**
+   * @brief Start reading/writing to an ipcbuf.
+   * 
+   * The read/write modes are:
+   *   r = inactive reader: has not yet started reading from the ipcbuf
+   *   R = active reader: is reading from the ipcbuf
+   *   w = inactive writer: has not yet started writing to the ipcbuf
+   *   W = active writer: is writing from the ipcbuf
+   * 
+   * @param ipc the ipcbuf on which to operate
+   * @param rdwrt the read/write mode for the open operation
+   * @return int 0 on success, -1 on failure
+   */
   int ipcio_open (ipcio_t* ipc, char rdwrt);
 
   /*! stop reading/writing to an ipcbuf */
@@ -66,7 +85,13 @@ extern "C" {
   /*! get the minimum byte that may be passed to ipcio_start */
   uint64_t ipcio_get_start_minimum (ipcio_t* ipc);
 
-  /*! enable start of data on the specified byte */
+  /**
+   * @brief Enable start of data on the specified byte.
+   * 
+   * @param ipc the ipcbuf on which to operate
+   * @param byte absolute byte relative to the first byte written to the data block
+   * @return int 
+   */
   int ipcio_start (ipcio_t* ipc, uint64_t byte);
 
   /*! write an end of data marker; may continue writing to ring buffer */

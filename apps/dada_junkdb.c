@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -13,9 +20,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <assert.h>
+#include <getopt.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/shm.h>
 
 #define DEFAULT_DATA_RATE 64.000
 #define DEFAULT_WRITE_TIME 10 

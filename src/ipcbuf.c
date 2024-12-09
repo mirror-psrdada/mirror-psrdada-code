@@ -1,3 +1,9 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -46,6 +52,14 @@
 #define IPCBUF_VIEWING 8  /* currently viewing */
 #define IPCBUF_VSTOP   9  /* end-of-data while viewer */
 
+/**
+ * @brief Return the process state name for the integer process state value.
+ * 
+ * @param state 
+ * @return const char* 
+ */
+const char * _ipcbuf_get_state_name(int state);
+
 /* *************************************************************** */
 /*!
   creates the shared memory block that may be used as an ipcsync_t struct
@@ -90,7 +104,7 @@ int ipcbuf_get (ipcbuf_t* id, int flag, int n_readers)
 {
   int retval = 0;
   ipcsync_t* sync = 0;
-  uint ibuf = 0;
+  unsigned ibuf = 0;
   unsigned iread = 0;
 
   if (!id)
@@ -119,7 +133,7 @@ int ipcbuf_get (ipcbuf_t* id, int flag, int n_readers)
   fprintf (stderr, "ipcbuf_get: semid=%d\n", id->semid_connect);
 #endif
 
-  /* shared memory data semphores */
+  /* shared memory data semaphores */
   id->semid_data = (int *) malloc(sizeof(int) * sync->n_readers);
   assert(id->semid_data != 0);
   for (iread=0; iread < sync->n_readers; iread++)
@@ -490,6 +504,9 @@ int ipcbuf_destroy (ipcbuf_t* id)
 /*! Lock this process in as the designated writer */
 int ipcbuf_lock_write (ipcbuf_t* id)
 {
+#ifdef _DEBUG
+  fprintf (stderr, "ipcbuf_lock_write: id->state=%s\n", _ipcbuf_get_state_name(id->state));
+#endif
   if (id->state != IPCBUF_VIEWER)
   {
     fprintf (stderr, "ipcbuf_lock_write: not connected\n");
@@ -497,7 +514,7 @@ int ipcbuf_lock_write (ipcbuf_t* id)
   }
 
 #ifdef _DEBUG
-  fprintf (stderr, "ipcbuf_lock_write: decrement WRITE=%d addr=%x\n",
+  fprintf (stderr, "ipcbuf_lock_write: decrement WRITE=%d addr=%p\n",
                    semctl (id->semid_connect, IPCBUF_WRITE, GETVAL), id);
 #endif
 
@@ -552,6 +569,10 @@ char ipcbuf_is_writing (ipcbuf_t* id)
   return id->state == IPCBUF_WRITING;
 }
 
+char ipcbuf_is_wchange (ipcbuf_t* id)
+{
+  return id->state == IPCBUF_WCHANGE;
+}
 
 int ipcbuf_enable_eod (ipcbuf_t* id)
 {
@@ -562,6 +583,9 @@ int ipcbuf_enable_eod (ipcbuf_t* id)
     return -1;
   }
 
+#ifdef _DEBUG
+  fprintf (stderr, "ipcbuf_enable_eod: setting state=IPCBUF_WCHANGE\n");
+#endif
   id->state = IPCBUF_WCHANGE;
   id->sync->w_state = IPCBUF_WCHANGE;
 
@@ -656,7 +680,7 @@ int ipcbuf_enable_sod (ipcbuf_t* id, uint64_t start_buf, uint64_t start_byte)
                      iread, semctl (id->semid_data[iread], IPCBUF_SODACK, GETVAL));
 #endif
 
-    /* decrement the start-of-data acknowlegement semaphore */
+    /* decrement the start-of-data acknowledgement semaphore */
     if (ipc_semop (id->semid_data[iread], IPCBUF_SODACK, -1, 0) < 0)
     {
       fprintf (stderr, "ipcbuf_enable_sod: error decrement SODACK[%d]\n", iread);
@@ -854,7 +878,7 @@ int ipcbuf_mark_filled (ipcbuf_t* id, uint64_t nbytes)
   int iread = 0;
 
 #ifdef _DEBUG
-  fprintf (stderr, "ipcbuf_mark_filled(%lu) w_buf_curr=%lu w_buf_next=%lu\n", nbytes, id->sync->w_buf_curr, id->sync->w_buf_next);
+  fprintf (stderr, "ipcbuf_mark_filled(%lu) w_buf_curr=%lu w_buf_next=%lu state=%s\n", nbytes, id->sync->w_buf_curr, id->sync->w_buf_next, _ipcbuf_get_state_name(id->state));
 #endif
 
   /* must be the designated writer */
@@ -915,7 +939,7 @@ int ipcbuf_mark_filled (ipcbuf_t* id, uint64_t nbytes)
     id->state = IPCBUF_WRITER;
     id->sync->w_state = IPCBUF_WRITER;
 
-    // corner case where EOD occured on first byte of the block
+    // corner case where EOD occurred on first byte of the block
     if (nbytes == 0)
     {
       // open the next write buffer which will be immediately closed
@@ -1177,7 +1201,7 @@ char* ipcbuf_get_next_read_work (ipcbuf_t* id, uint64_t* bytes, int flag)
                      semctl (id->semid_data[iread], IPCBUF_SODACK, GETVAL));
 #endif
 
-      /* increment the start-of-data acknowlegement semaphore */
+      /* increment the start-of-data acknowledgement semaphore */
       if (ipc_semop (id->semid_data[iread], IPCBUF_SODACK, 1, flag) < 0) {
         fprintf (stderr, "ipcbuf_get_next_read: error increment SODACK\n");
         return NULL;
@@ -1243,7 +1267,7 @@ char* ipcbuf_get_next_read_work (ipcbuf_t* id, uint64_t* bytes, int flag)
     while (sync->w_buf_curr <= id->viewbuf)
     {
 #ifdef _DEBUG
-      fprintf (stderr, "ipcbuf_get_next_read: sync->eod[%d]=%d sync->r_bufs[%d]=%"PRIu64" sync->e_buf[%d]=%"PRIu64"\n",
+      fprintf (stderr, "ipcbuf_get_next_read: sync->eod[%ld]=%d sync->r_bufs[%d]=%"PRIu64" sync->e_buf[%ld]=%"PRIu64"\n",
                         id->xfer, sync->eod[id->xfer], iread, sync->r_bufs[iread], id->xfer, sync->e_buf[id->xfer]);
 #endif
 
@@ -1352,7 +1376,7 @@ char* ipcbuf_get_next_readable(ipcbuf_t* id, uint64_t* bytes, char *interrupt)
   while (sync->w_buf_curr <= id->viewbuf)
   {
 #ifdef _DEBUG
-    fprintf(stderr, "ipcbuf_get_next_readable: sync->w_buf_curr=%lu sync->eod[%d]=%d sync->r_bufs[%d]=%"PRIu64" sync->e_buf[%d]=%"PRIu64"\n",
+    fprintf(stderr, "ipcbuf_get_next_readable: sync->w_buf_curr=%lu sync->eod[%ld]=%d sync->r_bufs[%d]=%"PRIu64" sync->e_buf[%ld]=%"PRIu64"\n",
                     sync->w_buf_curr, id->xfer, sync->eod[id->xfer], iread, sync->r_bufs[iread], id->xfer, sync->e_buf[id->xfer]);
 #endif
 
@@ -1959,4 +1983,30 @@ int ipcbuf_get_device (ipcbuf_t* id)
 #else
   return -1;
 #endif
+}
+
+const char * _ipcbuf_get_state_name(int state)
+{
+  if (state == IPCBUF_DISCON)
+    return "DISCON";
+  if (state == IPCBUF_WCHANGE)
+    return "WCHANGE";
+  if (state == IPCBUF_VIEWER)
+    return "VIEWER";
+  if (state == IPCBUF_WRITER)
+    return "WRITER";
+  if (state == IPCBUF_WRITING)
+    return "WRITING";
+  if (state == IPCBUF_WCHANGE)
+    return "WCHANGE";
+  if (state == IPCBUF_READER)
+    return "READER";
+  if (state == IPCBUF_READING)
+    return "READING";
+  if (state == IPCBUF_RSTOP)
+    return "RSTOP";
+  if (state == IPCBUF_VIEWING)
+    return "VIEWING";
+  if (state == IPCBUF_VSTOP)
+    return "VSTOP";
 }

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #include "monitor.h"
 
 #include <sys/types.h>
@@ -6,8 +13,6 @@
 
 #include <stdlib.h>
 #include <assert.h>
-
-// #define _DEBUG 1
 
 /*! Create a new monitor */
 monitor_t* monitor_create ()
@@ -50,7 +55,7 @@ void* monitor_thread (void* context)
   /* Create a multi log to view PWC collated PWC messages */
   monitor->log = multilog_open ("dada_pwc_command_logger", 0);
 
-  /* Turn of timestamping as they will already be stamped by the pwc */
+  /* Turn off time stamping as they will already be stamped by the pwc */
   monitor->log->timestamp = 0;
 
   multilog_serve (monitor->log, monitor->nexus->multilog_port); 
@@ -137,7 +142,7 @@ void* monitor_thread (void* context)
       pthread_mutex_unlock (&(monitor->nexus->mutex));
 
       if (inode == nnode)
-        fprintf (stderr, "monitor_thread: select returns, but no FD_ISSSET\n");
+        fprintf (stderr, "monitor_thread: select returns, but no FD_ISSET\n");
       else {
         fgets (buffer, buffer_size, node->from);
 

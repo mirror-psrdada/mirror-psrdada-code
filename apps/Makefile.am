@@ -30,6 +30,7 @@ bin_PROGRAMS = \
   dada_dbevent \
   dada_dbrecover \
   dada_dbmergedb \
+  dada_emptydb \
   dada_zerodb
 
 bin_SCRIPTS = \

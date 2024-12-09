@@ -7,25 +7,26 @@ set(tests
     test_median_smooth_zap.c
     test_multilog.c
     test_uint64_t.c
+    test_ipcio.c
+    test_ipcio_lifecycle.c
 )
 
-set(manual_tests
+foreach(test_source_file IN LISTS tests)
+    string(REPLACE ".c" "" test_name ${test_source_file})
+    add_executable(${test_name} ${test_source_file})
+    target_link_libraries(${test_name} psrdada)
+    add_test(${test_name} ${test_name})
+endforeach(test_source_file IN LISTS tests)
+
+set(manualtests
     test_command_parse_server.c
     test_dada_nexus.c
-    test_ipcio.c
     test_multilog_server.c
 )
 
-foreach(testsourcefile IN LISTS tests)
-    string(REPLACE ".c" "" testname ${testsourcefile})
-    add_executable(${testname} ${testsourcefile})
-    target_link_libraries(${testname} psrdada)
-    add_test(${testname} ${testname})
-endforeach(testsourcefile IN LISTS tests)
-
-foreach(testsourcefile IN LISTS manualtests)
-    string(REPLACE ".c" "" testname ${testsourcefile})
-    add_executable(${testname} ${testsourcefile})
-    target_link_libraries(${testname} psrdada)
-endforeach(testsourcefile IN LISTS manualtests)
+foreach(test_source_file IN LISTS manualtests)
+    string(REPLACE ".c" "" test_name ${test_source_file})
+    add_executable(${test_name} ${test_source_file})
+    target_link_libraries(${test_name} psrdada)
+endforeach(test_source_file IN LISTS manualtests)
 

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +24,6 @@ void ipcio_init (ipcio_t* ipc)
   ipc -> rdwrt = 0;
   ipc -> curbuf = 0;
   ipc -> curbufsz = 0;
-  ipc -> rdwrt = 0;
 
   ipc -> marked_filled = 0;
 
@@ -74,6 +80,9 @@ int ipcio_create_work (ipcio_t* ipc, key_t key, uint64_t nbufs, uint64_t bufsz, 
 /* connect to an already created ipcbuf_t struct in shared memory */
 int ipcio_connect (ipcio_t* ipc, key_t key)
 {
+#ifdef _DEBUG
+  fprintf (stderr, "ipcio_connect: ipcbuf_connect(ipc, key)\n");
+#endif
   if (ipcbuf_connect ((ipcbuf_t*)ipc, key) < 0) {
     fprintf (stderr, "ipcio_connect: ipcbuf_connect error\n");
     return -1;
@@ -85,6 +94,9 @@ int ipcio_connect (ipcio_t* ipc, key_t key)
 /* disconnect from an already connected ipcbuf_t struct in shared memory */
 int ipcio_disconnect (ipcio_t* ipc)
 {
+#ifdef _DEBUG
+  fprintf (stderr, "ipcio_disconnect: ipcbuf_disconnect(ipc)\n");
+#endif
   if (ipcbuf_disconnect ((ipcbuf_t*)ipc) < 0) {
     fprintf (stderr, "ipcio_disconnect: ipcbuf_disconnect error\n");
     return -1;
@@ -95,13 +107,22 @@ int ipcio_disconnect (ipcio_t* ipc)
 
 int ipcio_destroy (ipcio_t* ipc)
 {
+#ifdef _DEBUG
+  fprintf (stderr, "ipcio_destroy: ipcio_init (ipc)\n");
+#endif
   ipcio_init (ipc);
+#ifdef _DEBUG
+  fprintf (stderr, "ipcio_destroy: ipcbuf_destroy (ipc)\n");
+#endif
   return ipcbuf_destroy ((ipcbuf_t*)ipc);
 }
 
 /* start reading/writing to an ipcbuf */
 int ipcio_open (ipcio_t* ipc, char rdwrt)
 {
+#ifdef _DEBUG
+  fprintf (stderr, "ipcio_open: rdwrt=%c\n", rdwrt);
+#endif
   if (rdwrt != 'R' && rdwrt != 'r' && rdwrt != 'w' && rdwrt != 'W') {
     fprintf (stderr, "ipcio_open: invalid rdwrt = '%c'\n", rdwrt);
     return -1;
@@ -113,6 +134,9 @@ int ipcio_open (ipcio_t* ipc, char rdwrt)
 
   if (rdwrt == 'w' || rdwrt == 'W') {
 
+#ifdef _DEBUG
+    fprintf (stderr, "ipcio_open: ipcbuf_lock_write(ipc)\n");
+#endif
     /* read from file, write to shm */
     if (ipcbuf_lock_write ((ipcbuf_t*)ipc) < 0) {
       fprintf (stderr, "ipcio_open: error ipcbuf_lock_write\n");
@@ -120,7 +144,7 @@ int ipcio_open (ipcio_t* ipc, char rdwrt)
     }
 
     if (rdwrt == 'w' && ipcbuf_disable_sod((ipcbuf_t*)ipc) < 0) {
-      fprintf (stderr, "ipcio_open: error ipcbuf_disable_sod\n");
+      fprintf (stderr, "ipcio_open: error ipcbuf_disable_sod failed\n");
       return -1;
     }
 
@@ -173,7 +197,7 @@ int ipcio_check_pending_sod (ipcio_t* ipc)
 
   /* Try to enable start of data on the sod_buf & sod byte */
   if (ipcbuf_enable_sod (buf, ipc->sod_buf, ipc->sod_byte) < 0) {
-    fprintf (stderr, "ipcio_check_pendind_sod: fail ipcbuf_enable_sod\n");
+    fprintf (stderr, "ipcio_check_pending_sod: fail ipcbuf_enable_sod\n");
     return -1;
   }
   
@@ -185,6 +209,9 @@ int ipcio_check_pending_sod (ipcio_t* ipc)
  * the start of the data block */
 int ipcio_start (ipcio_t* ipc, uint64_t byte)
 {
+#ifdef _DEBUG
+  fprintf(stderr, "ipcio_start: ipc=%p byte=%lu\n", ipc, byte);
+#endif
   ipcbuf_t* buf  = (ipcbuf_t*) ipc;
   uint64_t bufsz = ipcbuf_get_bufsz (buf);
 
@@ -204,14 +231,38 @@ int ipcio_start (ipcio_t* ipc, uint64_t byte)
 /* stop reading/writing to an ipcbuf */
 int ipcio_stop_close (ipcio_t* ipc, char unlock)
 {
+#ifdef _DEBUG
+  fprintf (stderr, "ipcio_stop_close: unlock=%d rdwrt=%c\n", unlock, ipc->rdwrt);
+#endif
   if (ipc -> rdwrt == 'W') {
 
 #ifdef _DEBUG
     if (ipc->curbuf)
-      fprintf (stderr, "ipcio_close:W curbuf: %"PRIu64" nextbuf: %"PRIu64" %"
+      fprintf (stderr, "ipcio_stop_close:W curbuf: %"PRIu64" nextbuf: %"PRIu64" %"
                         PRIu64" bytes. buf[0]=%p\n", ipc->buf.sync->w_buf_curr,
                         ipc->buf.sync->w_buf_next, ipc->bytes, (void *) ipc->curbuf);
 #endif
+
+    // if the IPCBUF 
+    if (ipcbuf_is_wchange((ipcbuf_t*)ipc))
+    {
+      if (!ipc->curbuf)
+      {
+#ifdef _DEBUG
+        fprintf (stderr, "ipcio_stop_close:W buffer:%"PRIu64" ipcbuf_get_next_write\n",
+                 ipc->buf.sync->w_buf_next);
+#endif
+
+        ipc->curbuf = ipcbuf_get_next_write ((ipcbuf_t*)ipc);
+        if (!ipc->curbuf) {
+          fprintf (stderr, "ipcio_stop_close:W ipcbuf_next_write failed to open buf\n");
+          return -1;
+        }
+
+        ipc->marked_filled = 0;
+        ipc->bytes = 0;
+      }
+    }
 
     if (ipcbuf_is_writing((ipcbuf_t*)ipc)) {
 
@@ -220,27 +271,27 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
       {
         uint64_t bufsz = ipcbuf_get_bufsz((ipcbuf_t*)ipc);
 #ifdef _DEBUG
-        fprintf (stderr, "ipcio_close: bufs_opened=%u, close_block_write(%lu)\n", ipc->bufs_opened, bufsz);
+        fprintf (stderr, "ipcio_stop_close:W bufs_opened=%u, close_block_write(%lu)\n", ipc->bufs_opened, bufsz);
 #endif
         if (ipcio_close_block_write(ipc, bufsz) < 0)
         {
-          fprintf (stderr, "ipcio_close: failed to close an open buffer bufs_opened=%u\n", ipc->bufs_opened);
+          fprintf (stderr, "ipcio_stop_close:W failed to close an open buffer bufs_opened=%u\n", ipc->bufs_opened);
           return -1;
         }
       }
 
       if (ipcbuf_enable_eod ((ipcbuf_t*)ipc) < 0) {
-        fprintf (stderr, "ipcio_close:W error ipcbuf_enable_eod\n");
+        fprintf (stderr, "ipcio_stop_close:W error ipcbuf_enable_eod\n");
         return -1;
       }
 
       if (ipcbuf_mark_filled ((ipcbuf_t*)ipc, ipc->bytes) < 0) {
-        fprintf (stderr, "ipcio_close:W error ipcbuf_mark_filled\n");
+        fprintf (stderr, "ipcio_stop_close:W error ipcbuf_mark_filled\n");
         return -1;
       }
 
       if (ipcio_check_pending_sod (ipc) < 0) {
-        fprintf (stderr, "ipcio_close:W error ipcio_check_pending_sod\n");
+        fprintf (stderr, "ipcio_stop_close:W error ipcio_check_pending_sod\n");
         return -1;
       }
 
@@ -250,7 +301,7 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
 
       if (ipc->bytes == ipcbuf_get_bufsz((ipcbuf_t*)ipc)) {
 #ifdef _DEBUG
-        fprintf (stderr, "ipcio_close:W last buffer was filled\n");
+        fprintf (stderr, "ipcio_stop_close:W last buffer was filled\n");
 #endif
         ipc->curbuf = 0;
       }
@@ -270,11 +321,11 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
      * data block */
     /*
 #ifdef _DEBUG
-    fprintf (stderr, "ipcio_close:W calling ipcbuf_reset\n");
+    fprintf (stderr, "ipcio_stop_close:w calling ipcbuf_reset\n");
 #endif
 
     if (ipcbuf_reset ((ipcbuf_t*)ipc) < 0) {
-      fprintf (stderr, "ipcio_close:W error ipcbuf_reset\n");
+      fprintf (stderr, "ipcio_stop_close:w error ipcbuf_reset\n");
       return -1;
     }*/
 
@@ -291,7 +342,7 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
     }
 
     if (ipcbuf_unlock_write ((ipcbuf_t*)ipc) < 0) {
-      fprintf (stderr, "ipcio_close:W error ipcbuf_unlock_write\n");
+      fprintf (stderr, "ipcio_stop_close:w error ipcbuf_unlock_write\n");
       return -1;
     }
 
@@ -306,7 +357,7 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
     fprintf (stderr, "ipcio_close:R ipcbuf_unlock_read()\n");
 #endif
     if (ipcbuf_unlock_read ((ipcbuf_t*)ipc) < 0) {
-      fprintf (stderr, "ipcio_close:R error ipcbuf_unlock_read\n");
+      fprintf (stderr, "ipcio_stop_close:R error ipcbuf_unlock_read\n");
       return -1;
     }
 
@@ -315,7 +366,7 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
 
   }
 
-  fprintf (stderr, "ipcio_close: invalid ipcio_t\n");
+  fprintf (stderr, "ipcio_stop_close: invalid ipcio_t\n");
   return -1;
 }
 
@@ -345,6 +396,9 @@ int ipcio_is_open (ipcio_t* ipc)
 /* write bytes to ipcbuf */
 ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
 {
+#ifdef _DEBUG
+  fprintf(stderr, "ipcio_write ipc=%p, ptr=%p, bytes=%ld\n", ipc, ptr, bytes);
+#endif
 
   size_t space = 0;
   size_t towrite = bytes;
@@ -388,10 +442,14 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
     */
     if (ipc->bytes == ipcbuf_get_bufsz((ipcbuf_t*)ipc)) {
 
+#ifdef _DEBUG
+      fprintf (stderr, "ipcio_write: buffer is filled, checking if already marked_filled\n");
+#endif 
+
       if (!ipc->marked_filled) {
 
 #ifdef _DEBUG
-        fprintf (stderr, "ipcio_write buffer:%"PRIu64" mark_filled\n",
+        fprintf (stderr, "ipcio_write: buffer:%"PRIu64" mark_filled\n",
                  ipc->buf.sync->w_buf_curr);
 #endif
         
@@ -414,10 +472,14 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
 
     }
 
+#ifdef _DEBUG
+    fprintf (stderr, "ipcio_write: ipc->curbuf=%p\n", (void *) ipc->curbuf);
+#endif 
+
     if (!ipc->curbuf) {
 
 #ifdef _DEBUG
-      fprintf (stderr, "ipcio_write buffer:%"PRIu64" ipcbuf_get_next_write\n",
+      fprintf (stderr, "ipcio_write: buffer:%"PRIu64" ipcbuf_get_next_write\n",
                ipc->buf.sync->w_buf_next);
 #endif
 
@@ -441,13 +503,13 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
       space = bytes;
 
 #ifdef _DEBUG
-    fprintf (stderr, "ipcio_write space=%"PRIu64"\n", space);
+    fprintf (stderr, "ipcio_write: space=%"PRIu64"\n", space);
 #endif
 
     if (space > 0) {
 
 #ifdef _DEBUG
-      fprintf (stderr, "ipcio_write buffer:%"PRIu64" offset:%"PRIu64
+      fprintf (stderr, "ipcio_write: buffer:%"PRIu64" offset:%"PRIu64
 	       " count=%"PRIu64"\n", ipc->buf.sync->w_buf_curr, ipc->bytes, space);
 #endif
 
@@ -472,7 +534,7 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
 #endif
       {
 #ifdef _DEBUG
-        fprintf (stderr, "ipcio_write: memcpy (%p, %p, :%"PRIu64"\n",
+        fprintf (stderr, "ipcio_write: memcpy (%p, %p, %"PRIu64")\n",
                  (void *) ipc->curbuf + ipc->bytes, (void *) ptr, space);
 #endif
         memcpy (ipc->curbuf + ipc->bytes, ptr, space);

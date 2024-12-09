@@ -1,3 +1,10 @@
+/***************************************************************************
+ *  
+ *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ * 
+ ****************************************************************************/
+
 #ifndef __DADA_CLIENT_H
 #define __DADA_CLIENT_H
 
@@ -47,13 +54,13 @@ extern "C" {
     /*! Additional context information */
     void* context;
 
-    /* The header to be transfered to the target */
+    /* The header to be transferred to the target */
     char* header;
 
     /* The size of the header */
     uint64_t header_size;
 
-    /* When set, the header is transfered to/from the target */
+    /* When set, the header is transferred to/from the target */
     char header_transfer;
 
     /* The direction of data transfer */
@@ -64,7 +71,7 @@ extern "C" {
     /*! The file descriptor of the data transfer target */
     int fd;
 
-    /*! The total number of bytes to be transfered to/from the target */
+    /*! The total number of bytes to be transferred to/from the target */
     uint64_t transfer_bytes;
 
     /*! The optimal number of bytes to transfer to/from the target buffer */
