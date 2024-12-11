@@ -243,7 +243,8 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
                         ipc->buf.sync->w_buf_next, ipc->bytes, (void *) ipc->curbuf);
 #endif
 
-    // if the IPCBUF 
+    /* if the IPCBUF is in the WCHANGE state, call ipcbuf_get_next_write, which in turn calls ipcbuf_enable_sod 
+       and ensures that any waiting reader(s) does(do) not hang indefinitely */
     if (ipcbuf_is_wchange((ipcbuf_t*)ipc))
     {
       if (!ipc->curbuf)
@@ -264,8 +265,8 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
       }
     }
 
-    if (ipcbuf_is_writing((ipcbuf_t*)ipc)) {
-
+    if (ipcbuf_is_writing((ipcbuf_t*)ipc))
+    {
       // ensure that any multiple opened blocks are closed
       while (ipc->bufs_opened > 0)
       {
