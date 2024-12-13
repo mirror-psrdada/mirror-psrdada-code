@@ -124,19 +124,6 @@ int main (int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  // // enable the start of data on the data block at byte 0
-  // fprintf(stderr, "main: ipcio_start(hdu->data_block, 0)\n");
-  // ipcio_start(hdu->data_block, 0);
-
-  // uint64_t block_id = 0;
-  // uint64_t bytes_written = 0;
-  // fprintf(stderr, "main: ipcio_open_block_write(hdu->data_block, &block_id)\n");
-  // ipcio_open_block_write(hdu->data_block, &block_id);
-  // fprintf(stderr, "main: ipcio_close_block_write(hdu->data_block, %lu)\n", bytes_written);
-  // ipcio_close_block_write(hdu->data_block, bytes_written);
-  char * buffer = malloc(4096);
-  ipcio_write(hdu->data_block, buffer, 0);
-
   // signals the end of data on the data block
   if (ipcio_close (hdu->data_block) < 0)  {
     multilog (log, LOG_ERR, "Could not close Data Block\n");

@@ -173,13 +173,16 @@ int dada_hdu_unlock_read (dada_hdu_t* hdu)
     return -1;
   }
 
-#ifdef _DEBUG
-  fprintf (stderr, "dada_hdu_unlock_read: ipcio_close (hdu->data_block)\n");
-#endif
-  if (ipcio_close (hdu->data_block) < 0)
+  if (ipcio_is_open(hdu->data_block))
   {
-    multilog (hdu->log, LOG_ERR, "Could not unlock Data Block read\n");
-    return -1;
+#ifdef _DEBUG
+    fprintf (stderr, "dada_hdu_unlock_read: ipcio_close (hdu->data_block)\n");
+#endif
+    if (ipcio_close (hdu->data_block) < 0)
+    {
+      multilog (hdu->log, LOG_ERR, "Could not unlock Data Block read\n");
+      return -1;
+    }
   }
 
   if (hdu->header)
