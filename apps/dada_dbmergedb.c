@@ -509,8 +509,6 @@ void input_thread (void * arg)
     db->error = 1;
     return;        
   }
-  // TODO fix this with chris
-  obs_offset -= 2147483648;
 
   uint64_t bytes_per_second;
   if (ascii_header_get (header, "BYTES_PER_SECOND", "%lu", &bytes_per_second) != 1)
@@ -519,8 +517,6 @@ void input_thread (void * arg)
     db->error = 1;
     return;
   }
-  // TODO remove and remind chris to fix this
-  bytes_per_second = 800000000;
 
   unsigned nchan, ndim, nbit;
   if (ascii_header_get (header, "NCHAN", "%u", &nchan) != 1)
@@ -636,7 +632,7 @@ void input_thread (void * arg)
           {
             if (ipcbuf_eod((ipcbuf_t*) db->hdu->data_block))
             {
-              fprintf (stderr, "input[%x]: EOD occured prior to alignment\n", db->key);
+              fprintf (stderr, "input[%x]: EOD occurred prior to alignment\n", db->key);
               db->error = 1;
               return;
             }
