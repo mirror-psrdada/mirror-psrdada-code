@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 #include "ipcbuf.h"
@@ -7,6 +14,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -53,12 +61,12 @@ int main (int argc, char **argv)
 
   int arg = 0;
 
-  /* TODO the amount to conduct a busy sleep inbetween clearing each sub
+  /* TODO the amount to conduct a busy sleep in between clearing each sub
    * block */
 
   while ((arg=getopt(argc,argv,"k:dv")) != -1)
     switch (arg) {
-     
+
     case 'k':
       if (sscanf (optarg, "%x", &dada_key) != 1) {
         fprintf (stderr,"dada_dbxferinfo: could not parse key from %s\n",
@@ -74,16 +82,16 @@ int main (int argc, char **argv)
     case 'v':
       verbose=1;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
 
   log = multilog_open ("dada_dbmonitor", daemon);
 
-  if (daemon) 
+  if (daemon)
     be_a_daemon ();
   else
     multilog_add (log, stderr);
@@ -100,10 +108,10 @@ int main (int argc, char **argv)
     return EXIT_FAILURE;
 
   /* get a pointer to the data block */
- 
+
   ipcbuf_t *hb = hdu->header_block;
   ipcbuf_t *db = (ipcbuf_t *) hdu->data_block;
-          
+
   uint64_t bufsz = ipcbuf_get_bufsz (hb);
   uint64_t nhbufs = ipcbuf_get_nbufs (hb);
   uint64_t total_bytes = nhbufs * bufsz;
@@ -150,7 +158,7 @@ void print_ipcbuf_info (ipcbuf_t * db)
               db->sync->r_bufs[iread],
               ipcbuf_get_sodack_iread(db, iread),
               ipcbuf_get_eodack_iread(db, iread),
-              ipcbuf_get_read_semaphore_count (db), 
+              ipcbuf_get_read_semaphore_count (db),
               ipcbuf_get_reader_conn_iread (db, iread),
               ipcbuf_get_nfull_iread(db, iread),
               ipcbuf_get_nclear_iread(db, iread),
@@ -164,29 +172,29 @@ void print_ipcbuf_info (ipcbuf_t * db)
   fprintf(stderr, "ID [    buf,   byte]    [    buf,   byte]   FLAG\n");
   fprintf(stderr, "=================================================\n");
   for (int i=0;i<IPCBUF_XFERS;i++) {
-    fprintf(stderr,"%2d [%7"PRIu64",%7"PRIu64"] => [%7"PRIu64",%7"PRIu64"]   %4d", 
+    fprintf(stderr,"%2d [%7"PRIu64",%7"PRIu64"] => [%7"PRIu64",%7"PRIu64"]   %4d",
                     i, db->sync->s_buf[i],db->sync->s_byte[i],
                     db->sync->e_buf[i],db->sync->e_byte[i],
                     db->sync->eod[i]);
 
-    if (i == db->sync->w_xfer) 
+    if (i == db->sync->w_xfer)
       fprintf(stderr, " W");
     else
       fprintf(stderr, "  ");
     for (int iread=0; iread < nreaders; iread++)
-      if (i == db->sync->r_xfers[iread] % IPCBUF_XFERS) 
+      if (i == db->sync->r_xfers[iread] % IPCBUF_XFERS)
         fprintf(stderr, " R%d", iread);
-      else 
+      else
         fprintf(stderr, "  ");
 
     fprintf(stderr,"\n");
   }
 }
 
-const char * state_to_str(int state) 
+const char * state_to_str(int state)
 {
 
-  switch (state) 
+  switch (state)
   {
     case 0:
       return "disconnected";

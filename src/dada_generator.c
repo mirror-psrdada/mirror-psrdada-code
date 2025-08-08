@@ -1,17 +1,25 @@
-/* 
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+/*
  *  Library functions for generating signals at various bit levels
  *  for udp generator codes
  */
 
+#include "dada_generator.h"
+
+#include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
 
-#include "dada_generator.h"
-
 /*
- * prints the binary representatino of a char
+ * prints the binary representation of a char
  */
-char * char_to_binary_string(char value) 
+char * char_to_binary_string(char value)
 {
   char * string = (char *) malloc(sizeof(char)*9);
   char c;
@@ -57,24 +65,24 @@ char * unsigned_to_binary_string(unsigned int value) {
 }
 
 /*
- * fill an char array with gaussian noise 
+ * fill an char array with gaussian noise
  */
 void fill_gaussian_chars(char *data, int size, int nbits, int gain) {
 
   float max = powf(2, (nbits-1));
-  
+
   int val;
   int twos;
   int i;
   float y2=0;
-  
+
   float centre = max * ((float) (gain-500) / 1000);
   float div = 4.0;
-  
+
   unsigned int mask = 0x000000ff;
 
   for (i=0; i < size; i++) {
-                                  
+
     val = 0;
     y2 = (float) rand_normal(centre, max/div);
 
@@ -97,12 +105,12 @@ void fill_gaussian_chars(char *data, int size, int nbits, int gain) {
 }
 
 // generate 8-bit integer data with the specified mean and stddev
-void fill_gaussian_data (char *data, int length, double mean, double stddev) 
+void fill_gaussian_data (char *data, int length, double mean, double stddev)
 {
   unsigned i=0;
   double sample;
   int sample_int;
-  for (i=0; i<length; i++) 
+  for (i=0; i<length; i++)
   {
     sample = rand_normal(mean, stddev);
 
@@ -131,9 +139,9 @@ void fill_gaussian_float (float *data, int length, double mean, double stddev)
 }
 
 /*
- * fill an unsigned int  array with gaussian noise 
+ * fill an unsigned int  array with gaussian noise
  */
-void fill_gaussian_unsigned (unsigned int *data, int size, int nbits, int gain) 
+void fill_gaussian_unsigned (unsigned int *data, int size, int nbits, int gain)
 {
   double max = powf(2, nbits);
   double y = 0;
@@ -148,7 +156,7 @@ void fill_gaussian_unsigned (unsigned int *data, int size, int nbits, int gain)
 }
 
 /*
- * Fill char array of length size with a cal signal _--_ 
+ * Fill char array of length size with a cal signal _--_
  * gain value of 1 - 1000
  */
 
@@ -187,10 +195,10 @@ void fill_cal_chars(char *data, int size, int nbits, int gain) {
 
 
 /*
- * fill an unsigned int  array with gaussian noise 
- */ 
+ * fill an unsigned int  array with gaussian noise
+ */
 void fill_cal_unsigned(unsigned int *data, int size, int nbits, int gain) {
-    
+
   double max = powf(2, nbits);
   double y = 0;
   int i;
@@ -199,7 +207,7 @@ void fill_cal_unsigned(unsigned int *data, int size, int nbits, int gain) {
   double div = 4.0;
   double off = centre / 1.3;
   double on = centre * 1.3;
-  
+
   for (i=0; i < size; i++) {
 
     if ((i < (size*0.25)) || (i > (size*0.75) )) {
@@ -223,7 +231,7 @@ double rand_normal(double mean, double stddev) {
   static int n2_cached = 0;
 
   if (!n2_cached) {
-     // Choose a point x,y in the unit circle uniformaly at random
+     // Choose a point x,y in the unit circle uniformly at random
      double x, y, r;
      do {
       // scale two random integers to doubles between -1 and 1

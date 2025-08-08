@@ -98,7 +98,7 @@ void StopTimer(stopwatch_t *stopWatch)
 
     stopWatch->runningTime.tv_nsec +=
         (now.tv_nsec - stopWatch->startTime.tv_nsec);
-    
+
     stopWatch->startTime.tv_sec = 0;
     stopWatch->startTime.tv_nsec = 0;
 }
@@ -161,13 +161,13 @@ unsigned long ReadTimer(const stopwatch_t *stopWatch)
 
     delta += ((now.tv_nsec - stopWatch->startTime.tv_nsec) +
         stopWatch->runningTime.tv_nsec) / 1000000;
- 
+
     return delta;
 }
 
 /***************************************************************************
 *   Function   : DelayTimer
-*   Description: This function waits for a time delay in seconds since the 
+*   Description: This function waits for a time delay in seconds since the
                  start time, then returns
 *   Parameters : stopWatch - pointer to the stopwatch_t structure
 *                containing the timer data.
@@ -180,7 +180,7 @@ void DelayTimer(const stopwatch_t *stopWatch, double delay)
     struct timespec now;
     unsigned long delta = 0;
     unsigned long end = (unsigned long) (delay * 1e9);
-    
+
     if (FALSE == stopWatch->isRunning)
       return ;
 

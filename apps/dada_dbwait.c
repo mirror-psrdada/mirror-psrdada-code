@@ -1,6 +1,14 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

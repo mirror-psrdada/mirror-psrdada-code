@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
+ *
  *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "dada_client.h"
@@ -27,7 +27,7 @@
 #include <sys/shm.h>
 
 #define DEFAULT_DATA_RATE 64.000
-#define DEFAULT_WRITE_TIME 10 
+#define DEFAULT_WRITE_TIME 10
 
 void usage()
 {
@@ -73,7 +73,7 @@ typedef struct {
   /* pre generated data to write */
   char * data;
 
-  /* length of each array */ 
+  /* length of each array */
   uint64_t data_size;
 
   /* transfer/file size */
@@ -115,7 +115,7 @@ int64_t transfer_data (dada_client_t* client, void* data, uint64_t data_size)
     return data_size;
   }
 
-  // copy data_size bytes at the specified rate into data  
+  // copy data_size bytes at the specified rate into data
   int64_t bytes_remaining = (int64_t) data_size;
   uint64_t bytes_copied = 0;
   uint64_t bytes = 0;
@@ -124,9 +124,9 @@ int64_t transfer_data (dada_client_t* client, void* data, uint64_t data_size)
   {
     if (junkdb->bytes_to_copy == 0) {
       float_sleep(0.1);
-    } 
+    }
 
-    // busy loop wait until the next second ticks over, then 
+    // busy loop wait until the next second ticks over, then
     // increment by bytes_per_second
     junkdb->prev_time = junkdb->curr_time;
     junkdb->curr_time = time(0);
@@ -138,12 +138,12 @@ int64_t transfer_data (dada_client_t* client, void* data, uint64_t data_size)
     }
 
     // if we have some data to copy now (due to rate)
-    if (junkdb->bytes_to_copy > 0) 
+    if (junkdb->bytes_to_copy > 0)
     {
       // how much data to memcpy into the ring buffer
       if (bytes_remaining < junkdb->bytes_to_copy)
         bytes = bytes_remaining;
-      else 
+      else
         bytes = junkdb->bytes_to_copy;
 
       // if the number of bytes to be copied is more than our
@@ -155,7 +155,7 @@ int64_t transfer_data (dada_client_t* client, void* data, uint64_t data_size)
       if (junkdb->perform_memcpy)
         memcpy (data + bytes_copied, junkdb->data, bytes);
 
-      // increment 
+      // increment
       bytes_copied += bytes;            // destination offset
       junkdb->bytes_to_copy -= bytes;   // data_rate offset
       bytes_remaining -= bytes;         // bytes left to copy to destination
@@ -165,8 +165,8 @@ int64_t transfer_data (dada_client_t* client, void* data, uint64_t data_size)
 #endif
     }
   }
-  
-#ifdef _DEBUG 
+
+#ifdef _DEBUG
   multilog (client->log, LOG_INFO, "transfer_data: copied %"PRIu64" bytes\n", bytes_copied);
 #endif
 
@@ -205,7 +205,7 @@ int dada_junkdb_open (dada_client_t* client)
   assert (junkdb != 0);
 
   uint64_t hdr_size = 0;
-  
+
   // read the header
   if (fileread (junkdb->header_file, client->header, client->header_size) < 0) {
     multilog (client->log, LOG_ERR, "Could not read header from %s\n", junkdb->header_file);
@@ -276,7 +276,7 @@ int dada_junkdb_open (dada_client_t* client)
     memset ((void *) junkdb->data, (int) junkdb->fill_char, junkdb->data_size);
   }
 
-  if (junkdb->write_gaussian) 
+  if (junkdb->write_gaussian)
   {
     multilog (client->log, LOG_INFO, "open: generating gaussian data %"PRIu64"\n", junkdb->data_size);
     if (nbit == 8)
@@ -441,7 +441,7 @@ int main (int argc, char **argv)
     case 'z':
       zero_copy = 1;
       break;
-      
+
     default:
       usage ();
       return EXIT_FAILURE;
@@ -451,7 +451,7 @@ int main (int argc, char **argv)
     fprintf (stderr, "Error: a header file must be specified\n");
     usage();
     exit(EXIT_FAILURE);
-  } 
+  }
 
   header_file = strdup(argv[optind]);
 

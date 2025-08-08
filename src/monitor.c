@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "monitor.h"
@@ -50,7 +50,7 @@ void* monitor_thread (void* context)
   assert (buffer != 0);
 
   /* For logging to local file */
-  FILE* pwcc_logfile = 0;   
+  FILE* pwcc_logfile = 0;
 
   /* Create a multi log to view PWC collated PWC messages */
   monitor->log = multilog_open ("dada_pwc_command_logger", 0);
@@ -58,7 +58,7 @@ void* monitor_thread (void* context)
   /* Turn off time stamping as they will already be stamped by the pwc */
   monitor->log->timestamp = 0;
 
-  multilog_serve (monitor->log, monitor->nexus->multilog_port); 
+  multilog_serve (monitor->log, monitor->nexus->multilog_port);
 
 #ifdef _DEBUG
   fprintf (stderr, "monitor_thread start nexus=%p\n", monitor->nexus);
@@ -88,14 +88,14 @@ void* monitor_thread (void* context)
 
     /* First we add the nodes to readset for select polling */
     for (inode = 0; inode < nnode; inode++) {
-     
+
       node = monitor->nexus->nodes[inode];
       if (node->from) {
 #ifdef _DEBUG
         fprintf (stderr, "monitor_thread add %d\n", fileno(node->from));
 #endif
         if (feof(node->from)) {
-          if (node->host) 
+          if (node->host)
             multilog_fprintf (stderr, LOG_INFO, "monitor_thread: lost "
               "connection with %s PWC=%d FD=%d\n", node->host, node->id, fileno(node->from));
           else
@@ -129,7 +129,7 @@ void* monitor_thread (void* context)
       for (inode = 0; inode < nnode; inode++) {
 
         node = monitor->nexus->nodes[inode];
-        
+
         /* If this node has been setup yet */
         if (node->from) {
 #ifdef _DEBUG
@@ -144,11 +144,11 @@ void* monitor_thread (void* context)
       if (inode == nnode)
         fprintf (stderr, "monitor_thread: select returns, but no FD_ISSET\n");
       else {
-        fgets (buffer, buffer_size, node->from);
+        char * str_read = fgets (buffer, buffer_size, node->from);
 
         /* If the connection dies to the pwc, reset the to/from FILE ptrs */
         if (feof(node->from)) {
-          if (node->host) 
+          if (node->host)
             multilog_fprintf (stderr, LOG_INFO, "lost connection with %s PWC=%d FD=%d\n", node->host, node->id, fileno(node->from));
           else
             multilog_fprintf (stderr, LOG_INFO, "lost connection with PWC=%d FD=%d\n", node->id, fileno(node->from));
@@ -164,12 +164,12 @@ void* monitor_thread (void* context)
           fprintf(node->log,"%s",buffer);
           fflush(node->log);
         }
-  
+
         if (pwcc_logfile) {
           fprintf(pwcc_logfile,"%02d %s",node->id, buffer);
           fflush(pwcc_logfile);
         }
-        
+
         if (monitor->log)
           multilog (monitor->log, LOG_INFO, "%02d %s", node->id, buffer);
 
@@ -182,7 +182,7 @@ void* monitor_thread (void* context)
     }
 
   }
-  
+
 #ifdef _DEBUG
   fprintf (stderr, "monitor_thread exit\n");
 #endif
@@ -208,4 +208,3 @@ int monitor_launch (monitor_t* monitor)
 
   return 0;
 }
-

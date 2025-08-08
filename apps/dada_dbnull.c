@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -7,6 +14,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -47,7 +55,7 @@ void usage()
      " -q         be quiet\n"
      " -x mbytes  transfer size MB [default 64]\n"
      " -X mbytes  transfer size MiB [default 64]\n"
-     " -o mbytes  transfer block sizei MB [default 8]\n"
+     " -o mbytes  transfer block size MB [default 8]\n"
      " -O mbytes  transfer block size Mi [default 8]\n"
      " -s         1 transfer, then exit\n"
      " -S         multiple transfers until OBS_XFER=-1, then exit\n"

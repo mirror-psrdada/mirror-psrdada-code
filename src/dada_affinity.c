@@ -1,6 +1,9 @@
-/*
- * For binding threads to CPU/Cores
- */
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
 #include "dada_affinity.h"
 
@@ -38,7 +41,7 @@ int dada_bind_thread_to_core(int core)
     hwloc_bitmap_free (cpuset);
   }
 #else
-#ifdef HAVE_AFFINTY
+#ifdef HAVE_AFFINITY
   cpu_set_t set;
   pid_t tpid;
 

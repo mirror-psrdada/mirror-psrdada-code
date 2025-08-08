@@ -1,9 +1,13 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
+
+#include "ipcbuf.h"
+#include "tmutil.h"
+#include "ipcutil.h"
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -22,19 +26,12 @@
 #include <time.h>
 
 #include "config.h"
-#include "ipcbuf.h"
-#include "tmutil.h"
-#include "ipcutil.h"
 
 #ifdef HAVE_CUDA
 #include "ipcutil_cuda.h"
 #endif
 
 // #define _DEBUG 1
-
-/* semaphores */
-
-// now defined in ipcbuf.h
 
 /* process states */
 
@@ -54,9 +51,9 @@
 
 /**
  * @brief Return the process state name for the integer process state value.
- * 
- * @param state 
- * @return const char* 
+ *
+ * @param state
+ * @return const char*
  */
 const char * _ipcbuf_get_state_name(int state);
 
@@ -479,6 +476,9 @@ int ipcbuf_destroy (ipcbuf_t* id)
   if (id->buffer)
     free (id->buffer);
   id->buffer = 0;
+  if (id->shm_addr)
+    free (id->shm_addr);
+  id->shm_addr = 0;
   if (id->shmid)
     free (id->shmid);
   id->shmid = 0;
@@ -1493,6 +1493,7 @@ int ipcbuf_mark_cleared (ipcbuf_t* id)
 
     id->state = IPCBUF_RSTOP;
     id->sync->r_states[iread] = IPCBUF_RSTOP;
+    id->sync->r_bufs[iread] ++;
 
     id->sync->r_xfers[iread] ++;
     id->xfer = id->sync->r_xfers[iread] % IPCBUF_XFERS;

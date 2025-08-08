@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_pwc_nexus.h"
 #include "futils.h"
 
@@ -27,7 +34,7 @@ int dada_pwc_nexus_cmd_config (void* context, FILE* output, char* args)
 
   int error = 0;
 
-  if (nexus->pwc->state != dada_pwc_idle && 
+  if (nexus->pwc->state != dada_pwc_idle &&
       nexus->pwc->state != dada_pwc_pending)
   {
     fprintf (output, "Cannot config when not IDLE or PENDING; state=%s\n",
@@ -45,7 +52,7 @@ int dada_pwc_nexus_cmd_config (void* context, FILE* output, char* args)
   if (!filename || filename[0] == '\0') {
     fprintf (output, "Please specify config filename\n");
     return -1;
-  } 
+  }
 
 #ifdef _DEBUG
   fprintf (stderr, "dada_pwc_nexus_config fopen (%s, 'r')\n", filename);

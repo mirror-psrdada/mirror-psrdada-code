@@ -1,5 +1,12 @@
-#ifndef __NEXUS_H
-#define __NEXUS_H
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#ifndef __DADA_NEXUS_H
+#define __DADA_NEXUS_H
 
 /* ************************************************************************
 
@@ -92,7 +99,7 @@ extern "C" {
 
     /* The base directory for multilog messages */
     char* logfile_dir;
-                                                                                                                                                                              
+
     /* Port on which multilog messages are available (only for mirror) */
     int multilog_port;
 
@@ -132,7 +139,7 @@ extern "C" {
   int nexus_parse (nexus_t* n, const char* buffer);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
-#endif
+#endif // __DADA_NEXUS_H

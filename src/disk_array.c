@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 // To enable the use of O_DIRECT
@@ -181,7 +181,7 @@ uint64_t get_available (const char* filename)
             filename, strerror(errno));
     return 0;
   }
-  
+
   space = info.f_bfree;
   space *= info.f_bsize;
 
@@ -229,7 +229,7 @@ int disk_array_open (disk_array_t* array, char* filename, uint64_t filesize,
   for (idisk = 0; idisk < array->ndisk; idisk++) {
     if (get_available (array->disks[idisk].path) > filesize)
     {
-      
+
       if (!fullname)
         fullname = malloc (FILENAME_MAX);
 
@@ -261,7 +261,7 @@ int disk_array_open (disk_array_t* array, char* filename, uint64_t filesize,
 int disk_array_reopen (disk_array_t* array, int curr_fd, char* filename)
 {
 
-  if (close (curr_fd) < 0) 
+  if (close (curr_fd) < 0)
   {
     fprintf (stderr, "disk_array_reopen: Error closing [%d] %s: %s\n", curr_fd, filename, strerror(errno));
     return -1;
@@ -275,7 +275,7 @@ int disk_array_reopen (disk_array_t* array, int curr_fd, char* filename)
 
   fd = open (filename, flags, perms);
 
-  if (fd < 0) 
+  if (fd < 0)
     fprintf(stderr, "disk_array_reopen: could not reopen %s: %s\n", filename, strerror(errno));
 
   pthread_mutex_unlock (&(array->mutex));

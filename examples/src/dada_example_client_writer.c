@@ -1,11 +1,20 @@
 /***************************************************************************
  *  
- *    Copyright (C) 2017 by Andrew Jameson
+ *    Copyright (C) 2017-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
  * 
  ****************************************************************************/
 
+// DADA includes for this example
+#include "futils.h"
+#include "dada_def.h"
+#include "dada_hdu.h"
+#include "dada_client.h"
+#include "multilog.h"
+#include "ipcio.h"
+#include "ascii_header.h"
 
+#include <getopt.h>
 #include <time.h>
 #include <assert.h>
 #include <sys/socket.h>
@@ -17,16 +26,6 @@
 #include <sched.h>
 #include <stdlib.h>
 #include <string.h>
-
-
-// DADA includes for this example
-#include "futils.h"
-#include "dada_def.h"
-#include "dada_hdu.h"
-#include "dada_client.h"
-#include "multilog.h"
-#include "ipcio.h"
-#include "ascii_header.h"
 
 int example_dada_client_writer_open (dada_client_t* client);
 int64_t example_dada_client_write (dada_client_t* client, void* data, uint64_t data_size);
@@ -91,7 +90,14 @@ int64_t example_dada_client_writer_write (dada_client_t* client, void* data, uin
     char * header = ipcbuf_get_next_write (ctx->hdu->header_block);
     memcpy (header, ctx->obs_header, header_size);
 
-    // flag the header block for this "obsevation" as filled
+    // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+    if (ipcbuf_enable_eod (ctx->hdu->header_block) < 0)
+    {
+      multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+      return -1;
+    }
+
+    // flag the header block for this "observation" as filled
     if (ipcbuf_mark_filled (ctx->hdu->header_block, header_size) < 0)
     {
       multilog (ctx->log, LOG_ERR, "could not mark filled Header Block\n");

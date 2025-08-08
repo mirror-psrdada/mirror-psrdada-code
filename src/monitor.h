@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_MONITOR_H
 #define __DADA_MONITOR_H
 
@@ -45,4 +52,4 @@ extern "C" {
 	   }
 #endif
 
-#endif
+#endif // __DADA_MONITOR_H

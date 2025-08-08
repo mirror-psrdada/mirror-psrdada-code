@@ -1,5 +1,11 @@
-//#define _GNU_SOURCE
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -44,11 +50,11 @@ int main (int argc, char **argv)
 
   while ((arg=getopt(argc,argv,"r:hM:v")) != -1)
     switch (arg) {
-     
-    case 'r': 
+
+    case 'r':
       rate = atoi(optarg);
       truncate_chunk = rate*1024*1024;
-      break; 
+      break;
 
     case 'M':
       metafile = optarg;
@@ -65,7 +71,7 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-      
+
   }
 
   if ((rate <= 0) || (rate > 1024)) {
@@ -130,7 +136,7 @@ int main (int argc, char **argv)
   }
 
 
-  if (verbose) 
+  if (verbose)
     fprintf(stdout, "Truncating %d files at %d MB/s\n", n_files, rate);
 
   for (i=0; i < n_files; i++)
@@ -160,30 +166,30 @@ int main (int argc, char **argv)
           f_size = (uint64_t) filestat.st_size;
           if (verbose)
             fprintf(stdout, "%s: %"PRIu64" bytes\n", f_names[i], f_size);
-  
+
           int64_t new_length = 0;
           unsigned n_ops = 0;
           unsigned i_op = 0;
           int j = 0;
 
-          if (verbose) 
+          if (verbose)
             fprintf(stderr, "%s [", f_names[i]);
 
           i_op = 0;
           n_ops = f_size / truncate_chunk;
-          if (n_ops == 0) 
+          if (n_ops == 0)
             n_ops = 1;
 
           if (verbose) {
             for (j=0; j<n_ops; j++) {
-              fprintf(stderr, " ");  
+              fprintf(stderr, " ");
             }
             fprintf(stderr, "]");
           }
 
           while (f_size > 0) {
 
-            new_length = f_size - truncate_chunk; 
+            new_length = f_size - truncate_chunk;
             if (new_length < 0)
               new_length = 0;
 
@@ -213,7 +219,7 @@ int main (int argc, char **argv)
               fprintf(stderr, "]");
             }
 
-            if (f_size > 0) 
+            if (f_size > 0)
               sleep(1);
           }
           if (verbose)

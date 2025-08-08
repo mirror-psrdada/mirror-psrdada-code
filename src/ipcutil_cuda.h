@@ -1,7 +1,14 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_IPCUTIL_CUDA_H
 #define __DADA_IPCUTIL_CUDA_H
 
-#include <sys/types.h>
+#include <sys/types.h> // for key_t
 
 /* ************************************************************************
 
@@ -27,4 +34,4 @@ extern "C" {
 	   }
 #endif
 
-#endif
+#endif // _DADA_IPCUTIL_CUDA_H

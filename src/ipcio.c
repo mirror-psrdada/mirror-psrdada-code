@@ -1,16 +1,18 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
+
+#include "ipcio.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ipc.h>
 
 #include "config.h"
-#include "ipcio.h"
 
 #ifdef HAVE_CUDA
 #include <cuda_runtime.h>
@@ -187,7 +189,7 @@ int ipcio_check_pending_sod (ipcio_t* ipc)
   ipcbuf_t* buf = (ipcbuf_t*) ipc;
 
   /* If the SOD flag has not been raised return 0 */
-  if (ipc->sod_pending == 0) 
+  if (ipc->sod_pending == 0)
     return 0;
 
   /* The the buffer we wish to raise SOD on has not yet been written, then
@@ -200,7 +202,7 @@ int ipcio_check_pending_sod (ipcio_t* ipc)
     fprintf (stderr, "ipcio_check_pending_sod: fail ipcbuf_enable_sod\n");
     return -1;
   }
-  
+
   ipc->sod_pending = 0;
   return 0;
 }
@@ -243,7 +245,7 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
                         ipc->buf.sync->w_buf_next, ipc->bytes, (void *) ipc->curbuf);
 #endif
 
-    /* if the IPCBUF is in the WCHANGE state, call ipcbuf_get_next_write, which in turn calls ipcbuf_enable_sod 
+    /* if the IPCBUF is in the WCHANGE state, call ipcbuf_get_next_write, which in turn calls ipcbuf_enable_sod
        and ensures that any waiting reader(s) does(do) not hang indefinitely */
     if (ipcbuf_is_wchange((ipcbuf_t*)ipc))
     {
@@ -318,7 +320,7 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
 
   if (ipc -> rdwrt == 'w') {
 
-    /* Removed to allow a writer to write more than one transfer to the 
+    /* Removed to allow a writer to write more than one transfer to the
      * data block */
     /*
 #ifdef _DEBUG
@@ -333,13 +335,13 @@ int ipcio_stop_close (ipcio_t* ipc, char unlock)
     if (ipc->buf.sync->w_xfer > 0) {
 
       uint64_t prev_xfer = ipc->buf.sync->w_xfer - 1;
-      /* Ensure the w_buf pointer is pointing buffer after the 
+      /* Ensure the w_buf pointer is pointing buffer after the
        * most recent EOD */
       ipc->buf.sync->w_buf_curr = ipc->buf.sync->e_buf[prev_xfer % IPCBUF_XFERS]+1;
       ipc->buf.sync->w_buf_next = ipc->buf.sync->w_buf_curr;
 
       // TODO CHECK IF WE NEED TO DECREMENT the count??
-      
+
     }
 
     if (ipcbuf_unlock_write ((ipcbuf_t*)ipc) < 0) {
@@ -445,7 +447,7 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
 
 #ifdef _DEBUG
       fprintf (stderr, "ipcio_write: buffer is filled, checking if already marked_filled\n");
-#endif 
+#endif
 
       if (!ipc->marked_filled) {
 
@@ -453,7 +455,7 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
         fprintf (stderr, "ipcio_write: buffer:%"PRIu64" mark_filled\n",
                  ipc->buf.sync->w_buf_curr);
 #endif
-        
+
         /* the buffer has been filled */
         if (ipcbuf_mark_filled ((ipcbuf_t*)ipc, ipc->bytes) < 0) {
           fprintf (stderr, "ipcio_write: error ipcbuf_mark_filled\n");
@@ -475,7 +477,7 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
 
 #ifdef _DEBUG
     fprintf (stderr, "ipcio_write: ipc->curbuf=%p\n", (void *) ipc->curbuf);
-#endif 
+#endif
 
     if (!ipc->curbuf) {
 
@@ -539,7 +541,7 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
                  (void *) ipc->curbuf + ipc->bytes, (void *) ptr, space);
 #endif
         memcpy (ipc->curbuf + ipc->bytes, ptr, space);
-      } 
+      }
       ipc->bytes += space;
       ptr += space;
       bytes -= space;
@@ -549,9 +551,9 @@ ssize_t ipcio_write (ipcio_t* ipc, char* ptr, size_t bytes)
   return towrite;
 }
 
-/* 
+/*
  * Open next Data Block unit for "direct" read access. Returns a pointer to the
- * DB unit and set the number of bytes in the block and the block index 
+ * DB unit and set the number of bytes in the block and the block index
  */
 char * ipcio_open_block_read (ipcio_t *ipc, uint64_t *curbufsz, uint64_t *block_id)
 {
@@ -625,7 +627,7 @@ ssize_t ipcio_close_block_read (ipcio_t *ipc, uint64_t bytes)
   // the reader should always have read the required number of bytes
   if (bytes != ipc->curbufsz)
   {
-    fprintf (stderr, "ipcio_close_block_read: WARNING! bytes [%"PRIu64"] != ipc->curbufsz [%"PRIu64"]\n", 
+    fprintf (stderr, "ipcio_close_block_read: WARNING! bytes [%"PRIu64"] != ipc->curbufsz [%"PRIu64"]\n",
               bytes, ipc->curbufsz);
   }
 
@@ -649,20 +651,19 @@ ssize_t ipcio_close_block_read (ipcio_t *ipc, uint64_t bytes)
   return 0;
 }
 
-
-/* 
+/*
  * Open next Data Block unit for "direct" write access. Returns a pointer to the
- * DB unit and set the block index 
+ * DB unit and set the block index
  */
 char * ipcio_open_block_write (ipcio_t *ipc, uint64_t *block_id)
 {
-  if (ipc->bytes != 0) 
+  if (ipc->bytes != 0)
   {
     fprintf (stderr, "ipcio_open_block_write: ipc->bytes != 0\n");
     return 0;
   }
 
-  if (ipc->curbuf && ipc->bufs_opened == 0) 
+  if (ipc->curbuf && ipc->bufs_opened == 0)
   {
     fprintf (stderr, "ipcio_open_block_write: ipc->curbuf != 0\n");
     return 0;
@@ -734,7 +735,7 @@ int ipcio_zero_next_block (ipcio_t *ipc)
 
 /*
  * Update the number of bytes written to a Data Block unit that was opened
- * for "direct" write access. This does not mark the buffer as filled. 
+ * for "direct" write access. This does not mark the buffer as filled.
  */
 ssize_t ipcio_update_block_write (ipcio_t *ipc, uint64_t bytes)
 {
@@ -784,9 +785,9 @@ ssize_t ipcio_close_block_write (ipcio_t *ipc, uint64_t bytes)
   }
 
   // if this buffer has not yet been marked as filled
-  if (!ipc->marked_filled) 
+  if (!ipc->marked_filled)
   {
-    if (ipcbuf_mark_filled ((ipcbuf_t*)ipc, ipc->bytes) < 0) 
+    if (ipcbuf_mark_filled ((ipcbuf_t*)ipc, ipc->bytes) < 0)
     {
       fprintf (stderr, "ipcio_close_block_write: error ipcbuf_mark_filled\n");
       return -2;
@@ -1038,10 +1039,8 @@ float ipcio_percent_full(ipcio_t* ipc) {
 
 }
 
-
 /* Returns the byte corresponding the start of data clocking/recording */
 uint64_t ipcio_get_soclock_byte(ipcio_t* ipc) {
   uint64_t bufsz = ipcbuf_get_bufsz ((ipcbuf_t *)ipc);
   return bufsz * ((ipcbuf_t*)ipc)->soclock_buf;
 }
-

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "futils.h"
 
 #include <stdio.h>
@@ -37,4 +44,3 @@ long fileread (const char* filename, char* buffer, unsigned bufsz)
 
   return 0;
 }
-

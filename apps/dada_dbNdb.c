@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -6,6 +13,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -65,7 +73,7 @@ typedef struct {
 
   /* Obs offset from header */
   int64_t obs_offset;
-  
+
 } dada_dbNdb_t;
 
 #define DADA_DBNDB_INIT { 0, 0, 0, "", 0, 0, 0, 0, 0}
@@ -75,7 +83,7 @@ int dbNdb_add_hdu (dada_dbNdb_t* queue, key_t key, multilog_t* log)
   dada_hdu_t* hdu = dada_hdu_create (log);
   dada_hdu_set_key (hdu, key);
 
-  if (queue->verbose) 
+  if (queue->verbose)
     fprintf(stderr, "dbNdb_add_hdu: connecting with key=%x\n", key);
 
   if (dada_hdu_connect (hdu) < 0)
@@ -84,7 +92,7 @@ int dbNdb_add_hdu (dada_dbNdb_t* queue, key_t key, multilog_t* log)
     return -1;
   }
 
-  if (queue->verbose) 
+  if (queue->verbose)
     fprintf(stderr, "dbNdb_add_hdu: adding to queue\n");
 
   queue->hdu = realloc( queue->hdu, (queue->nhdu+1) * sizeof(dada_hduq_t) );
@@ -102,7 +110,7 @@ int hdu_open_function (dada_client_t* client)
 
   /* the dada_dbNdb specific data */
   dada_dbNdb_t* queue = 0;
-  
+
   /* the queue element to which data will be sent */
   dada_hduq_t* hdu = 0;
 
@@ -146,7 +154,7 @@ int hdu_open_function (dada_client_t* client)
     int64_t space_left = ipcio_space_left(queue->hdu[ihdu].hdu->data_block);
     float percent_full  = ipcio_percent_full(queue->hdu[ihdu].hdu->data_block);
 
-    if (queue->verbose) 
+    if (queue->verbose)
       multilog(log, LOG_INFO, "dada_dbNdb: hdu_open_function() HDU %x, %"PRIi64" bytes, %5.2f percent full\n",queue->hdu[ihdu].key, space_left, percent_full);
 
     /* test if enough space is available on the data block question */
@@ -209,37 +217,44 @@ int hdu_open_function (dada_client_t* client)
   header = ipcbuf_get_next_write (header_block);
   if (!header)  {
     multilog (log, LOG_ERR, "Could not get next header block\n");
-    return EXIT_FAILURE;
+    return -1;
   }
 
   memcpy ( header, client->header, header_size );
 
-  if (ipcbuf_mark_filled (header_block, header_size) < 0)  {
-    multilog (log, LOG_ERR, "Could not mark filled Header Block\n");
-    return EXIT_FAILURE;
+  // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+  if (ipcbuf_enable_eod(header_block) < 0)
+  {
+    multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+    return -1;
   }
 
-  if (queue->verbose) 
+  if (ipcbuf_mark_filled (header_block, header_size) < 0)  {
+    multilog (log, LOG_ERR, "Could not mark filled Header Block\n");
+    return -1;
+  }
+
+  if (queue->verbose)
     multilog (log, LOG_INFO, "HDU (key=%x) opened for writing\n", hdu->key);
 
   client->transfer_bytes = 0;
 
   /* Only set the obs_offset upon the first call to this function */
-  if (queue->obs_offset == -1) 
+  if (queue->obs_offset == -1)
     queue->obs_offset = obs_offset;
 
   if (queue->verbose)
     multilog (log, LOG_INFO, "current_bytes=%"PRIu64", obs_offset=%"PRIu64"\n",
                     queue->current_bytes,  queue->obs_offset);
-  
+
   /* Get the observation ID */
   int bytes_per_second = 0;
-  if (ascii_header_get (client->header, "BYTES_PER_SECOND", "%d", 
+  if (ascii_header_get (client->header, "BYTES_PER_SECOND", "%d",
                         &bytes_per_second) != 1) {
     multilog (log, LOG_WARNING, "Header with no BYTES_PER_SECOND\n");
     bytes_per_second=64000000;
   }
-  
+
   queue->chunk_size = (bytes_per_second * 10);
 
   client->header_transfer = 0;
@@ -281,12 +296,12 @@ int hdu_close_function (dada_client_t* client, uint64_t bytes_written)
 }
 
 /*! Pointer to the function that transfers data to/from the target */
-int64_t hdu_write_function (dada_client_t* client, 
+int64_t hdu_write_function (dada_client_t* client,
                             void* data, uint64_t data_size)
 {
   /* the dada_dbNdb specific data */
   dada_dbNdb_t* queue = 0;
-  
+
   /* the queue element to which data will be sent */
   dada_hduq_t* hdu = 0;
 
@@ -305,7 +320,7 @@ int64_t hdu_write_function (dada_client_t* client,
   int64_t bytes_written = ipcio_write (hdu->hdu->data_block, data, data_size);
 
   queue->current_bytes += data_size;
- 
+
   if (!client->transfer_bytes) {
 
     /* If the next write would cross a chunk boundary, test if we should
@@ -329,20 +344,20 @@ int64_t hdu_write_function (dada_client_t* client,
           /* and its a different hdu to the current hdu, set stopping byte */
           if (ihdu != queue->ihdu) {
 
-            //if (ihdu == 0) 
+            //if (ihdu == 0)
               multilog(client->log, LOG_WARNING, "DB full, switching %x -> %x\n", hdu->key, newhdu->key);
 
             /* Take into account chunk size and resolution */
             uint64_t gap = (queue->obs_offset + next_chunk_byte) % queue->byte_multiple;
 
-            if (queue->verbose) 
+            if (queue->verbose)
               multilog(client->log, LOG_INFO, "hdu_write_function: gap is %"PRIu64" bytes\n", gap);
 
             /* shrink the xfer so that it is on a byte_multiple */
             client->transfer_bytes = next_chunk_byte - gap;
 
             /* If the gap is > 0.5 byte_multiples, grow it */
-            if (gap > queue->byte_multiple / 2) 
+            if (gap > queue->byte_multiple / 2)
               client->transfer_bytes += queue->byte_multiple;
 
             if (queue->verbose)
@@ -389,11 +404,11 @@ int main (int argc, char **argv)
 
   while ((arg=getopt(argc,argv,"dk:v")) != -1)
     switch (arg) {
-      
+
     case 'd':
       daemon=1;
       break;
-      
+
     case 'k':
 
       if (sscanf (optarg, "%x", &dada_key) != 1) {
@@ -418,11 +433,11 @@ int main (int argc, char **argv)
       verbose=1;
       queue.verbose = 1;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
 
 
@@ -433,7 +448,7 @@ int main (int argc, char **argv)
   else
     multilog_add (log, stderr);
 
-  if (verbose) 
+  if (verbose)
      multilog (log, LOG_INFO, "dada_dbNdb: creating structures\n");
 
   hdu = dada_hdu_create (log);
@@ -442,7 +457,7 @@ int main (int argc, char **argv)
     return EXIT_FAILURE;
 
   if (verbose)
-    multilog (log, LOG_INFO,"dada_dbNdb: lock read key=%x\n", 
+    multilog (log, LOG_INFO,"dada_dbNdb: lock read key=%x\n",
                             hdu->data_block_key);
 
   if (dada_hdu_lock_read (hdu) < 0)

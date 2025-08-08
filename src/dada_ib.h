@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #ifndef __DADA_IB_H
@@ -12,21 +12,18 @@
  * DADA Infiniband library functions
  */
 
+#include "multilog.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <inttypes.h>
-
-//#include <infiniband/arch.h>
 #include <rdma/rdma_cma.h>
-
-#include "multilog.h"
 
 #define DADA_IB_DEFAULT_CHUNK_SIZE 65536
 
@@ -56,14 +53,14 @@ typedef struct dada_ib_mb
   unsigned        wr_id;
 } dada_ib_mb_t;
 
-typedef struct dada_ib_shm_block 
+typedef struct dada_ib_shm_block
 {
   uintptr_t  buf_va;
   uint32_t  buf_rkey;
   uint32_t  buf_lkey;
 } dada_ib_shm_block_t;
 
-typedef struct dada_ib_rdma_cm 
+typedef struct dada_ib_rdma_cm
 {
   struct rdma_event_channel     * cm_channel;
   struct rdma_cm_id             * cm_id;
@@ -116,7 +113,7 @@ int dada_ib_create_verbs (dada_ib_cm_t * ctx);
 dada_ib_mb_t * dada_ib_reg_buffer (dada_ib_cm_t * ctx, void * buffer,
                                    uint64_t bufsz, int access_flags);
 
-int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz, 
+int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz,
                         int access_flags);
 
 int dada_ib_reg_buffers_partial (dada_ib_cm_t * ctx, char ** buffers, uint64_t nbytes,
@@ -149,12 +146,12 @@ int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
                      struct ibv_comp_channel * comp_chan, struct ibv_cq * cq);
 
 
-int dada_ib_post_sends (dada_ib_cm_t * ctx, void * buffer, uint64_t bytes, 
-                        uint64_t chunk_size, uint32_t lkey, uint32_t rkey, 
+int dada_ib_post_sends (dada_ib_cm_t * ctx, void * buffer, uint64_t bytes,
+                        uint64_t chunk_size, uint32_t lkey, uint32_t rkey,
                         uintptr_t raddr);
 
-int dada_ib_post_sends_gap (dada_ib_cm_t * ctx, void * buffer, uint64_t bytes, 
-                            uint64_t chunk_size, uint32_t lkey, uint32_t rkey, 
+int dada_ib_post_sends_gap (dada_ib_cm_t * ctx, void * buffer, uint64_t bytes,
+                            uint64_t chunk_size, uint32_t lkey, uint32_t rkey,
                             uintptr_t raddr, uint64_t roffset, uint64_t rgap);
 
 int dada_ib_client_destroy (dada_ib_cm_t * ctx);
@@ -168,4 +165,4 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx);
 }
 #endif
 
-#endif // __DADA_IB_H */
+#endif // __DADA_IB_H

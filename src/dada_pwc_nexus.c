@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_pwc_nexus.h"
 #include "ascii_header.h"
 #include "dada_def.h"
@@ -6,7 +13,6 @@
 #include <string.h>
 #include <assert.h>
 #include <sys/stat.h>
-
 
 /* #define _DEBUG 1 */
 
@@ -98,7 +104,7 @@ int dada_pwc_nexus_parse (nexus_t* n, const char* config)
   /* the status returned by sub-routines */
   int status = 0;
 
-  /* get the heaer size */
+  /* get the header size */
   if (ascii_header_get (config, "HDR_SIZE", "%u", &hdr_size) < 0)
    multilog_fprintf (stderr, LOG_WARNING, "dada_pwc_nexus_parse: using default HDR_SIZE\n");
   else
@@ -155,14 +161,14 @@ int dada_pwc_nexus_parse (nexus_t* n, const char* config)
        multilog_fprintf (stderr, LOG_ERR, " no default available\n");
         return -1;
       }
-    } 
+    }
 
     n->mirror->logfile_dir = malloc(strlen(logfile_dir));
     sprintf(n->mirror->logfile_dir,"%s",logfile_dir);
 
     struct stat st;
     stat(n->mirror->logfile_dir,&st);
-                                                                                                                                                                              
+
     /* check the dir:  is dir     write      execute  permissions */
     if (!(S_ISDIR(st.st_mode))) {
      multilog_fprintf (stderr, LOG_WARNING, "nexus_parse: logfile directory %s did not exist\n",
@@ -170,7 +176,7 @@ int dada_pwc_nexus_parse (nexus_t* n, const char* config)
       n->mirror->logfile_dir = NULL;
       return -1;
     }
-                                                                                                                                                                              
+
     if (!((st.st_mode & S_IWUSR) && (st.st_mode & S_IXUSR) &&
                                     (st.st_mode & S_IRUSR))) {
      multilog_fprintf (stderr, LOG_ERR, "nexus_parse: logfile directory %s was not writeable\n",
@@ -209,7 +215,7 @@ int dada_pwc_nexus_update_state (dada_pwc_nexus_t* nexus)
 
   /* the nexus will always be in the same state as its PWC's. The only
    * exception to this is if nodes are in an error state. */
-  
+
   for (inode = 0; inode < nnode; inode++)
   {
     node = base->nodes[inode];
@@ -286,7 +292,7 @@ int dada_pwc_nexus_cmd_state (void* context, FILE* fptr, char* args)
   unsigned inode = 0;
   unsigned nnode = 0;
 
-  fprintf (fptr, "overall: %s\n", 
+  fprintf (fptr, "overall: %s\n",
            dada_pwc_state_to_string( nexus->pwc->state ));
 
   pthread_mutex_lock (&(base->mutex));
@@ -421,7 +427,7 @@ int dada_pwc_nexus_send (dada_pwc_nexus_t* nexus, dada_pwc_command_t command)
       return -1;
 
     return nexus_send ((nexus_t*)nexus, "clock");
-    
+
   case dada_pwc_record_start:
 
     if (dada_pwc_set_state (nexus->pwc, dada_pwc_recording, time(0)) < 0)
@@ -430,7 +436,7 @@ int dada_pwc_nexus_send (dada_pwc_nexus_t* nexus, dada_pwc_command_t command)
     strftime (buffer, buffer_size, "rec_start " DADA_TIMESTR,
               nexus->convert_to_tm (&command.utc));
     return nexus_send ((nexus_t*)nexus, buffer);
-    
+
   case dada_pwc_record_stop:
 
     if (dada_pwc_set_state (nexus->pwc, dada_pwc_clocking, time(0)) < 0)
@@ -439,9 +445,9 @@ int dada_pwc_nexus_send (dada_pwc_nexus_t* nexus, dada_pwc_command_t command)
     strftime (buffer, buffer_size, "rec_stop " DADA_TIMESTR,
               nexus->convert_to_tm (&command.utc));
     return nexus_send ((nexus_t*)nexus, buffer);
-    
+
   case dada_pwc_start:
-    
+
     if (dada_pwc_set_state (nexus->pwc, dada_pwc_recording, time(0)) < 0)
       return -1;
 
@@ -451,7 +457,7 @@ int dada_pwc_nexus_send (dada_pwc_nexus_t* nexus, dada_pwc_command_t command)
     strftime (buffer, buffer_size, "start " DADA_TIMESTR,
               nexus->convert_to_tm (&command.utc));
     return nexus_send ((nexus_t*)nexus, buffer);
-    
+
   case dada_pwc_stop:
 
     if (dada_pwc_set_state (nexus->pwc, dada_pwc_idle, time(0)) < 0)
@@ -472,7 +478,7 @@ int dada_pwc_nexus_send (dada_pwc_nexus_t* nexus, dada_pwc_command_t command)
     strftime (buffer, buffer_size, "set_utc_start " DADA_TIMESTR,
               nexus->convert_to_tm (&command.utc));
     return nexus_send ((nexus_t*)nexus, buffer);
-          
+
   case dada_pwc_reset:
 
     return nexus_send((nexus_t*)nexus, "reset");

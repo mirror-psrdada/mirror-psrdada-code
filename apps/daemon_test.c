@@ -1,9 +1,16 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
+#include "daemon.h"
+
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "daemon.h"
-
 
 void usage ()
 {
@@ -22,7 +29,7 @@ int main (int argc, char** argv)
 
     switch (arg)  {
     case 'l':
-      if (optarg) 
+      if (optarg)
         log_file = optarg;
       else {
         fprintf(stderr, "must specify a logfile\n");
@@ -33,7 +40,7 @@ int main (int argc, char** argv)
     }
   }
 
-  if (log_file) 
+  if (log_file)
     be_a_daemon_with_log (log_file);
   else
     be_a_daemon();

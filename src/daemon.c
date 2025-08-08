@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "daemon.h"
 
 #include <stdio.h>
@@ -16,22 +23,22 @@ void be_a_daemon ()
 
   if (pid < 0)
     exit(EXIT_FAILURE);
-  
+
   // if the pid is good, then we can exit the parent process
   if (pid > 0)
     exit(EXIT_SUCCESS);
 
   // change the file mode mask
   umask (0);
-  
+
   // create a new SID for the child process
   if (setsid() < 0)
     exit (EXIT_FAILURE);
-  
-  // change the current working directory 
+
+  // change the current working directory
   if (chdir("/") < 0)
     exit (EXIT_FAILURE);
-  
+
   // Close out the standard file descriptors
   close(STDIN_FILENO);
   close(STDOUT_FILENO);
@@ -39,7 +46,7 @@ void be_a_daemon ()
 }
 
 
-int be_a_daemon_with_log(char * logfile) 
+int be_a_daemon_with_log(char * logfile)
 {
 
   // fork off the parent process
@@ -59,7 +66,7 @@ int be_a_daemon_with_log(char * logfile)
   if (setsid() < 0)
     exit (EXIT_FAILURE);
 
-  // change the current working directory 
+  // change the current working directory
   if (chdir("/") < 0)
     exit (EXIT_FAILURE);
 
@@ -74,16 +81,16 @@ int be_a_daemon_with_log(char * logfile)
   {
     // open the logfile
     int fd = open(logfile, O_RDWR|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR|S_IRGRP);
-    if (fd == -1) 
+    if (fd == -1)
       return(PS_IOERR);
 
-    // dup2 will close STD[OUT|ERR]_FILENO if neccesary
+    // dup2 will close STD[OUT|ERR]_FILENO if necessary
     dup2(fd, STDOUT_FILENO);
     dup2(fd, STDERR_FILENO);
 
     close(fd);
 
-  } 
+  }
   else // just close STDOUT and STDERR
   {
     close(STDOUT_FILENO);

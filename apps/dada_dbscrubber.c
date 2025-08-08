@@ -1,8 +1,16 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 #include "multilog.h"
 #include "ipcutil.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -33,9 +41,9 @@ void usage()
      " -d         run as daemon\n", DADA_DEFAULT_BLOCK_KEY);
 }
 
-void signal_handler(int signalValue) 
+void signal_handler(int signalValue)
 {
-  if (quit) 
+  if (quit)
   {
     fprintf(stderr, "received signal %d twice, hard exit\n", signalValue);
     exit(EXIT_FAILURE);
@@ -73,7 +81,7 @@ int main (int argc, char **argv)
         return -1;
       }
       break;
-      
+
     default:
       usage ();
       return 0;
@@ -90,7 +98,7 @@ int main (int argc, char **argv)
   hdu = dada_hdu_create (log);
 
   dada_hdu_set_key(hdu, dada_key);
-  
+
   if (verbose)
     multilog_fprintf (stderr, LOG_INFO, "connecting to hdu\n");
   if (dada_hdu_connect (hdu) < 0)
@@ -145,7 +153,7 @@ int main (int argc, char **argv)
   ipcbuf_t * db = (ipcbuf_t *) hdu->data_block;
   ipcio_t * ipc = hdu->data_block;
 
-  if (ipc ->rdwrt != 'R') 
+  if (ipc ->rdwrt != 'R')
   {
     multilog_fprintf(stderr, LOG_ERR, "not a designated reader\n");
     quit = 1;
@@ -167,8 +175,8 @@ int main (int argc, char **argv)
 
   block_id = ipcbuf_get_read_index (db);
 
-  // whilst we are not at the EOD 
-  while (!quit && !ipcbuf_eod(db)) 
+  // whilst we are not at the EOD
+  while (!quit && !ipcbuf_eod(db))
   {
     if (!ipc->curbuf)
     {

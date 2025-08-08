@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -8,6 +15,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,8 +46,8 @@ void usage()
 
 
 typedef struct dada_dbud {
-  
-  // port to listen on for connections 
+
+  // port to listen on for connections
   unsigned port;
 
   // verbose messages
@@ -53,7 +61,7 @@ typedef struct dada_dbud {
   size_t send_bufsz;
 
   char * header;
-  
+
   /* current observation id, as defined by OBS_ID attribute */
   char obs_id [DADA_OBS_ID_MAXLEN];
 
@@ -86,7 +94,7 @@ int64_t dada_dbud_send (dada_client_t* client, void* data, uint64_t data_size)
  * transfer function write data directly to the specified memory
  * block buffer with the specified block_id and size
  */
-int64_t dada_dbud_send_block (dada_client_t* client, void* data, 
+int64_t dada_dbud_send_block (dada_client_t* client, void* data,
                          uint64_t data_size, uint64_t block_id)
 {
 
@@ -216,7 +224,7 @@ int main (int argc, char **argv)
     //    return EXIT_FAILURE;
     //  }
     //  break;
-      
+
     //case 'q':
     //  qpn = atoi (optarg);
     //  break;
@@ -232,11 +240,11 @@ int main (int argc, char **argv)
     case 'v':
       verbose++;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
   }
 
@@ -305,7 +313,7 @@ int main (int argc, char **argv)
     //dbud.ib_dg->dest_qpn = qpn;
     dbud.ib_dg->queue_depth = 100;
 
-    // intialize the IB resources
+    // initialize the IB resources
     multilog(log, LOG_INFO, "main: dada_ib_dg_init()\n");
     if (dada_ib_dg_init (dbud.ib_dg) < 0)
     {
@@ -341,7 +349,7 @@ int main (int argc, char **argv)
                dbud.remote->lid, dbud.remote->qpn, dbud.remote->psn, gid);
 
 
-      // intialize the IB resources
+      // initialize the IB resources
       multilog(log, LOG_INFO, "main: dada_ib_dg_activate()\n");
       if (dada_ib_dg_activate (dbud.ib_dg, local, dbud.remote, -1, sl) < 0)
       {
@@ -356,7 +364,7 @@ int main (int argc, char **argv)
     client->quit = 1;
   }
 
-  while (!client->quit) 
+  while (!client->quit)
   {
     if (dada_client_read (client) < 0)
     {

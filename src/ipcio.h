@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #ifndef __DADA_IPCIO_H
@@ -60,13 +60,13 @@ extern "C" {
 
   /**
    * @brief Start reading/writing to an ipcbuf.
-   * 
+   *
    * The read/write modes are:
    *   r = inactive reader: has not yet started reading from the ipcbuf
    *   R = active reader: is reading from the ipcbuf
    *   w = inactive writer: has not yet started writing to the ipcbuf
    *   W = active writer: is writing from the ipcbuf
-   * 
+   *
    * @param ipc the ipcbuf on which to operate
    * @param rdwrt the read/write mode for the open operation
    * @return int 0 on success, -1 on failure
@@ -87,10 +87,10 @@ extern "C" {
 
   /**
    * @brief Enable start of data on the specified byte.
-   * 
+   *
    * @param ipc the ipcbuf on which to operate
    * @param byte absolute byte relative to the first byte written to the data block
-   * @return int 
+   * @return int
    */
   int ipcio_start (ipcio_t* ipc, uint64_t byte);
 
@@ -133,4 +133,4 @@ extern "C" {
 	   }
 #endif
 
-#endif
+#endif // __DADA_IPCIO_H

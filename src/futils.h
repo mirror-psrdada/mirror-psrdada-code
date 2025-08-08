@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_FUTILS_H
 #define __DADA_FUTILS_H
 
@@ -12,5 +19,4 @@ long fileread (const char* filename, char* buffer, unsigned bufsz);
 }
 #endif
 
-#endif
-
+#endif // __DADA_FUTILS_H

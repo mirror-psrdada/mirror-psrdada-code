@@ -1,8 +1,14 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
 #include <stddef.h>
 
-#ifndef __ASCII_HEADER_h
-#define __ASCII_HEADER_h
+#ifndef __DADA_ASCII_HEADER_H
+#define __DADA_ASCII_HEADER_H
 
 /*! ascii_header_set/get - Set/get header variables
 
@@ -58,4 +64,4 @@ size_t ascii_header_get_size_fd (int fd);
 }
 #endif
 
-#endif
+#endif // __DADA_ASCII_HEADER_H

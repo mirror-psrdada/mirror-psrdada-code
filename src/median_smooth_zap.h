@@ -1,12 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008-2025 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-#ifndef _psrdada_median_smooth_zap_h
-#define _psrdada_median_smooth_zap_h
+#ifndef __DADA_MEDIAN_SMOOTH_ZAP_H
+#define __DADA_MEDIAN_SMOOTH_ZAP_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +32,7 @@ static int median_smooth (unsigned ndat, TEMPLATE_TYPE* data, unsigned wsize)
 
   if (wsize < 3)
     return -1;
-    
+
   if (ndat < wsize + 1)
     return -1;
 
@@ -62,7 +62,7 @@ static int median_smooth (unsigned ndat, TEMPLATE_TYPE* data, unsigned wsize)
     qsort (window, truncated, sizeof (TEMPLATE_TYPE), less_than);
     result[ipt] = window[tmid];
   }
-  
+
   for (ipt=0; ipt < rsize; ipt++)
   {
     for (jpt=0; jpt<wsize; jpt++)
@@ -81,7 +81,7 @@ static int median_smooth (unsigned ndat, TEMPLATE_TYPE* data, unsigned wsize)
     qsort (window, truncated, sizeof (TEMPLATE_TYPE), less_than);
     result[ipt+middle] = window[tmid];
   }
-  
+
   for (ipt=0; ipt < ndat; ipt++)
     data[ipt] = result[ipt];
 
@@ -129,7 +129,7 @@ static int median_smooth_zap (unsigned ndat, TEMPLATE_TYPE* data,
         variance -= copy[idat]/ndat;
         copy[idat] = data[idat] = 0.0;
 	total_zapped ++;
-        zapped = 1; 
+        zapped = 1;
       }
     }
   }
@@ -139,4 +139,4 @@ static int median_smooth_zap (unsigned ndat, TEMPLATE_TYPE* data,
   free (copy);
 }
 
-#endif
+#endif // __DADA_MEDIAN_SMOOTH_ZAP_H

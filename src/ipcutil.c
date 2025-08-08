@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "ipcutil.h"
@@ -70,7 +70,7 @@ int ipc_semop (int semid, short num, short op, short flag)
   semopbuf.sem_num = num;
   semopbuf.sem_op = op;
   semopbuf.sem_flg = flag;
- 
+
   if (semop (semid, &semopbuf, 1) < 0) {
     if (!(flag | IPC_NOWAIT))
       perror ("ipc_semop: semop");
@@ -104,7 +104,7 @@ int ipc_semtimedop (int semid, short num, short op, short flag, uint64_t timeout
   semopbuf.sem_num = num;
   semopbuf.sem_op = op;
   semopbuf.sem_flg = flag;
- 
+
   if (semtimedop (semid, &semopbuf, 1, &ts) < 0)
   {
     if ( errno == EAGAIN )

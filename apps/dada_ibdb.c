@@ -38,12 +38,12 @@ void usage()
 
 
 typedef struct dada_ibdb {
-  
-  // port to listen on for connections 
+
+  // port to listen on for connections
   unsigned port;
 
   // chunk size for IB transport
-  unsigned chunk_size; 
+  unsigned chunk_size;
 
   // number of chunks in a data block buffer
   unsigned chunks_per_block;
@@ -53,9 +53,9 @@ typedef struct dada_ibdb {
 
   // flag for active RDMA connection
   unsigned connected;
-    
+
   char * header;
-  
+
   /* current observation id, as defined by OBS_ID attribute */
   char obs_id [DADA_OBS_ID_MAXLEN];
 
@@ -144,7 +144,7 @@ int64_t dada_ibdb_recv (dada_client_t* client, void* data, uint64_t data_size)
  * transfer function write data directly to the specified memory
  * block buffer with the specified block_id and size
  */
-int64_t dada_ibdb_recv_block (dada_client_t* client, void* data, 
+int64_t dada_ibdb_recv_block (dada_client_t* client, void* data,
                          uint64_t data_size, uint64_t block_id)
 {
 
@@ -155,7 +155,7 @@ int64_t dada_ibdb_recv_block (dada_client_t* client, void* data,
   // send the ready message to dbib
   if (ibdb->verbose)
     multilog(client->log, LOG_INFO, "recv_block: send_message on sync_to [READY]\n");
-  if (dada_ib_send_message (ib_cm, DADA_IB_READY_KEY, 0) < 0) 
+  if (dada_ib_send_message (ib_cm, DADA_IB_READY_KEY, 0) < 0)
   {
     multilog(client->log, LOG_ERR, "recv_block: send_message on sync_to [READY] failed\n");
     return -1;
@@ -174,7 +174,7 @@ int64_t dada_ibdb_recv_block (dada_client_t* client, void* data,
 
   // this is a signal for the end of data which occurs only when we have received
   // less than client->transfer_bytes (from header var TRANSFER_SIZE)
-  if (bytes_to_be_received == 0) 
+  if (bytes_to_be_received == 0)
   {
     if (ibdb->verbose)
       multilog(client->log, LOG_INFO, "recv_block: bytes_to_be_received = 0\n");
@@ -232,7 +232,7 @@ int64_t dada_ibdb_recv_block (dada_client_t* client, void* data,
   }
 
   if (ibdb->verbose)
-    multilog(client->log, LOG_INFO, "recv_block: bytes transferred=%"PRIu64"\n", 
+    multilog(client->log, LOG_INFO, "recv_block: bytes transferred=%"PRIu64"\n",
              bytes_received);
 
   return (int64_t) bytes_received;
@@ -257,12 +257,12 @@ int dada_ibdb_close (dada_client_t* client, uint64_t bytes_written)
   {
     if (ibdb->verbose)
       multilog(client->log, LOG_INFO, "close: send_message on sync_to [READY]\n");
-    if (dada_ib_send_message (ib_cm, DADA_IB_READY_KEY, 0) < 0) 
+    if (dada_ib_send_message (ib_cm, DADA_IB_READY_KEY, 0) < 0)
     {
       multilog(client->log, LOG_ERR, "close: send_message on sync_to [READY] failed\n");
       return -1;
-    } 
-  
+    }
+
     // get the number of bytes to be xferred
     if (ibdb->verbose)
       multilog(client->log, LOG_INFO, "close: recv_message on sync_from [BYTES TO XFER]\n");
@@ -274,10 +274,10 @@ int dada_ibdb_close (dada_client_t* client, uint64_t bytes_written)
 
     // this is a signal for the end of data
     uint64_t bytes_to_be_received = ib_cm->sync_from_val[1];
-    if (bytes_to_be_received != 0) 
+    if (bytes_to_be_received != 0)
     {
       multilog(client->log, LOG_ERR, "close:  bytes_to_be_received != 0 [%"PRIu64"]\n", bytes_to_be_received);
-    } 
+    }
   }
 
   return 0;
@@ -297,7 +297,7 @@ int dada_ibdb_open (dada_client_t* client)
   if (ibdb->verbose)
     multilog(client->log, LOG_INFO, "dada_ibdb_open()\n");
 
-  // post receive for the header transfer 
+  // post receive for the header transfer
   if (ibdb->verbose)
     multilog(client->log, LOG_INFO, "open: post_recv on header_mb\n");
   if (dada_ib_post_recv(ib_cm, ib_cm->header_mb) < 0)
@@ -363,7 +363,7 @@ dada_ib_cm_t * dada_ibdb_ib_init(dada_ibdb_t * ctx, dada_hdu_t * hdu, multilog_t
   if (!ib_cm)
   {
     multilog(log, LOG_ERR, "ib_init: dada_ib_create_cm failed\n");
-    return 0; 
+    return 0;
   }
 
   ib_cm->verbose = ctx->verbose;
@@ -498,7 +498,7 @@ int main (int argc, char **argv)
         return EXIT_FAILURE;
       }
       break;
-      
+
     case 'p':
       port = atoi (optarg);
       break;
@@ -510,11 +510,11 @@ int main (int argc, char **argv)
     case 'v':
       verbose++;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
   }
 
@@ -564,7 +564,7 @@ int main (int argc, char **argv)
   if (!ibdb.ib_cm)
     multilog (log, LOG_ERR, "Failed to initialise IB resources\n");
 
-  while (!client->quit) 
+  while (!client->quit)
   {
     if (dada_client_write (client) < 0)
     {

@@ -1,3 +1,11 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -5,9 +13,9 @@
 #include <pthread.h>
 #include <inttypes.h>
 
-#define DEFAULT_MEM_SIZE 1024 
+#define DEFAULT_MEM_SIZE 1024
 
-int quit_threads = 0;
+volatile int quit_threads = 0;
 int verbose = 0;
 void * load_thread (void * arg);
 
@@ -20,8 +28,8 @@ typedef struct {
 
 void usage ()
 {
-  fprintf (stdout,   
-     "load_test      test the memory/cache bandwidth for multitple threads\n\n"
+  fprintf (stdout,
+     "load_test      test the memory/cache bandwidth for multiple threads\n\n"
      "Usage:   load_test [options]\n"
      " -m  size      size of memory array in KB [default %d]\n"
      " -t  num       launch num threads [default 1]\n"
@@ -49,7 +57,7 @@ int main (int argc, char** argv)
       case 't':
         num_threads = atoi(optarg);
         break;
- 
+
       case 's':
         num_seconds = atoi(optarg);
         break;
@@ -72,7 +80,7 @@ int main (int argc, char** argv)
 
   int i = 0;
 
-  if (verbose) 
+  if (verbose)
     fprintf(stderr, "creating %d threads, running for %d seconds with %d byte memcpys\n", num_threads, num_seconds, mem_size);
 
 
@@ -92,18 +100,18 @@ int main (int argc, char** argv)
     } else {
       if (verbose)
         fprintf(stderr, "create thread[%d]\n", i);
-    } 
+    }
   }
 
   int count = 0;
   while (count < num_seconds) {
-    if (verbose && (count % 10 == 0)) 
+    if (verbose && (count % 10 == 0))
       fprintf(stderr, "main: %d seconds left\n", num_seconds-count);
     count++;
     sleep(1);
   }
 
-  if (verbose) 
+  if (verbose)
     fprintf(stderr, "joining %d threads\n", num_threads);
 
   quit_threads = 1;
@@ -150,13 +158,13 @@ void * load_thread (void * arg) {
 
   for (j=0; j<size; j++) {
     buf1[j] = 1;
-    buf2[j] = 1; 
+    buf2[j] = 1;
   }
 
   while (!quit_threads) {
     for (j=0; j<size; j++) {
       buf1[j] += buf2[j];
-      if (buf1[j] == 127) 
+      if (buf1[j] == 127)
         buf1[j] = 0;
     }
 
@@ -174,7 +182,6 @@ void * load_thread (void * arg) {
     fprintf(stderr, "THREAD_END[%d] size=%d KB, score=%d\n", vals->id, vals->size, vals->score);
 
   pthread_exit((void*) &(vals->score));
-  //return 0;
 
 }
 

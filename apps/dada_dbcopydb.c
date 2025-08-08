@@ -1,9 +1,17 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
 
 #include "ascii_header.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,10 +23,6 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-
-int quit_threads = 0;
-
-void control_thread (void *);
 
 void usage()
 {
@@ -33,7 +37,7 @@ void usage()
            " out_keys  DADA keys for output data block\n");
 }
 
-typedef struct 
+typedef struct
 {
   dada_hdu_t *  hdu;
   key_t         key;
@@ -43,12 +47,11 @@ typedef struct
   char *        curr_block;
 } dada_dbcopydb_hdu_t;
 
-
 typedef struct {
 
   dada_dbcopydb_hdu_t * outputs;
 
-  unsigned n_outputs; 
+  unsigned n_outputs;
 
   // number of bytes read
   uint64_t bytes_in;
@@ -73,14 +76,14 @@ int dbdecidb_open (dada_client_t* client)
   // the dada_dbcopydb specific data
   dada_dbcopydb_t* ctx = (dada_dbcopydb_t *) client->context;
 
-  // status and error logging facilty
+  // status and error logging facility
   multilog_t* log = client->log;
 
   // header to copy from in to out
   char * header = 0;
 
-  dada_dbcopydb_hdu_t * o = 0;  
- 
+  dada_dbcopydb_hdu_t * o = 0;
+
   unsigned i = 0;
 
   if (ctx->verbose)
@@ -104,7 +107,7 @@ int dbdecidb_open (dada_client_t* client)
 
   int64_t transfer_size = 0;
   if (ascii_header_get (client->header, "TRANSFER_SIZE", "%"PRIi64, &transfer_size) != 1)
-     multilog (log, LOG_WARNING, "header with no TRASFER_SIZE\n");
+     multilog (log, LOG_WARNING, "header with no TRANSFER_SIZE\n");
 
   // signal main that this is the final xfer
   if (obs_xfer == -1)
@@ -131,16 +134,23 @@ int dbdecidb_open (dada_client_t* client)
     // copy the header from the in to the out
     memcpy ( header, client->header, header_size );
 
+    // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+    if (ipcbuf_enable_eod(o->hdu->header_block) < 0)
+    {
+      multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+      return -1;
+    }
+
     // mark the outgoing header as filled
     if (ipcbuf_mark_filled (o->hdu->header_block, header_size) < 0)  {
       multilog (log, LOG_ERR, "Could not mark filled Header Block\n");
       return -1;
     }
-    if (ctx->verbose) 
+    if (ctx->verbose)
       multilog (log, LOG_INFO, "open: HDU (key=%x) opened for writing\n", o->key);
   }
 
-  client->transfer_bytes = transfer_size; 
+  client->transfer_bytes = transfer_size;
   client->optimal_bytes = 64*1024*1024;
 
   ctx->bytes_in = 0;
@@ -153,7 +163,7 @@ int dbdecidb_open (dada_client_t* client)
 int dbdecidb_close (dada_client_t* client, uint64_t bytes_written)
 {
   dada_dbcopydb_t* ctx = (dada_dbcopydb_t*) client->context;
-  
+
   multilog_t* log = client->log;
 
   dada_dbcopydb_hdu_t * o = 0;
@@ -165,7 +175,7 @@ int dbdecidb_close (dada_client_t* client, uint64_t bytes_written)
                     ctx->bytes_in, ctx->bytes_out );
 
   for (i=0; i<ctx->n_outputs; i++)
-  { 
+  {
     o = &(ctx->outputs[i]);
 
     // close the block if it is open
@@ -220,7 +230,7 @@ int64_t dbdecidb_write (dada_client_t* client, void* data, uint64_t data_size)
 
   if (ctx->verbose)
     multilog (log, LOG_INFO, "write: read %"PRIu64", wrote %"PRIu64" bytes\n", data_size, data_size);
- 
+
   return data_size;
 }
 
@@ -249,10 +259,10 @@ int64_t dbdecidb_write_block (dada_client_t* client, void* data, uint64_t data_s
     {
       if (ctx->verbose > 1)
         multilog (log, LOG_INFO, "write_block: [%x] ipcio_open_block_write()\n", o->key);
-  
+
       o->curr_block = ipcio_open_block_write(o->hdu->data_block, &out_block_id);
       if (!o->curr_block)
-      { 
+      {
         multilog (log, LOG_ERR, "write_block: [%x] ipcio_open_block_write failed %s\n", o->key, strerror(errno));
         return -1;
       }
@@ -263,7 +273,7 @@ int64_t dbdecidb_write_block (dada_client_t* client, void* data, uint64_t data_s
       outdat = o->curr_block + o->bytes_written;
 
     memcpy (outdat, indat, data_size);
-  
+
     o->bytes_written += data_size;
 
     if (o->bytes_written > o->block_size)
@@ -347,7 +357,7 @@ int main (int argc, char **argv)
 
   while ((arg=getopt(argc,argv,"p:sSvz")) != -1)
   {
-    switch (arg) 
+    switch (arg)
     {
       case 'p':
         if (optarg)
@@ -373,15 +383,15 @@ int main (int argc, char **argv)
       case 'v':
         verbose++;
         break;
-        
+
       case 'z':
         zero_copy = 1;
         break;
-        
+
       default:
         usage ();
         return 0;
-      
+
     }
   }
 
@@ -389,13 +399,13 @@ int main (int argc, char **argv)
 
   int num_args = argc-optind;
   int i = 0;
-      
+
   if ((argc-optind) < 2)
   {
     fprintf(stderr, "dada_dbcopydb: at least 2 arguments required\n");
     usage();
     exit(EXIT_FAILURE);
-  } 
+  }
 
   if (verbose)
     fprintf (stderr, "parsing input key=%s\n", argv[optind]);

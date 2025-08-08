@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "string_array.h"
 
 #include <stdio.h>
@@ -181,6 +188,6 @@ int string_array_tok (string_array_t* list, char* string, const char* white)
   char* word = 0;
   for (word = strtok (string, white); word != 0; word = strtok (NULL, white))
     if (!string_array_search (list, word))
-      string_array_append (list, word);  
+      string_array_append (list, word);
   return 0;
 }

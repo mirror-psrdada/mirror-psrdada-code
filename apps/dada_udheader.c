@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_def.h"
 #include "dada_msg.h"
 #include "dada_ib_datagram.h"
@@ -6,6 +13,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,8 +39,8 @@ void usage()
 
 
 typedef struct dada_udheader {
-  
-  // port to listen on for connections 
+
+  // port to listen on for connections
   unsigned port;
 
   // verbose messages
@@ -44,9 +52,9 @@ typedef struct dada_udheader {
   void * recv_buf;
 
   size_t recv_bufsz;
-    
+
   char * header;
-  
+
   /* current observation id, as defined by OBS_ID attribute */
   char obs_id [DADA_OBS_ID_MAXLEN];
 
@@ -115,11 +123,11 @@ int main (int argc, char **argv)
     case 'v':
       verbose++;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
   }
 
@@ -157,7 +165,7 @@ int main (int argc, char **argv)
     udheader.ib_dg->ib_port = ib_port;
     udheader.ib_dg->queue_depth = 1000;
 
-    // intialize the IB resources
+    // initialize the IB resources
     multilog(log, LOG_INFO, "main: dada_ib_dg_init()\n");
     if (dada_ib_dg_init (udheader.ib_dg) < 0)
     {
@@ -251,7 +259,7 @@ int main (int argc, char **argv)
     }
 
     // for each completion event, check the status
-    for (i = 0; i < ne; i++) 
+    for (i = 0; i < ne; i++)
     {
       if (wcs[i].status != IBV_WC_SUCCESS)
       {
@@ -264,7 +272,7 @@ int main (int argc, char **argv)
       j = wcs[i].wr_id - 100;
 
       if (verbose > 1)
-        multilog(log, LOG_INFO, "main: buffer %d recieved data\n", j);
+        multilog(log, LOG_INFO, "main: buffer %d received data\n", j);
 
       // setup pointer to data (inc 40 bytes due to some IB header thing...
       buffer = udheader.ib_dg->bufs[j]->buffer + 40;

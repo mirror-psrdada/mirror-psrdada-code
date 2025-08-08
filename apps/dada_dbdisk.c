@@ -1,5 +1,14 @@
-/* To enable the use of O_DIRECT */
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+// To enable the use of O_DIRECT
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 #include "dada_client.h"
 #include "dada_hdu.h"
@@ -9,6 +18,7 @@
 #include "daemon.h"
 #include "dada_affinity.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -21,6 +31,7 @@
 
 /* #define _DEBUG 1 */
 
+//! print command line usage to stdout
 void usage()
 {
   fprintf (stdout,
@@ -30,7 +41,7 @@ void usage()
            " -k         hexadecimal shared memory key  [default: %x]\n"
            " -D <path>  add a disk to which data will be written\n"
            " -o         use O_DIRECT flag to bypass kernel buffering\n"
-           " -W         over-write exisiting files\n"
+           " -W         over-write existing files\n"
            " -s         single transfer only\n"
            " -t bytes   set optimal bytes\n"
            " -z         use zero copy transfers\n"
@@ -68,7 +79,7 @@ int file_open_function (dada_client_t* client)
 {
   /* the dada_dbdisk specific data */
   dada_dbdisk_t* dbdisk = 0;
-  
+
   /* status and error logging facility */
   multilog_t* log;
 
@@ -109,7 +120,7 @@ int file_open_function (dada_client_t* client)
   header = client->header;
   assert (header != 0);
 
-  // get the UTC_START 
+  // get the UTC_START
   if (ascii_header_get (client->header, "UTC_START", "%s", utc_start) != 1)
   {
     multilog (log, LOG_WARNING, "Header with no UTC_START\n");
@@ -151,7 +162,7 @@ int file_open_function (dada_client_t* client)
   dbdisk->obs_offset = obs_offset;
 
   // create the current file name
-  snprintf (dbdisk->file_name, FILENAME_MAX, "%s_%016"PRIu64".%06u.dada", 
+  snprintf (dbdisk->file_name, FILENAME_MAX, "%s_%016"PRIu64".%06u.dada",
             utc_start, obs_offset, dbdisk->file_number);
 
   // check if the file size is defined in the header
@@ -162,7 +173,7 @@ int file_open_function (dada_client_t* client)
     multilog (log, LOG_INFO, "open: advertised FILE_SIZE=%"PRIu64"\n", file_size);
 
   // get the bytes per second from the header
-  if (ascii_header_get (header, "BYTES_PER_SECOND", "%"PRIu64, &bytes_ps) != 1) 
+  if (ascii_header_get (header, "BYTES_PER_SECOND", "%"PRIu64, &bytes_ps) != 1)
   {
     multilog (log, LOG_WARNING, "Header with no BYTES_PER_SECOND\n");
     bytes_ps = 64000000;
@@ -176,7 +187,7 @@ int file_open_function (dada_client_t* client)
   }
 
   // if file_size is not defined, then use 10 * bytes_ps
-  if (file_size == 0) 
+  if (file_size == 0)
     file_size = bytes_ps * 10;
 
   uint64_t byte_multiple = 1;
@@ -188,7 +199,7 @@ int file_open_function (dada_client_t* client)
 #endif
 
   if (dbdisk->verbose)
-    multilog (log, LOG_INFO, "open: RESOULTION=%"PRIu64"\n", resolution);
+    multilog (log, LOG_INFO, "open: RESOLUTION=%"PRIu64"\n", resolution);
 
   // If we have RESOLUTION, include this in byte_multiple
   if (resolution > 0)
@@ -198,12 +209,12 @@ int file_open_function (dada_client_t* client)
 
   file_size -= gap;
 
-  if (gap > byte_multiple / 2) 
+  if (gap > byte_multiple / 2)
     file_size += byte_multiple;
 
-  if (dbdisk->verbose) 
+  if (dbdisk->verbose)
     multilog (log, LOG_INFO, "OBS_OFFSET=%"PRIu64", FILE_SIZE=%"PRIu64","
-              " BYTE_MULTIPLE=%"PRIu64"\n", obs_offset, file_size, 
+              " BYTE_MULTIPLE=%"PRIu64"\n", obs_offset, file_size,
               byte_multiple);
 
   /* update header with actual FILE_SIZE */
@@ -245,7 +256,7 @@ int file_open_function (dada_client_t* client)
   client->fd = fd;
   client->transfer_bytes = file_size;
   client->optimal_bytes = 512 * optimal_bytes;
-  
+
   multilog (log, LOG_INFO, "%s opened for writing %"PRIu64" bytes in %"PRIu64" chunks\n",
             dbdisk->file_name, client->transfer_bytes, client->optimal_bytes);
 
@@ -274,7 +285,7 @@ int file_close_function (dada_client_t* client, uint64_t bytes_written)
     multilog (log, LOG_INFO, "close: wrote %"PRIu64" bytes\n", bytes_written);
 
   if (close (client->fd) < 0)
-    multilog (log, LOG_ERR, "Error closing %s: %s\n", 
+    multilog (log, LOG_ERR, "Error closing %s: %s\n",
               dbdisk->file_name, strerror(errno));
 
   if (!bytes_written)
@@ -282,11 +293,11 @@ int file_close_function (dada_client_t* client, uint64_t bytes_written)
     multilog (log, LOG_ERR, "Removing empty file: %s\n", dbdisk->file_name);
 
     if (chmod (dbdisk->file_name, S_IRWXU) < 0)
-      multilog (log, LOG_ERR, "Error chmod (%s, rwx): %s\n", 
+      multilog (log, LOG_ERR, "Error chmod (%s, rwx): %s\n",
         	dbdisk->file_name, strerror(errno));
-    
+
     if (remove (dbdisk->file_name) < 0)
-      multilog (log, LOG_ERR, "Error remove (%s): %s\n", 
+      multilog (log, LOG_ERR, "Error remove (%s): %s\n",
         	dbdisk->file_name, strerror(errno));
   }
 
@@ -294,7 +305,7 @@ int file_close_function (dada_client_t* client, uint64_t bytes_written)
 }
 
 /*! Pointer to the function that transfers data to/from the target */
-int64_t file_write_function (dada_client_t* client, 
+int64_t file_write_function (dada_client_t* client,
         		     void* data, uint64_t data_size)
 {
   dada_dbdisk_t * dbdisk = (dada_dbdisk_t*) client->context;
@@ -305,7 +316,7 @@ int64_t file_write_function (dada_client_t* client,
   uint64_t written  = 0;
   uint64_t to_write = 0;
   uint64_t wrote    = 0;
-  
+
 
   while (written < data_size)
   {
@@ -319,7 +330,7 @@ int64_t file_write_function (dada_client_t* client,
       to_write = data_size;
 
     // Need to check we that to_write is a 512 byte multiple if using o_direct
-    if (dbdisk->o_direct && (to_write % 512 != 0)) 
+    if (dbdisk->o_direct && (to_write % 512 != 0))
     {
 
       multilog (client->log, LOG_WARNING, "Using O_DIRECT and data_size not mod 512\n");
@@ -332,14 +343,14 @@ int64_t file_write_function (dada_client_t* client,
 
       client->fd = disk_array_reopen(dbdisk->array, client->fd, dbdisk->file_name);
 
-      if (client->fd < 0) 
+      if (client->fd < 0)
       {
         multilog (client->log, LOG_ERR, "Could not reopen file: fd=%d\n",client->fd);
         return written;
-      } 
-      else 
+      }
+      else
       {
-        // ensure O_DIRECT is now off 
+        // ensure O_DIRECT is now off
         dbdisk->o_direct = 0;
         wrote = write (client->fd, data+written, to_write-wrote);
         written += wrote;
@@ -424,14 +435,14 @@ int main (int argc, char **argv)
     case 'd':
       daemon=1;
       break;
-      
+
     case 'D':
       if (disk_array_add (dbdisk.array, optarg) < 0) {
         fprintf (stderr, "Could not add '%s' to disk array\n", optarg);
         return EXIT_FAILURE;
       }
       break;
-      
+
     case 'o':
       dbdisk.o_direct = 1;
       disk_array_set_overwrite (dbdisk.array, 1);
@@ -445,7 +456,7 @@ int main (int argc, char **argv)
       dbdisk.verbose = 1;
 
       break;
-      
+
     case 'W':
       disk_array_set_overwrite (dbdisk.array, 1);
       break;
@@ -461,7 +472,7 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-      
+
     }
 
   if (cpu_core >= 0)

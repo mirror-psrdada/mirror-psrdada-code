@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_def.h"
 #include "dada_msg.h"
 
@@ -78,7 +85,7 @@ void nexus_init (nexus_t* nexus)
   /* no file logging be default */
   nexus -> logfile_dir = 0;
   nexus -> multilog_port = 0;
-  
+
 }
 
 /*! Create a new nexus */
@@ -170,12 +177,12 @@ int nexus_parse (nexus_t* n, const char* buffer)
     sprintf (node_name, "%s_%u", n->node_prefix, inode);
 
     if (ascii_header_get (buffer, node_name, "%s", host_name) < 0)
-      fprintf (stderr, "nexus_parse: WARNING no host name for %s\n", 
+      fprintf (stderr, "nexus_parse: WARNING no host name for %s\n",
 	       node_name);
-    else if (nexus_add (n, inode, host_name) < 0) 
-      fprintf (stderr, "nexus_parse: Error adding %s %s\n", 
+    else if (nexus_add (n, inode, host_name) < 0)
+      fprintf (stderr, "nexus_parse: Error adding %s %s\n",
 	       node_name, host_name);
-    
+
   }
 
   return 0;
@@ -338,7 +345,7 @@ void* node_open_thread (void* context)
       }
     }
   }
- 
+
   free (host_name);
 
   /* do not buffer the I/O */
@@ -347,7 +354,7 @@ void* node_open_thread (void* context)
 
   pthread_mutex_lock (&(nexus->mutex));
   for (inode = 0; inode < nexus->nnode; inode++) {
-          
+
     node = (node_t*) nexus->nodes[inode];
     if (id == node->id) {
       node->to = to;
@@ -385,7 +392,7 @@ int nexus_connect (nexus_t* nexus, unsigned inode)
 	     inode, nexus->nnode);
     return -1;
   }
-  
+
   node = (node_t*) nexus->nodes[inode];
 
   /* start a new thread to open a socket connection with the host */
@@ -433,7 +440,7 @@ int nexus_add (nexus_t* nexus, int id, char* host_name)
 
   node = nexus->node_create();
   assert (node != 0);
-  
+
   node->host = strdup (host_name);
   assert (node->host != 0);
 
@@ -547,7 +554,7 @@ int nexus_recv_node (nexus_t* nexus, unsigned inode)
 	     inode, nexus->nnode);
     return -1;
   }
-    
+
   status = node_recv (nexus->nodes[inode],
 		      nexus->recv_buffer,
 		      nexus->recv_bufsz);
@@ -592,7 +599,7 @@ int node_recv (node_t* node, char* buffer, unsigned size)
 
     if ( (c=fgetc (from))=='>' )
       break;
-    else 
+    else
       ungetc (c, from);
 
     buf += strlen(buf);

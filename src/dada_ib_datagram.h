@@ -1,10 +1,9 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
-
 
 #ifndef __DADA_IB_DATAGRAM_H
 #define __DADA_IB_DATAGRAM_H
@@ -12,6 +11,9 @@
 /*
  * DADA Infiniband library functions
  */
+
+#include "multilog.h"
+#include "dada_ib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,9 +28,6 @@
 
 #include <infiniband/verbs.h>
 #include <rdma/rdma_cma.h>
-
-#include "multilog.h"
-#include "dada_ib.h"
 
 #define DADA_IB_DG_IB_PORT 1
 #define DADA_IB_DB_TCP_PORT 54321
@@ -104,4 +103,4 @@ void gid_to_wire_gid(const union ibv_gid *gid, char wgid[]);
 void dada_ib_dg_encode_header (char *b, uint64_t seq_no);
 void dada_ib_dg_decode_header (unsigned char * b, uint64_t *seq_no);
 
-#endif // __DADA_IB_DATAGRAM_H */
+#endif // __DADA_IB_DATAGRAM_H

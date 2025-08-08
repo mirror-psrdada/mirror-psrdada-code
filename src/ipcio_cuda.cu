@@ -1,10 +1,16 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include "ipcio_cuda.h"
+#include "ipcbuf_cuda.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "config.h"
-#include "ipcio_cuda.h"
-#include "ipcbuf_cuda.h"
 
 // #define _DEBUG
 
@@ -40,9 +46,9 @@ ssize_t ipcio_read_cuda_work (ipcio_t* ipc, char* ptr, char * zero_ptr, size_t b
     fprintf (stderr, "ipcio_read_cuda_work: invalid ipcio_t (rdwrt=%c)\n", ipc->rdwrt);
     return -1;
   }
- 
+
   cudaMemcpyKind kind = cudaMemcpyHostToDevice;
-  cudaMemcpyKind invkind = cudaMemcpyDeviceToHost; 
+  cudaMemcpyKind invkind = cudaMemcpyDeviceToHost;
 
   // >= 0 if buffers are located in device memory
   if (ipcbuf_get_device((ipcbuf_t*)ipc) >= 0)
@@ -117,7 +123,7 @@ ssize_t ipcio_read_cuda_work (ipcio_t* ipc, char* ptr, char * zero_ptr, size_t b
   }
 
 #ifdef _DEBUG
-  fprintf (stderr, "ipcio_read_cuda_work: to_read=%ld bytes=%ld return=%ld\n", 
+  fprintf (stderr, "ipcio_read_cuda_work: to_read=%ld bytes=%ld return=%ld\n",
            toread, bytes, (toread - bytes));
 #endif
   return toread - bytes;
@@ -134,4 +140,3 @@ ssize_t ipcio_zero_next_block_cuda (ipcio_t* ipc, char * dev_ptr, size_t dev_byt
 
   return ipcbuf_zero_next_block_cuda ((ipcbuf_t*)ipc, dev_ptr, dev_bytes, stream);
 }
-

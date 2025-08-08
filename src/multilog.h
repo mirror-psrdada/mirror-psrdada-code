@@ -1,9 +1,12 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_MULTILOG_H
 #define __DADA_MULTILOG_H
-
-/* ************************************************************************
-
-   ************************************************************************ */
 
 #include <syslog.h>
 #include <stdio.h>
@@ -25,7 +28,7 @@ extern "C" {
     pthread_t thread;
 
     int port;         /* the port on which multilog_server is listening */
-    int timestamp;    /* flag for placing a preceeding timestamp on the msg */
+    int timestamp;    /* flag for placing a preceding timestamp on the msg */
 
   } multilog_t;
 
@@ -51,4 +54,4 @@ extern "C" {
 	   }
 #endif
 
-#endif
+#endif // __DADA_MULTILOG_H

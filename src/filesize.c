@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "futils.h"
 
 #define _FILE_OFFSET_BITS 64
@@ -18,4 +25,3 @@ long filesize (const char* filename)
 
   return (long) statistics.st_size;
 }
-

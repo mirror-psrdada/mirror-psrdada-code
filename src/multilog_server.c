@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "multilog.h"
 #include "sock.h"
 
@@ -48,7 +55,7 @@ static void* multilog_server (void * arg)
 int multilog_serve (multilog_t* log, int port)
 {
 #if 0
-  sighandler_t handler = 
+  sighandler_t handler =
 #endif
   signal (SIGPIPE, SIG_IGN);
 #if 0
@@ -63,4 +70,3 @@ int multilog_serve (multilog_t* log, int port)
   }
   return 0;
 }
-

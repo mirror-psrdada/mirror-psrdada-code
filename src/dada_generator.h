@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_GENERATOR_H
 #define __DADA_GENERATOR_H
 
@@ -31,4 +38,4 @@ char * int_to_binary_string(int value);
 }
 #endif
 
-#endif /* __DADA_GENERATOR_H */
+#endif // __DADA_GENERATOR_H

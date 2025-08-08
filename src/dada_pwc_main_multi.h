@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_PWC_MAIN_MULTI_H
 #define __DADA_PWC_MAIN_MULTI_H
 
@@ -70,11 +77,11 @@ extern "C" {
   int dada_pwc_main_multi (dada_pwc_main_multi_t* pwcm);
 
   /*! process error value, and set state accordingly */
-  void dada_pwc_main_multi_process_error(dada_pwc_main_multi_t* pwcm, int rval); 
+  void dada_pwc_main_multi_process_error(dada_pwc_main_multi_t* pwcm, int rval);
 
 
 #ifdef __cplusplus
 	   }
 #endif
 
-#endif
+#endif // __DADA_PWC_MAIN_MULTI_H

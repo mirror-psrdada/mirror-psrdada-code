@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "multilog.h"
 
 #include <unistd.h>
@@ -26,4 +33,3 @@ int main ()
 
   return 0;
 }
-

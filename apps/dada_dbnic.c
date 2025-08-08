@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -8,6 +15,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -22,8 +30,8 @@ void usage()
 	   " -N <name>[:port]  add a node to which data will be written [default port: %d]\n"
      " -k <key>          hexadecimal shared memory key  [default: %x]\n"
      " -s                single transfer only\n"
-	   " -d                run as daemon\n" 
-     " -h                print help text\n", DADA_DEFAULT_NICDB_PORT, 
+	   " -d                run as daemon\n"
+     " -h                print help text\n", DADA_DEFAULT_NICDB_PORT,
      DADA_DEFAULT_BLOCK_KEY);
 }
 
@@ -49,7 +57,7 @@ int setup_nodes (dada_client_t* client)
 {
   /* the dada_dbnic specific data */
   dada_dbnic_t* dbnic = 0;
-  
+
   /* the currently open connections */
   node_array_t* array = 0;
 
@@ -144,7 +152,7 @@ int setup_nodes (dada_client_t* client)
     char * pch = strtok(dest, ":");
 
     if (pch != NULL) {
-    
+
       name = (char *) malloc((strlen(pch)+1) * sizeof(char));
       strcpy(name, pch);
 
@@ -180,7 +188,7 @@ int sock_open_function (dada_client_t* client)
 {
   /* the dada_dbnic specific data */
   dada_dbnic_t* dbnic = 0;
-  
+
   /* status and error logging facility */
   multilog_t* log;
 
@@ -335,7 +343,7 @@ int sock_close_function (dada_client_t* client, uint64_t bytes_written)
   }
 
   /* receive the acknowledgement header from the target node */
-  if (recv (client->fd, header, client->header_size, 
+  if (recv (client->fd, header, client->header_size,
 	    DADA_MSG_FLAGS) < client->header_size)
     {
       multilog (log, LOG_ERR, "Could not recv acknowledgement Header: %s\n",
@@ -362,7 +370,7 @@ int sock_close_function (dada_client_t* client, uint64_t bytes_written)
 }
 
 /*! Pointer to the function that transfers data to/from the target */
-int64_t sock_send_function (dada_client_t* client, 
+int64_t sock_send_function (dada_client_t* client,
 			    void* data, uint64_t data_size)
 {
 #ifdef _DEBUG
@@ -404,11 +412,11 @@ int main (int argc, char **argv)
 
   while ((arg=getopt(argc,argv,"dN:k:svh")) != -1)
     switch (arg) {
-      
+
     case 'd':
       daemon=1;
       break;
-      
+
     case 'N':
       if (!dbnic.usr_node_names)
 	      dbnic.usr_node_names = string_array_create ();
@@ -425,7 +433,7 @@ int main (int argc, char **argv)
     case 's':
       quit = 1;
       break;
-      
+
     case 'v':
       verbose=1;
       break;
@@ -433,11 +441,11 @@ int main (int argc, char **argv)
     case 'h':
       usage ();
       return 0;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
 
   log = multilog_open ("dada_dbnic", daemon);
@@ -480,7 +488,7 @@ int main (int argc, char **argv)
     if (dada_client_read (client) < 0)
       multilog (log, LOG_ERR, "Error during transfer\n");
 
-    if (quit) 
+    if (quit)
       client->quit = 1;
   }
 

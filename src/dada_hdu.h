@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #ifndef __DADA_HDU_H
@@ -18,7 +18,7 @@
 #include "multilog.h"
 #include "ipcio.h"
 
-#include <sys/types.h>  // for key_t
+#include <sys/ipc.h>  // for key_t
 
 #ifdef __cplusplus
 extern "C" {

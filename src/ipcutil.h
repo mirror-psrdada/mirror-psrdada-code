@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #ifndef __DADA_IPCUTIL_H
@@ -34,7 +34,7 @@ extern "C" {
    * @brief operate on the specified semaphore, within the timeout.
    *
    * If the timeout is zero, then the ipc_semop function will be used.
-   *  
+   *
    * @param semid the semaphore identifier on which to operated
    * @param num the semaphore number
    * @param op the semaphore operation
@@ -45,7 +45,7 @@ extern "C" {
   int ipc_semtimedop (int semid, short num, short op, short flag, uint64_t timeout);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_IPCUTIL_H

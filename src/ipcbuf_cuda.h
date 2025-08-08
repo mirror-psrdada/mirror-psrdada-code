@@ -1,10 +1,12 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_IPCBUF_CUDA_H
 #define __DADA_IPCBUF_CUDA_H
-
-/* ************************************************************************
-
-
-   ************************************************************************ */
 
 #include "ipcbuf.h"
 
@@ -19,4 +21,4 @@ ssize_t ipcbuf_zero_next_block_cuda (ipcbuf_t* id, char * dev_ptr, size_t dev_by
 }
 #endif
 
-#endif
+#endif // __DADA_IPCBUF_CUDA_H

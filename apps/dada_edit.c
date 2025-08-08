@@ -1,7 +1,14 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
 #include "dada_def.h"
 #include "ascii_header.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -52,7 +59,7 @@ int main (int argc, char **argv)
   while ((arg=getopt(argc,argv,"c:i:hs:v")) != -1)
 
     switch (arg)
-    {      
+    {
     case 'c':
       key = strdup (optarg);
       val = strchr (key, '=');
@@ -77,12 +84,12 @@ int main (int argc, char **argv)
     case 'v':
       verbose=1;
       break;
-   
+
     case 'h':
     default:
       usage ();
       return 0;
-      
+
     }
 
   char* mode = "r";

@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #ifndef __DADA_IPCBUF_H
@@ -15,7 +15,7 @@
 
    ************************************************************************ */
 
-#include <inttypes.h> 
+#include <inttypes.h>
 #include <sys/types.h>
 
 #ifdef __cplusplus
@@ -102,7 +102,7 @@ extern "C" {
 #define IPCBUF_INIT {0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1}
 
   /* ////////////////////////////////////////////////////////////////////
-     
+
      FUNCTIONS USED TO CREATE/CONNECT/DESTROY SHARED MEMORY
 
      //////////////////////////////////////////////////////////////////// */
@@ -121,7 +121,7 @@ extern "C" {
   int ipcbuf_destroy (ipcbuf_t*);
 
   /* ////////////////////////////////////////////////////////////////////
-     
+
      FUNCTIONS USED BY THE PROCESS WRITING TO SHARED MEMORY
 
      //////////////////////////////////////////////////////////////////// */
@@ -166,17 +166,17 @@ extern "C" {
 
   /*! Return true if process is the data writer */
   char ipcbuf_is_writer (ipcbuf_t*);
-  
+
   /**
    * @brief Return true if the ipcbuf is in wchange state.
-   * 
+   *
    * @param id ipcbuf to inspect
    * @return char 1 if ipcbuf is in wchange state, 0 otherwise
    */
   char ipcbuf_is_wchange (ipcbuf_t* id);
 
   /* ////////////////////////////////////////////////////////////////////
-     
+
      FUNCTIONS USED BY THE PROCESS READING FROM SHARED MEMORY
 
      //////////////////////////////////////////////////////////////////// */
@@ -283,7 +283,7 @@ extern "C" {
   int ipcbuf_get_device (ipcbuf_t* id);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
-#endif
+#endif // __DADA_IPCBUF_H

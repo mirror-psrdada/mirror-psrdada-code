@@ -1,5 +1,12 @@
-#ifndef __DADA_command_parse_h
-#define __DADA_command_parse_h
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#ifndef __DADA_COMMAND_PARSE_H
+#define __DADA_COMMAND_PARSE_H
 
 #include <stdio.h>
 
@@ -52,7 +59,7 @@ int command_parse_destroy (command_parse_t* parser);
 int command_parse_reply (command_parse_t* parser, FILE* fptr);
 
 /* add a command to the list of available commands */
-int command_parse_add (command_parse_t* parser, 
+int command_parse_add (command_parse_t* parser,
 		       command cmd, void* context,
 		       const char* command_name,
 		       const char* short_help,
@@ -67,4 +74,4 @@ int command_parse (command_parse_t* parser, char* command);
 /* parse a command; different output */
 int command_parse_output (command_parse_t* parser, char* command, FILE* out);
 
-#endif
+#endif // __DADA_COMMAND_PARSE_H

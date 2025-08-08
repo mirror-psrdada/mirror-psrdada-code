@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "ascii_header.h"
 #include "dada_def.h"
 
@@ -35,7 +42,7 @@ int main ()
   fprintf (stderr, "%s", header);
 
   if (ascii_header_del (header, "DATA_1") < 0)
-  { 
+  {
     fprintf (stderr, "test_ascii_header: failed to delete DATA_1\n");
     return -1;
   }
@@ -45,4 +52,3 @@ int main ()
 
   return 0;
 }
-

@@ -1,23 +1,22 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2012 by Andrew Jameson
+ *
+ *    Copyright (C) 2012-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE 1
+#define _GNU_SOURCE
 #endif
+
+#include "dada_ib_datagram.h"
 
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 #include <malloc.h>
-
-#include "dada_ib_datagram.h"
 
 dada_ib_datagram_t * dada_ib_dg_create (unsigned int nbufs, multilog_t * log)
 {
@@ -59,11 +58,11 @@ dada_ib_datagram_t * dada_ib_dg_create (unsigned int nbufs, multilog_t * log)
 struct ibv_device * dada_ib_dg_get_device (dada_ib_datagram_t * ctx, char * ib_devname)
 {
   if (ctx->verbose)
-    multilog(ctx->log, LOG_INFO, "dada_ib_dg_get_device()\n"); 
+    multilog(ctx->log, LOG_INFO, "dada_ib_dg_get_device()\n");
 
   multilog(ctx->log, LOG_INFO, "get_device: ibv_get_device_list(NULL)\n");
   ctx->dev_list = ibv_get_device_list(NULL);
-  if (!ctx->dev_list) 
+  if (!ctx->dev_list)
   {
     multilog(ctx->log, LOG_ERR, "dada_ib_dg_get_device: ibv_get_device_list failed: %s\n",
              strerror(errno));
@@ -76,7 +75,7 @@ struct ibv_device * dada_ib_dg_get_device (dada_ib_datagram_t * ctx, char * ib_d
   {
     multilog(ctx->log, LOG_INFO, "get_device: setting to first value\n");
     ib_dev = *(ctx->dev_list);
-    if (!ib_dev) 
+    if (!ib_dev)
     {
       multilog(ctx->log, LOG_ERR, "dada_ib_dg_get_device: no IB devices found\n");
       return 0;
@@ -89,7 +88,7 @@ struct ibv_device * dada_ib_dg_get_device (dada_ib_datagram_t * ctx, char * ib_d
       if (!strcmp(ibv_get_device_name(ctx->dev_list[i]), ib_devname))
         break;
     ib_dev = ctx->dev_list[i];
-    if (!ib_dev) 
+    if (!ib_dev)
     {
       multilog (ctx->log, LOG_ERR, "dada_ib_dg_get_device: IB device %s not found\n", ib_devname);
       return 0;
@@ -99,7 +98,7 @@ struct ibv_device * dada_ib_dg_get_device (dada_ib_datagram_t * ctx, char * ib_d
 }
 
 /*
- *  
+ *
  */
 int dada_ib_dg_init (dada_ib_datagram_t * ctx)
 {
@@ -121,7 +120,7 @@ int dada_ib_dg_init (dada_ib_datagram_t * ctx)
 
   // open the RDMA device context
   ctx->context = ibv_open_device(ib_dev);
-  if (!ctx->context) 
+  if (!ctx->context)
   {
     multilog (ctx->log, LOG_ERR, "dada_ib_dg_init: ibv_open_device failed\n");
     return -1;
@@ -143,7 +142,7 @@ int dada_ib_dg_init (dada_ib_datagram_t * ctx)
     return -1;
   }
 
-  // register memory regions for "sockets" 
+  // register memory regions for "sockets"
   unsigned ibuf;
   uint64_t bufsz = IB_DATAGRAM;
   int flags = IBV_ACCESS_LOCAL_WRITE;
@@ -158,7 +157,7 @@ int dada_ib_dg_init (dada_ib_datagram_t * ctx)
   // create the completion queue
   multilog (ctx->log, LOG_INFO, "init: ibv_create_cq (%p, %d, NULL, %p, 0)\n", ctx->context, ctx->queue_depth + 1, ctx->channel);
   ctx->cq = ibv_create_cq(ctx->context, ctx->queue_depth + 1, NULL, ctx->channel, 0);
-  if (!ctx->cq) 
+  if (!ctx->cq)
   {
     multilog (ctx->log, LOG_ERR, "dada_ib_dg_init: couldn't create CQ\n");
     return -1;
@@ -188,7 +187,7 @@ int dada_ib_dg_init (dada_ib_datagram_t * ctx)
 
     multilog (ctx->log, LOG_INFO, "dada_ib_dg_init: ibv_create_qp(%p, %p)\n", ctx->pd, &attr);
     ctx->qp = ibv_create_qp(ctx->pd, &attr);
-    if (!ctx->qp)  
+    if (!ctx->qp)
     {
       multilog (ctx->log, LOG_ERR, "dada_ib_dg_init: couldn't create QP\n");
       return -1;
@@ -209,7 +208,7 @@ int dada_ib_dg_init (dada_ib_datagram_t * ctx)
               IBV_QP_STATE              |
               IBV_QP_PKEY_INDEX         |
               IBV_QP_PORT               |
-              IBV_QP_QKEY)) 
+              IBV_QP_QKEY))
     {
       multilog (ctx->log, LOG_ERR, "dada_ib_dg_init: failed to modify QP to INIT: %s\n", strerror(errno));
       return -1;
@@ -235,7 +234,7 @@ int dada_ib_dg_activate (dada_ib_datagram_t * ctx, dada_ib_datagram_dest_t * loc
     .qp_state       = IBV_QPS_RTR
   };
 
-  if (ibv_modify_qp (ctx->qp, &attr, IBV_QP_STATE)) 
+  if (ibv_modify_qp (ctx->qp, &attr, IBV_QP_STATE))
   {
     multilog (ctx->log, LOG_ERR, "dada_ib_dg_activate: failed to modify QP to RTR: %s\n", strerror(errno));
     return -1;
@@ -244,7 +243,7 @@ int dada_ib_dg_activate (dada_ib_datagram_t * ctx, dada_ib_datagram_dest_t * loc
   attr.qp_state = IBV_QPS_RTS;
   attr.sq_psn   = local->psn;
 
-  if (ibv_modify_qp (ctx->qp, &attr, IBV_QP_STATE | IBV_QP_SQ_PSN)) 
+  if (ibv_modify_qp (ctx->qp, &attr, IBV_QP_STATE | IBV_QP_SQ_PSN))
   {
     multilog (ctx->log, LOG_ERR, "dada_ib_dg_activate: failed to modify QP to RTS: %s\n", strerror(errno));
     return -1;
@@ -336,10 +335,10 @@ dada_ib_datagram_dest_t * dada_ib_dg_get_local_port (dada_ib_datagram_t * ctx)
   dest->psn = lrand48() & 0xffffff;
 
   int gidx = -1;
-  if (gidx >= 0) 
+  if (gidx >= 0)
   {
     multilog (ctx->log, LOG_INFO, "dada_ib_dg_get_local_port: ibv_query_gid()\n");
-    if (ibv_query_gid (ctx->context, ctx->ib_port, gidx, &(dest->gid))) 
+    if (ibv_query_gid (ctx->context, ctx->ib_port, gidx, &(dest->gid)))
     {
       multilog(ctx->log, LOG_ERR, "dada_ib_dg_get_local_port: could not get local gid for gid index %d\n", gidx);
       return 0;
@@ -359,7 +358,7 @@ int dada_ib_dg_free_buffer (dada_ib_mb_t * mr)
   if (mr->mr)
   {
     ibv_dereg_mr(mr->mr);
-    mr->mr = 0; 
+    mr->mr = 0;
   }
   if (mr->buffer)
     free(mr->buffer);
@@ -408,7 +407,7 @@ int dada_ib_dg_post_recvs (dada_ib_datagram_t * ctx, dada_ib_mb_t ** mb, int n_t
 
 
 /*
- *  post recv on the specified Memory Buffer (mb) and connection 
+ *  post recv on the specified Memory Buffer (mb) and connection
  */
 int dada_ib_dg_post_recv (dada_ib_datagram_t * ctx, dada_ib_mb_t *mb)
 {
@@ -459,9 +458,9 @@ int dada_ib_dg_wait_recv(dada_ib_datagram_t * ctx, dada_ib_mb_t * mb)
   return dada_ib_dg_wait_cq (ctx, mb, ctx->channel, ctx->cq);
 }
 
-int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb, 
+int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb,
                      struct ibv_comp_channel * comp_chan, struct ibv_cq * cq)
-{ 
+{
   assert(ctx);
   multilog_t * log = ctx->log;
 
@@ -488,7 +487,7 @@ int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb,
   }
 
   while (!data_received) {
-  
+
     if (ctx->verbose > 1)
       multilog(log, LOG_INFO, "wait_cq: ibv_get_cq_event\n");
     if (ibv_get_cq_event(comp_chan, &evt_cq, &cq_context))
@@ -504,7 +503,7 @@ int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb,
     {
       multilog(log, LOG_ERR, "dada_ib_dg_wait_cq: ibv_req_notify_cq() failed\n");
       return -1;
-    } 
+    }
 
     if (ctx->verbose > 1)
       multilog(log, LOG_INFO, "wait_cq: ibv_poll_cq\n");
@@ -514,15 +513,15 @@ int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb,
       return -1;
     }
 
-    if (wc.status != IBV_WC_SUCCESS) 
+    if (wc.status != IBV_WC_SUCCESS)
     {
       multilog(log, LOG_WARNING, "wait_cq: wc.status != IBV_WC_SUCCESS "
-               "[wc.status=%s, wc.wr_id=%"PRIu64", mb->wr_id=%"PRIu64"]\n", 
+               "[wc.status=%s, wc.wr_id=%"PRIu64", mb->wr_id=%"PRIu64"]\n",
                ibv_wc_status_str(wc.status), wc.wr_id, mb->wr_id);
       return -1;
     }
 
-    if (wc.wr_id != mb->wr_id ) 
+    if (wc.wr_id != mb->wr_id )
     {
       multilog(log, LOG_WARNING, "wait_cq: wr_id=%"PRIu64" != %"PRIu64"\n", wc.wr_id, mb->wr_id);
       uint64_t * tmpptr = (uint64_t *) mb->buffer;
@@ -534,12 +533,12 @@ int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb,
       if (ctx->buffered_cqe)
       {
         multilog(log, LOG_ERR, "wait_cq: will not buffer more than 1 CQE\n");
-        multilog(log, LOG_INFO,  "wait_cq: ibv_ack_cq_events\n"); 
+        multilog(log, LOG_INFO,  "wait_cq: ibv_ack_cq_events\n");
         ibv_ack_cq_events(cq, 1);
         return -1;
-      } 
+      }
       // save this CQE and wr_id so that it can be retrieved later
-      else 
+      else
       {
         multilog(log, LOG_WARNING, "dada_ib_dg_wait_cq: buffering wr_id=%"PRIu64"\n", wc.wr_id);
         ctx->buffered_cqe = 1;
@@ -555,7 +554,7 @@ int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb,
     }
 
     if (ctx->verbose > 1)
-      multilog(log, LOG_INFO, "wait_cq: ibv_ack_cq_events\n"); 
+      multilog(log, LOG_INFO, "wait_cq: ibv_ack_cq_events\n");
     ibv_ack_cq_events(cq, 1);
   }
 
@@ -569,7 +568,7 @@ int dada_ib_dg_wait_cq (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb,
 /*
  *  post_send the specified memory buffer (ib) on the specified connection
  *
- *  Will send the data in the buffer in one transaction via the WR_SEND 
+ *  Will send the data in the buffer in one transaction via the WR_SEND
  *  mode which will require a post_recv on the remote end
  */
 int dada_ib_dg_post_send (dada_ib_datagram_t * ctx, dada_ib_mb_t * mb, int remote_qpn)
@@ -682,15 +681,15 @@ int dada_ib_dg_post_sends (dada_ib_datagram_t * ctx, dada_ib_mb_t ** mbs, int nm
 
 
 #if 0
-// check if the UD message size is validm
+// check if the UD message size is valid
 int dada_ib_dg_check_message_size (dada_ib_datagram_t * ctx, int message_size)
 {
-  struct ibv_port_attr port_attr; 
+  struct ibv_port_attr port_attr;
   int ret;
   ret = ibv_query_port(ctx->context->verbs, ctx->port, &port_attr);
   if (ret)
     return ret;
-  if (message_size > (1 << (port_attr.active_mtu + 7))) 
+  if (message_size > (1 << (port_attr.active_mtu + 7)))
   {
     multilog(ctx->log, LOG_ERR, "dada_ib_check_message_size: size %d is larger "
              "than active mtu %d\n", message_size, 1 << (port_attr.active_mtu + 7));
@@ -702,7 +701,7 @@ int dada_ib_dg_check_message_size (dada_ib_datagram_t * ctx, int message_size)
 
 
 /*
- * Disconnect the IB connection  
+ * Disconnect the IB connection
  */
 int dada_ib_dg_disconnect(dada_ib_datagram_t * ctx)
 {
@@ -713,7 +712,7 @@ int dada_ib_dg_disconnect(dada_ib_datagram_t * ctx)
   int err;
 
   if (ctx->verbose > 1)
-    multilog (log, LOG_INFO, "disconnect: ibv_destroy_qp\n"); 
+    multilog (log, LOG_INFO, "disconnect: ibv_destroy_qp\n");
   if (ctx->qp)
   {
     if (ibv_destroy_qp(ctx->qp)) {
@@ -724,7 +723,7 @@ int dada_ib_dg_disconnect(dada_ib_datagram_t * ctx)
   }
 
   if (ctx->verbose > 1)
-    multilog (log, LOG_INFO, "disconnect: ibv_destroy_cq\n"); 
+    multilog (log, LOG_INFO, "disconnect: ibv_destroy_cq\n");
   if (ctx->cq) {
     if (ibv_destroy_cq(ctx->cq)) {
       multilog(log, LOG_ERR, "disconnect: failed to destroy CQ\n");
@@ -733,7 +732,7 @@ int dada_ib_dg_disconnect(dada_ib_datagram_t * ctx)
     ctx->cq = 0;
   }
 
-  if (ctx->bufs) 
+  if (ctx->bufs)
   {
     unsigned i=0;
     for (i=0; i<ctx->nbufs; i++)
@@ -748,11 +747,11 @@ int dada_ib_dg_disconnect(dada_ib_datagram_t * ctx)
     }
   }
 
-  if (ctx->channel) 
+  if (ctx->channel)
   {
     if (ctx->verbose > 1)
       multilog (log, LOG_INFO, "disconnect: ibv_destroy_comp_channel()\n");
-    if (ibv_destroy_comp_channel(ctx->channel)) 
+    if (ibv_destroy_comp_channel(ctx->channel))
     {
       multilog(log, LOG_ERR, "disconnect: failed to destroy completion channel\n");
       err = 1;
@@ -760,11 +759,11 @@ int dada_ib_dg_disconnect(dada_ib_datagram_t * ctx)
     ctx->channel = 0;
   }
 
-  if (ctx->pd) 
+  if (ctx->pd)
   {
     if (ctx->verbose > 1)
       multilog (log, LOG_INFO, "disconnect: ibv_dealloc_pd()\n");
-    if (ibv_dealloc_pd(ctx->pd)) 
+    if (ibv_dealloc_pd(ctx->pd))
     {
       multilog(log, LOG_ERR, "disconnect: failed to deallocate PD\n");
       err = 1;
@@ -788,7 +787,7 @@ int dada_ib_dg_disconnect(dada_ib_datagram_t * ctx)
 }
 
 /*
- * clean up IB resources 
+ * clean up IB resources
  */
 int dada_ib_dg_destroy (dada_ib_datagram_t * ctx)
 {
@@ -803,8 +802,8 @@ int dada_ib_dg_destroy (dada_ib_datagram_t * ctx)
 
   if (dada_ib_dg_disconnect(ctx) < 0)
   {
-    multilog(log, LOG_ERR, "destroy: dada_ib_disconnect failed()\n");    
-    err = 1;    
+    multilog(log, LOG_ERR, "destroy: dada_ib_disconnect failed()\n");
+    err = 1;
   }
 
   if (ctx->bufs)
@@ -882,7 +881,11 @@ dada_ib_datagram_dest_t * dada_ib_dg_client_exch_dest ( const char *servername, 
     goto out;
   }
 
-  write(sockfd, "done", sizeof "done");
+  if (write(sockfd, "done", sizeof "done") != sizeof "done")
+  {
+    fprintf(stderr, "Couldn't send done\n");
+    goto out;
+  }
 
   rem_dest = malloc(sizeof *rem_dest);
   if (!rem_dest)
@@ -989,7 +992,12 @@ dada_ib_datagram_dest_t * dada_ib_dg_server_exch_dest(dada_ib_datagram_t * ctx,
       goto out;
     }
 
-    read(connfd, msg, sizeof msg);
+    n = read(connfd, msg, sizeof msg);
+    if (n != sizeof msg) {
+      perror("server read");
+      fprintf(stderr, "%d/%d: Couldn't read done\n", n, (int) sizeof msg);
+      goto out;
+    }
 
 out:
     close(connfd);

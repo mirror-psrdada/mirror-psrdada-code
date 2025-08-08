@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *    Copyright (C) 2012 by Andrew Jameson
+ *    Copyright (C) 2012-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
  *
  ****************************************************************************/
@@ -20,6 +20,7 @@
 #include "sock.h"
 #include "tmutil.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -125,7 +126,7 @@ void usage()
      "dada_dbevent [options] inkey outkey\n"
      " inkey       input hexadecimal shared memory key\n"
      " outkey      input hexadecimal shared memory key\n"
-     " -b percent  delay procesing of the input buffer up to this amount [default %d %%]\n"
+     " -b percent  delay processing of the input buffer up to this amount [default %d %%]\n"
      " -t delay    maximum delay (s) to retain data for [default %ds]\n"
      " -h          print this help text\n"
      " -p port     port to listen for event commands [default %d]\n"
@@ -636,8 +637,13 @@ int receive_events (dada_dbevent_t * dbevent, int listen_fd)
   setbuf (sockin, 0);
 
   // first line on the socket should be the number of events
-  fgets (buffer, buffer_size, sockin);
-  if (sscanf (buffer, "N_EVENTS %"PRIu64, &n_events) != 1)
+  char* s = fgets (buffer, buffer_size, sockin);
+  if (s == NULL)
+  {
+    multilog(log, LOG_WARNING, "end of data on socket when expecting N_EVENTS\n");
+    return events_recorded;
+  }
+  else if (sscanf (buffer, "N_EVENTS %"PRIu64, &n_events) != 1)
   {
     multilog(log, LOG_WARNING, "failed to parse N_EVENTS\n");
     more_events = 0;
@@ -647,8 +653,13 @@ int receive_events (dada_dbevent_t * dbevent, int listen_fd)
     events = (event_t *) malloc (sizeof(event_t) * n_events);
   }
 
-  // second line on the socket should be the UTC_START of the obsevation
-  fgets (buffer, buffer_size, sockin);
+  // second line on the socket should be the UTC_START of the observation
+  s = fgets (buffer, buffer_size, sockin);
+  if (s == NULL)
+  {
+    multilog(log, LOG_WARNING, "end of data on socket when expecting UTC_START\n");
+    return events_recorded;
+  }
   time_t event_utc_start = str2utctime (buffer);
 
   char * comment = 0;
@@ -664,7 +675,13 @@ int receive_events (dada_dbevent_t * dbevent, int listen_fd)
       multilog (log, LOG_INFO, "getting new line\n");
     char * saveptr = 0;
 
-    fgets (buffer, buffer_size, sockin);
+    char* s = fgets (buffer, buffer_size, sockin);
+    if (s == NULL)
+    {
+      multilog(log, LOG_WARNING, "end of data on socket\n");
+      more_events = 0;
+      continue;
+    }
 
     //if (dbevent->verbose > 1)
     multilog (log, LOG_INFO, " <- %s", buffer);
@@ -849,7 +866,7 @@ int receive_events (dada_dbevent_t * dbevent, int listen_fd)
           dbevent->work_buffer = realloc (dbevent->work_buffer, dbevent->work_buffer_size);
           if (dbevent->work_buffer == NULL)
           {
-            multilog (dbevent->log, LOG_ERR, "Could not re-allocat work buffer to %ld bytes\n", dbevent->work_buffer_size);
+            multilog (dbevent->log, LOG_ERR, "Could not re-allocate work buffer to %ld bytes\n", dbevent->work_buffer_size);
             return -1;
           }
 
@@ -889,6 +906,9 @@ int receive_events (dada_dbevent_t * dbevent, int listen_fd)
         ascii_header_set (header, "EVENT_DM", "%f",  events[i].dm);
         ascii_header_set (header, "EVENT_WIDTH", "%f",  events[i].width);
         ascii_header_set (header, "EVENT_BEAM", "%u",  events[i].beam);
+
+        // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+        ipcbuf_enable_eod(dbevent->out_hdu->header_block);
 
         // tag this header as filled
         ipcbuf_mark_filled (dbevent->out_hdu->header_block, header_size);

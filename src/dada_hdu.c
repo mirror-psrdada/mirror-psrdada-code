@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "dada_hdu.h"
@@ -126,7 +126,7 @@ int dada_hdu_disconnect (dada_hdu_t* hdu)
   hdu->header_block = 0;
   free (hdu->data_block);
   hdu->data_block = 0;
-  
+
   return status;
 }
 
@@ -419,5 +419,3 @@ char ** dada_hdu_hb_addresses(dada_hdu_t * hdu, uint64_t * nbufs, uint64_t * buf
 
   return hb->buffer;
 }
-
-

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_PWC_H
 #define __DADA_PWC_H
 
@@ -11,7 +18,7 @@
 #include "command_parse_server.h"
 #include "multilog.h"
 
-#include <inttypes.h> 
+#include <inttypes.h>
 #include <time.h>
 
 #ifdef __cplusplus
@@ -45,7 +52,7 @@ extern "C" {
     /*! hard error: the pwc cannot be restarted, but data block is intact */
     dada_pwc_hard_error,
 
-    /*! fatal error: a fatal error has occurred that will require the 
+    /*! fatal error: a fatal error has occurred that will require the
      * dada clients to be killed and the data block reset */
     dada_pwc_fatal_error
 
@@ -150,7 +157,7 @@ extern "C" {
     /*! The size of the ASCII header */
     unsigned header_size;
 
-    /*! The command parse server */ 
+    /*! The command parse server */
     command_parse_server_t* server;
 
     /*! The command parser */
@@ -200,4 +207,4 @@ extern "C" {
 	   }
 #endif
 
-#endif
+#endif // __DADA_PWC_H

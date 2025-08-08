@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
+ *
  *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #ifndef __DADA_CLIENT_H
@@ -39,7 +39,7 @@ extern "C" {
     int (*open_function) (struct dada_client*);
 
     /*! Pointer to the function that transfers data to/from the target */
-    int64_t (*io_function) (struct dada_client*, 
+    int64_t (*io_function) (struct dada_client*,
 			    void* data, uint64_t data_size);
 
     /*! Pointer to the function that directly operates on shared memory blocks */

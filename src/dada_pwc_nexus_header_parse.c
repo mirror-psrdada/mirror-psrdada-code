@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_pwc_nexus.h"
 #include "ascii_header.h"
 #include "futils.h"
@@ -70,9 +77,9 @@ int dada_pwc_specify_header (char keep, const char* filter,
       param_value[param_value_length] = '\0';
       param_value_length--;
     }
-    
+
 #ifdef _DEBUG
-    fprintf (stderr, "param filter=%s name=%s value=%s\n", 
+    fprintf (stderr, "param filter=%s name=%s value=%s\n",
              filter, param_name, param_value);
 #endif
 
@@ -102,7 +109,7 @@ int dada_pwc_specify_header (char keep, const char* filter,
       }
 
     }
-      
+
   }
 
   return 0;
@@ -138,9 +145,9 @@ int dada_pwc_nexus_header_parse (dada_pwc_nexus_t* n, FILE* fptr)
     sprintf (node_name, "Band%d_", inode);
     if (dada_pwc_specify_header (1, node_name, node->header, fptr) < 0)
       return -1;
-    
+
   }
-    
+
   return 0;
 }
 

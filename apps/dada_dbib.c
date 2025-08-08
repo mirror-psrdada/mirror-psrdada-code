@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2009 by Andrew Jameson
+ *
+ *    Copyright (C) 2009-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "dada_client.h"
@@ -16,6 +16,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,14 +32,14 @@ void usage()
   fprintf (stdout,
 	   "dada_dbib [options] hostname\n"
      " -c <bytes>        default chunk size for IB transport [default %d]\n"
-	   " -d                run as daemon\n" 
+	   " -d                run as daemon\n"
      " -k <key>          hexadecimal shared memory key  [default: %x]\n"
      " -p <port>         port on which to connect [default %d]\n"
      " -s                single transfer only\n"
      " -v                verbose output\n"
-     " -h                print help text\n", 
-     DADA_IB_DEFAULT_CHUNK_SIZE, 
-     DADA_DEFAULT_BLOCK_KEY, 
+     " -h                print help text\n",
+     DADA_IB_DEFAULT_CHUNK_SIZE,
+     DADA_DEFAULT_BLOCK_KEY,
      DADA_DEFAULT_IBDB_PORT);
 }
 
@@ -47,14 +48,14 @@ typedef struct {
   // machine to which data will be written
   const char * host;
 
-  // port to connect to machine 
+  // port to connect to machine
   unsigned port;
 
   // chunk size for IB transport
-  unsigned chunk_size; 
+  unsigned chunk_size;
 
   // number of chunks in a data block buffer
-  unsigned chunks_per_block; 
+  unsigned chunks_per_block;
 
   unsigned connected;
 
@@ -105,7 +106,7 @@ int dbib_open (dada_client_t* client)
   }
 
   char utc_start[64];
-  if (ascii_header_get (client->header, "UTC_START", "%s", utc_start) != 1) 
+  if (ascii_header_get (client->header, "UTC_START", "%s", utc_start) != 1)
   {
     multilog (client->log, LOG_WARNING, "Header with no UTC_START\n");
     strcpy (utc_start, "UNKNOWN");
@@ -157,7 +158,7 @@ int dbib_close (dada_client_t* client, uint64_t bytes_written)
       return -1;
     }
 
-    // ibdb will be waiting for the next block, send 0 bytes to xfer as an EOD message 
+    // ibdb will be waiting for the next block, send 0 bytes to xfer as an EOD message
     if (dbib->verbose)
       multilog (log, LOG_INFO, "close: sending EOD via sync_to\n");
     if (dada_ib_send_message (ib_cm, DADA_IB_BYTES_TO_XFER_KEY, 0) < 0)
@@ -171,7 +172,7 @@ int dbib_close (dada_client_t* client, uint64_t bytes_written)
     if (dbib->verbose)
       multilog (log, LOG_INFO, "close: no need to preform closing steps\n");
   }
-  
+
   if (bytes_written < client->transfer_bytes) {
     multilog (log, LOG_INFO, "Transfer stopped early at %"PRIu64" bytes\n",
               bytes_written);
@@ -243,11 +244,10 @@ int64_t dbib_send (dada_client_t* client, void * buffer, uint64_t bytes)
 
 }
 
-
 /*! Pointer to the function that transfers data to the target, 1 data block at a time */
 int64_t dbib_send_block(dada_client_t* client, void * buffer, uint64_t bytes, uint64_t block_id)
 {
-  
+
   dada_dbib_t* dbib = (dada_dbib_t*) client->context;
 
   dada_ib_cm_t * ib_cm = dbib->ib_cm;
@@ -261,7 +261,7 @@ int64_t dbib_send_block(dada_client_t* client, void * buffer, uint64_t bytes, ui
   if (dbib->verbose)
     multilog(log, LOG_INFO, "send_block: recv_message on sync_from [READY]\n");
   if (dada_ib_recv_message (ib_cm, DADA_IB_READY_KEY) < 0)
-  { 
+  {
     multilog (log, LOG_ERR, "send_block: recv_message on sync_from [READY] failed\n");
     return -1;
   }
@@ -323,7 +323,7 @@ int64_t dbib_send_block(dada_client_t* client, void * buffer, uint64_t bytes, ui
     multilog(log, LOG_INFO, "send_block: post_recv on sync_from [READY]\n");
   if (dada_ib_post_recv (ib_cm, ib_cm->sync_from) < 0)
   {
-    multilog(log, LOG_ERR, "send_block: post_recv on sync_from [READU] failed\n");
+    multilog(log, LOG_ERR, "send_block: post_recv on sync_from [READY] failed\n");
     return -1;
   }
 
@@ -332,10 +332,10 @@ int64_t dbib_send_block(dada_client_t* client, void * buffer, uint64_t bytes, ui
 
   // send the number of valid bytes transferred to dada_ibdb
   if (dbib->verbose)
-    multilog(log, LOG_INFO, "send_block: send_message on sync_to [BYTES XFERED]\n");
+    multilog(log, LOG_INFO, "send_block: send_message on sync_to [BYTES XFERRED]\n");
   if (dada_ib_send_message (ib_cm, DADA_IB_BYTES_XFERRED_KEY, bytes) < 0)
   {
-    multilog(log, LOG_INFO, "send_block: send_message on sync_to [BYTES XFERED] failed\n");
+    multilog(log, LOG_INFO, "send_block: send_message on sync_to [BYTES XFERRED] failed\n");
     return -1;
   }
 
@@ -490,7 +490,6 @@ void signal_handler(int signalValue) {
 
 }
 
-
 int main (int argc, char **argv)
 {
   /* DADA Data Block to Node configuration */
@@ -528,7 +527,7 @@ int main (int argc, char **argv)
   while ((arg=getopt(argc,argv,"c:dk:p:svh")) != -1)
   {
     switch (arg) {
-      
+
     case 'c':
       if (optarg)
       {
@@ -540,12 +539,12 @@ int main (int argc, char **argv)
         fprintf(stderr, "ERROR: no chunk size specified\n");
         usage();
         return EXIT_FAILURE;
-      } 
+      }
 
     case 'd':
       daemon=1;
       break;
-      
+
     case 'k':
       if (sscanf (optarg, "%x", &dada_key) != 1) {
         fprintf (stderr,"dada_dbib: could not parse key from %s\n",optarg);
@@ -577,11 +576,11 @@ int main (int argc, char **argv)
     case 'h':
       usage ();
       return 0;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
   }
 
@@ -660,7 +659,7 @@ int main (int argc, char **argv)
       quit = 1;
     }
 
-    if (quit) 
+    if (quit)
       client->quit = 1;
     else
     {

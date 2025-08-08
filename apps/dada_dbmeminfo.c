@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 #include "ipcbuf.h"
@@ -7,6 +14,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -48,12 +56,12 @@ int main (int argc, char **argv)
 
   int arg = 0;
 
-  /* TODO the amount to conduct a busy sleep inbetween clearing each sub
+  /* TODO the amount to conduct a busy sleep in between clearing each sub
    * block */
 
   while ((arg=getopt(argc,argv,"k:v")) != -1)
     switch (arg) {
-     
+
     case 'k':
       if (sscanf (optarg, "%x", &dada_key) != 1) {
         fprintf (stderr,"dada_dbmeminfo: could not parse key from %s\n",
@@ -65,11 +73,11 @@ int main (int argc, char **argv)
     case 'v':
       verbose=1;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
 
   log = multilog_open ("dada_dbmonitor", 0);
@@ -98,7 +106,7 @@ int main (int argc, char **argv)
     fprintf(stderr,"HEADER BLOCK:\n");
     fprintf(stderr,"Number of buffers: %"PRIu64"\n",nhbufs);
     fprintf(stderr,"Buffer size: %"PRIu64"\n",bufsz);
-    fprintf(stderr,"Total buffer memory: %5.0f MB\n", ((double) total_bytes) / 
+    fprintf(stderr,"Total buffer memory: %5.0f MB\n", ((double) total_bytes) /
                                                        (1024.0*1024.0));
   }
 
@@ -107,7 +115,7 @@ int main (int argc, char **argv)
   fprintf(stderr,"DATA BLOCK:\n");
   fprintf(stderr,"Number of buffers: %"PRIu64"\n",ndbufs);
   fprintf(stderr,"Buffer size: %"PRIu64"\n",bufsz);
-  fprintf(stderr,"Total buffer memory: %5.0f MB\n", ((double) total_bytes) / 
+  fprintf(stderr,"Total buffer memory: %5.0f MB\n", ((double) total_bytes) /
                                                        (1024.0*1024.0));
 
   if (dada_hdu_disconnect (hdu) < 0)
@@ -117,10 +125,10 @@ int main (int argc, char **argv)
 }
 
 
-const char * state_to_str(int state) 
+const char * state_to_str(int state)
 {
 
-  switch (state) 
+  switch (state)
   {
     case 0:
       return "disconnected";

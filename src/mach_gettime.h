@@ -1,11 +1,18 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include <sys/types.h>
 #include <sys/_types/_timespec.h>
 #include <mach/mach.h>
 #include <mach/clock.h>
 #include <time.h>
 
-#ifndef mach_time_h
-#define mach_time_h
+#ifndef __DADA_MACH_TIME_H
+#define __DADA_MACH_TIME_H
 
 // XXX only supports a single timer
 #define TIMER_ABSTIME -1
@@ -22,11 +29,11 @@
 typedef int clockid_t;
 
 /* the mach kernel uses struct mach_timespec, so struct timespec
-    is loaded from <sys/_types/_timespec.h> for compatability */
+    is loaded from <sys/_types/_timespec.h> for compatibility */
 // struct timespec { time_t tv_sec; long tv_nsec; };
 
 int clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 #endif
 
-#endif
+#endif // __DADA_MACH_TIME_H

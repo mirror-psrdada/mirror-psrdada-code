@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_DEF_H
 #define __DADA_DEF_H
 
@@ -84,4 +91,5 @@
 #define DADA_ERROR_SOFT  -1
 #define DADA_ERROR_HARD  -2
 #define DADA_ERROR_FATAL -3
-#endif
+
+#endif // __DADA_DEF_H

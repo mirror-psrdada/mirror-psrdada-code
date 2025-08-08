@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2011 by Andrew Jameson
+ *
+ *    Copyright (C) 2011-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -12,8 +12,6 @@
 #ifndef __DADA_CUDA_H
 #define __DADA_CUDA_H
 
-#include <cuda_runtime.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,9 +19,11 @@ extern "C" {
 #include "dada_hdu.h"
 #include "ipcbuf.h"
 
-typedef enum { 
-  PINNED, 
-  PAGEABLE 
+#include <cuda_runtime.h>
+
+typedef enum {
+  PINNED,
+  PAGEABLE
 } memory_mode_t;
 
 /*
@@ -63,4 +63,4 @@ void check_error_stream (const char* method, cudaStream_t stream);
 }
 #endif
 
-#endif
+#endif // __DADA_CUDA_H

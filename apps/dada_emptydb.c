@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2024 by Andrew Jameson
+ *
+ *    Copyright (C) 2024-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "dada_client.h"
@@ -85,7 +85,7 @@ int main (int argc, char **argv)
     fprintf (stderr, "Error: a header file must be specified\n");
     usage();
     exit(EXIT_FAILURE);
-  } 
+  }
 
   header_file = strdup(argv[optind]);
 
@@ -116,6 +116,13 @@ int main (int argc, char **argv)
   fprintf(stderr, "main: hdu->header=%p hdu->header_size=%lu\n", hdu->header, hdu->header_size);
   if (fileread (header_file, hdu->header, hdu->header_size) < 0) {
     multilog (log, LOG_ERR, "Could not read header from %s\n", header_file);
+  }
+
+  // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+  if (ipcbuf_enable_eod(hdu->header_block) < 0)
+  {
+    multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+    return EXIT_FAILURE;
   }
 
   fprintf(stderr, "main: ipcbuf_mark_filled(hdu->header_block, %lu)\n", hdu->header_size);

@@ -80,7 +80,7 @@ int main (int argc, char** argv)
 
   }
 
-  if ((!header_filename && todo != MODIFY) || 
+  if ((!header_filename && todo != MODIFY) ||
       (header_filename && todo == MODIFY)) {
     fprintf (stderr, "Please specify either -H or -p\n");
     return -1;
@@ -110,7 +110,7 @@ int main (int argc, char** argv)
     fprintf (stderr, "Reading header: %u bytes\n", header_size);
 
     if (read (fd, old_header, header_size) < header_size) {
-      fprintf (stderr, "Could not read header from %s: %s\n", 
+      fprintf (stderr, "Could not read header from %s: %s\n",
                argv[arg], strerror(errno));
       close (fd);
       continue;

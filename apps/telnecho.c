@@ -1,5 +1,13 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "sock.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,7 +56,7 @@ int main (int argc, char** argv)
     fprintf (stderr, "%s available on %d\n",hostname, port);
     cfd = sock_accept (sfd);
     fprintf (stderr, "Connection accepted.\n");
-    
+
     sockin = fdopen (cfd, "r");
     sockout = fdopen (cfd, "w");
 

@@ -1,3 +1,11 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include "tmutil.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +18,6 @@
 #define __USE_XOPEN
 #endif
 #include <time.h>
-
-#include "tmutil.h"
 
 time_t str2time (const char* str)
 {
@@ -76,7 +82,7 @@ time_t str2tm (struct tm* time, const char* str)
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
   if (endstr < 0)
     return -1;
-  temp [endstr+1] = '\0'; 
+  temp [endstr+1] = '\0';
 
 
   /* parse UTC seconds */
@@ -90,7 +96,7 @@ time_t str2tm (struct tm* time, const char* str)
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
   if (endstr < 0)
     return 0;
-  temp [endstr+1] = '\0'; 
+  temp [endstr+1] = '\0';
 
   /* parse UTC minutes */
   trav = endstr - 1;
@@ -103,7 +109,7 @@ time_t str2tm (struct tm* time, const char* str)
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
   if (endstr < 0)
     return 0;
-  temp [endstr+1] = '\0'; 
+  temp [endstr+1] = '\0';
 
   /* parse UTC hours */
   trav = endstr - 1;
@@ -116,7 +122,7 @@ time_t str2tm (struct tm* time, const char* str)
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
   if (endstr < 0)
     return 0;
-  temp [endstr+1] = '\0'; 
+  temp [endstr+1] = '\0';
 
   /* parse UTC days in month */
   trav = endstr - 1;
@@ -129,7 +135,7 @@ time_t str2tm (struct tm* time, const char* str)
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
   if (endstr < 0)
     return 0;
-  temp [endstr+1] = '\0'; 
+  temp [endstr+1] = '\0';
 
   /* parse UTC months */
   trav = endstr - 1;
@@ -144,7 +150,7 @@ time_t str2tm (struct tm* time, const char* str)
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
   if (endstr < 0)
     return 0;
-  temp [endstr+1] = '\0'; 
+  temp [endstr+1] = '\0';
 
   /* parse UTC year */
   trav = endstr;
@@ -167,18 +173,18 @@ time_t str2tm (struct tm* time, const char* str)
      time->tm_year += 100;
 
   return mktime (time);
-  
-} 
+
+}
 
 time_t str2utctm (struct tm* time, const char* str)
 {
-  
+
   /* append the GMT+0 timeszone information */
   char * str_utc = malloc(sizeof(char) * (strlen(str) + 4 + 1));
   sprintf(str_utc, "%s UTC",str);
 
   const char * format = "%Y-%m-%d-%H:%M:%S %Z";
-  
+
   strptime(str_utc, format, time);
 
   free(str_utc);
@@ -230,5 +236,3 @@ void float_sleep (float seconds)
   t.tv_usec = seconds * 1e6;
   select (0, 0, 0, 0, &t) ;
 }
-
-

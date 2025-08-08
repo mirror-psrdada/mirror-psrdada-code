@@ -1,19 +1,18 @@
-/* $Source$
-   $Revision$
-   $Date$
-   $Author$ */
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
-#ifndef DADA_TMUTIL_H
-#define DADA_TMUTIL_H
-
-//#ifndef _XOPEN_SOURCE
-//#define _XOPEN_SOURCE /* glibc2 needs this for strptime  */
-//#endif
-//#include <time.h>
+#ifndef __DADA_TMUTIL_H
+#define __DADA_TMUTIL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+  #include <time.h>
 
   /*! parse a string into struct tm; return equivalent time_t */
   time_t str2tm (struct tm* time, const char* str);
@@ -36,4 +35,4 @@ extern "C" {
 }
 #endif
 
-#endif
+#endif // __DADA_TMUTIL_H

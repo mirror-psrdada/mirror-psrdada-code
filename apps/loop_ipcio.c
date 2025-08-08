@@ -1,10 +1,19 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "ipcio.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/ipc.h>
 
 static char quick = 0;
 
@@ -194,7 +203,7 @@ int main (int argc, char** argv)
 
       while (!ipcbuf_eod((ipcbuf_t*)&ringbuf)) {
 
-	bytesio = ipcio_read (&ringbuf, (char*)smbuf, 
+	bytesio = ipcio_read (&ringbuf, (char*)smbuf,
 			      smbufsz*sizeof(unsigned long));
 
 	if (bytesio < 0) {

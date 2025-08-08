@@ -1,3 +1,12 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#ifndef __DADA_MSG_H
+#define __DADA_MSG_H
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -15,3 +24,5 @@
 #else
 #define DADA_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
 #endif
+
+#endif // __DADA_MSG_H

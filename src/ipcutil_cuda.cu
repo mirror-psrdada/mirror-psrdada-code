@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "ipcutil_cuda.h"
 
 #include <stdio.h>
@@ -31,7 +38,7 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
 
   // we want to extract the IPC handle
   id = shmget (key, handle_size, flag);
-  if (id < 0) 
+  if (id < 0)
   {
      fprintf (stderr, "ipc_alloc_cuda: shmget (key=%x, size=%ld, flag=%x) %s\n",
               key, handle_size, flag, strerror(errno));
@@ -44,7 +51,7 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
 
   // pointer to cudaIpcMemHandle_t
   *shm_addr = shmat (id, 0, flag);
-  if (*shm_addr == (void *)-1) 
+  if (*shm_addr == (void *)-1)
   {
     fprintf (stderr,
        "ipc_alloc_cuda: shmat (shmid=%d) %s\n"
@@ -81,7 +88,7 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
     error = cudaMalloc (&devPtr, size);
     if (error != cudaSuccess)
     {
-      fprintf (stderr, "failed to allocate %ld bytes on device %d: %s\n", 
+      fprintf (stderr, "failed to allocate %ld bytes on device %d: %s\n",
                size, device_id, cudaGetErrorString (error));
       return 0;
     }
@@ -93,7 +100,7 @@ void* ipc_alloc_cuda (key_t key, size_t size, int flag, int* shmid, void ** shm_
     error = cudaIpcGetMemHandle (handlePtr, devPtr);
     if (error != cudaSuccess)
     {
-      fprintf (stderr, "failed to get IPC memory handle for devPtr=%p on device %d: %s\n", 
+      fprintf (stderr, "failed to get IPC memory handle for devPtr=%p on device %d: %s\n",
                devPtr, device_id, cudaGetErrorString (error));
       return 0;
     }
@@ -137,7 +144,7 @@ int ipc_disconnect_cuda (void * devPtr)
     return -1;
   }
 
-  // now restore 
+  // now restore
   return 0;
 }
 
@@ -171,4 +178,3 @@ int ipc_zero_buffer_cuda (void * devPtr, size_t nbytes)
 
   return 0;
 }
-

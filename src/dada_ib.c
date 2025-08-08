@@ -1,15 +1,17 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
+
+#include "dada_ib.h"
 
 #include <assert.h>
 #include <errno.h>
-#include "dada_ib.h"
+#include <netdb.h>
 
-dada_ib_cm_t * dada_ib_create_cm (unsigned nbufs, multilog_t * log) 
+dada_ib_cm_t * dada_ib_create_cm (unsigned nbufs, multilog_t * log)
 {
 
   dada_ib_cm_t * ctx = (dada_ib_cm_t *) malloc(sizeof(dada_ib_cm_t));
@@ -63,7 +65,7 @@ dada_ib_cm_t * dada_ib_create_cm (unsigned nbufs, multilog_t * log)
 }
 
 /*
- *  Accpet the RDMA CM connection on the specified port 
+ *  Accept the RDMA CM connection on the specified port
  */
 int dada_ib_listen_cm (dada_ib_cm_t * ctx, int port)
 {
@@ -102,8 +104,8 @@ int dada_ib_listen_cm (dada_ib_cm_t * ctx, int port)
 
   // ensure the REUSEADDR option is set on this listening ID
   int optval = 1;
-  err = rdma_set_option (listen_id, RDMA_OPTION_ID, 
-                         RDMA_OPTION_ID_REUSEADDR, 
+  err = rdma_set_option (listen_id, RDMA_OPTION_ID,
+                         RDMA_OPTION_ID_REUSEADDR,
                          (void *)&optval, sizeof(optval));
   if (err)
   {
@@ -117,7 +119,7 @@ int dada_ib_listen_cm (dada_ib_cm_t * ctx, int port)
   sin.sin_port        = htons(port);
   sin.sin_addr.s_addr = INADDR_ANY;
 
-  // Bind to local port and listen for connection request 
+  // Bind to local port and listen for connection request
   if (ctx->verbose > 1)
     multilog(log, LOG_INFO, "dada_ib_listen_cm: rdma_bind_addr on port %d\n", port);
   err = rdma_bind_addr(listen_id, (struct sockaddr *) &sin);
@@ -140,14 +142,14 @@ int dada_ib_listen_cm (dada_ib_cm_t * ctx, int port)
   if (err)
   {
     multilog(log, LOG_ERR, "dada_ib_listen_cm: rdma_get_cm_event failed "
-             "[%d]\n", err); 
+             "[%d]\n", err);
     return -1;
   }
 
   if (event->event != RDMA_CM_EVENT_CONNECT_REQUEST)
   {
     multilog(log, LOG_ERR, "dada_ib_listen_cm: rdma_get_cm_event returned "
-             "%s event, expected RDMA_CM_EVENT_CONNECT_REQUEST\n", 
+             "%s event, expected RDMA_CM_EVENT_CONNECT_REQUEST\n",
              rdma_event_str(event->event));
     return -1;
   }
@@ -198,12 +200,12 @@ int dada_ib_bind_cm (dada_ib_cm_t * ctx, const char * address, int port)
 
   // ensure the REUSEADDR option is set on this listening ID
   int optval = 1;
-  err = rdma_set_option (ctx->listen_id, RDMA_OPTION_ID, 
-                         RDMA_OPTION_ID_REUSEADDR, 
+  err = rdma_set_option (ctx->listen_id, RDMA_OPTION_ID,
+                         RDMA_OPTION_ID_REUSEADDR,
                          (void *)&optval, sizeof(optval));
   if (err)
   {
-    multilog (log, LOG_ERR, "dada_ib_bind_cm: rdma_set_option failed [%d] -> %s\n", 
+    multilog (log, LOG_ERR, "dada_ib_bind_cm: rdma_set_option failed [%d] -> %s\n",
              err, strerror(errno));
     return -1;
   }
@@ -212,7 +214,7 @@ int dada_ib_bind_cm (dada_ib_cm_t * ctx, const char * address, int port)
   sin.sin_port        = htons(port);
   sin.sin_addr.s_addr = inet_addr(address);
 
-  // Bind to local port and listen for connection request 
+  // Bind to local port and listen for connection request
   if (ctx->verbose > 1)
     multilog(log, LOG_INFO, "dada_ib_bind_cm: rdma_bind_addr on port %d\n", port);
   err = rdma_bind_addr(ctx->listen_id, (struct sockaddr *) &sin);
@@ -248,12 +250,12 @@ int dada_ib_connect_cm (dada_ib_cm_t * ctx, const char *host, unsigned port)
   struct addrinfo *res, *t;
   char port_str[8];
   sprintf(port_str, "%d", port);
-  
+
   // create the event channel
   assert(ctx->cm_channel == 0);
   ctx->cm_channel = rdma_create_event_channel();
   if (!ctx->cm_channel)
-  { 
+  {
     multilog(log, LOG_ERR, "connect_cm: rdma_create_event_channel failed\n");
     return -1;
   }
@@ -283,14 +285,14 @@ int dada_ib_connect_cm (dada_ib_cm_t * ctx, const char *host, unsigned port)
     if (!err)
       break;
   }
-  if (err) 
+  if (err)
   {
     multilog(log, LOG_ERR, "connect_cm: rdma_resolve_addr failed. host=%s, port=%s\n", host, port_str);
     return -1;
   }
 
   err = rdma_get_cm_event(ctx->cm_channel, &event);
-  if (err) 
+  if (err)
   {
     multilog(log, LOG_ERR, "connect_cm: rdma_get_cm_event failed\n");
     return -1;
@@ -315,7 +317,7 @@ int dada_ib_connect_cm (dada_ib_cm_t * ctx, const char *host, unsigned port)
   }
 
   err = rdma_get_cm_event(ctx->cm_channel, &event);
-  if (err) 
+  if (err)
   {
     multilog(log, LOG_ERR, "connect_cm: rdma_get_cm_event failed\n");
     return -1;
@@ -401,8 +403,8 @@ int dada_ib_create_verbs(dada_ib_cm_t * ctx)
 
   //multilog(log, LOG_INFO, "dada_ib_create_verbs: ctx->verbs=%p\n", ctx->verbs);
 
-  // create a PD (protection domain). The PD limits which memory regions can be 
-  // accessed by which QP (queue pairs) or CQ (completion queues). 
+  // create a PD (protection domain). The PD limits which memory regions can be
+  // accessed by which QP (queue pairs) or CQ (completion queues).
   if (ctx->verbose > 1)
     multilog(log, LOG_INFO, "create_verbs: ibv_alloc_pd \n");
   ctx->pd = ibv_alloc_pd(ctx->verbs);
@@ -412,7 +414,7 @@ int dada_ib_create_verbs(dada_ib_cm_t * ctx)
     return -1;
   }
 
-  // create a send and recv completion channel. This is the mechanism for 
+  // create a send and recv completion channel. This is the mechanism for
   // receiving notifications when CQEs are placed on the CQ
   if (ctx->verbose > 1)
     multilog(log, LOG_INFO, "create_verbs: ibv_create_comp_channel for send and recv\n");
@@ -450,7 +452,7 @@ int dada_ib_create_verbs(dada_ib_cm_t * ctx)
     return -1;
   }
 
-  // arm the notification mechanism for the send and recv CQs 
+  // arm the notification mechanism for the send and recv CQs
   if (ctx->verbose > 1)
     multilog(log, LOG_INFO, "create_verbs: ibv_req_notify_cq send and recv CQs\n");
 
@@ -470,8 +472,8 @@ int dada_ib_create_verbs(dada_ib_cm_t * ctx)
 
 
 /*
- * register the buffer of bufsz bytes to the ctx's PD with the specified access flags 
- * return a dada_ib_mb_t initialised to the correct values 
+ * register the buffer of bufsz bytes to the ctx's PD with the specified access flags
+ * return a dada_ib_mb_t initialised to the correct values
  */
 dada_ib_mb_t * dada_ib_reg_buffer (dada_ib_cm_t * ctx, void * buffer,
                                    uint64_t bufsz, int access_flags)
@@ -514,7 +516,7 @@ int dada_ib_dereg_buffer (dada_ib_mb_t * mr)
   if (mr->mr)
   {
     ibv_dereg_mr(mr->mr);
-    mr->mr = 0; 
+    mr->mr = 0;
   }
   mr->buffer = 0;
   mr->size = 0;
@@ -525,10 +527,10 @@ int dada_ib_dereg_buffer (dada_ib_mb_t * mr)
 }
 
 /*
- *  register the specified number of buffers to the PD (protection domain), 
+ *  register the specified number of buffers to the PD (protection domain),
  *  all buffers should be the same size
  */
-int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz, 
+int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz,
                         int access_flags)
 {
   assert(ctx);
@@ -543,7 +545,7 @@ int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz,
   {
     multilog(log, LOG_ERR, "reg_buffers: ctx->bufs was not defined\n");
     return -1;
-  } 
+  }
 
   if (!ctx->nbufs)
   {
@@ -568,7 +570,7 @@ int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz,
 
     if (ctx->verbose > 1)
       multilog (log, LOG_INFO, "reg_buffers: block[%d] buffer=%p buf_va=%p buf_lkey=%p "
-                "buf_rkey=%p\n", i, ctx->bufs[i]->buffer, ctx->local_blocks[i].buf_va, 
+                "buf_rkey=%p\n", i, ctx->bufs[i]->buffer, ctx->local_blocks[i].buf_va,
                 ctx->local_blocks[i].buf_lkey, ctx->local_blocks[i].buf_rkey);
 
   }
@@ -584,7 +586,7 @@ int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz,
     multilog(log, LOG_INFO, "reg_buffers: creating sync buffers size=%d "
              "bytes\n", ctx->sync_size);
 
-  ctx->sync_to = dada_ib_reg_buffer(ctx, ctx->sync_to_val, ctx->sync_size, 
+  ctx->sync_to = dada_ib_reg_buffer(ctx, ctx->sync_to_val, ctx->sync_size,
                                     access_flags);
   if (!ctx->sync_to)
   {
@@ -595,7 +597,7 @@ int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz,
   ctx->sync_to_val[0] = 0;
   ctx->sync_to_val[1] = 0;
 
-  ctx->sync_from = dada_ib_reg_buffer(ctx, ctx->sync_from_val, ctx->sync_size, 
+  ctx->sync_from = dada_ib_reg_buffer(ctx, ctx->sync_from_val, ctx->sync_size,
                                       access_flags);
   if (!ctx->sync_from)
   {
@@ -610,10 +612,10 @@ int dada_ib_reg_buffers(dada_ib_cm_t * ctx, char ** buffers, uint64_t bufsz,
 }
 
 /*
- *  register the specified number of buffers to the PD (protection domain), 
- *  register only nbytes of the buffer from the offset 
+ *  register the specified number of buffers to the PD (protection domain),
+ *  register only nbytes of the buffer from the offset
  */
-int dada_ib_reg_buffers_partial (dada_ib_cm_t * ctx, char ** buffers, uint64_t nbytes, 
+int dada_ib_reg_buffers_partial (dada_ib_cm_t * ctx, char ** buffers, uint64_t nbytes,
                         uint64_t offset, int access_flags)
 {
   assert(ctx);
@@ -628,7 +630,7 @@ int dada_ib_reg_buffers_partial (dada_ib_cm_t * ctx, char ** buffers, uint64_t n
   {
     multilog(log, LOG_ERR, "reg_buffers: ctx->bufs was not defined\n");
     return -1;
-  } 
+  }
 
   if (!ctx->nbufs)
   {
@@ -653,7 +655,7 @@ int dada_ib_reg_buffers_partial (dada_ib_cm_t * ctx, char ** buffers, uint64_t n
 
     if (ctx->verbose > 1)
       multilog (log, LOG_INFO, "reg_buffers: block[%d] buffer=%p buf_va=%p buf_lkey=%p "
-                "buf_rkey=%p\n", i, ctx->bufs[i]->buffer, ctx->local_blocks[i].buf_va, 
+                "buf_rkey=%p\n", i, ctx->bufs[i]->buffer, ctx->local_blocks[i].buf_va,
                 ctx->local_blocks[i].buf_lkey, ctx->local_blocks[i].buf_rkey);
   }
 
@@ -668,7 +670,7 @@ int dada_ib_reg_buffers_partial (dada_ib_cm_t * ctx, char ** buffers, uint64_t n
     multilog(log, LOG_INFO, "reg_buffers: creating sync buffers size=%d "
              "bytes\n", ctx->sync_size);
 
-  ctx->sync_to = dada_ib_reg_buffer(ctx, ctx->sync_to_val, ctx->sync_size, 
+  ctx->sync_to = dada_ib_reg_buffer(ctx, ctx->sync_to_val, ctx->sync_size,
                                     access_flags);
   if (!ctx->sync_to)
   {
@@ -679,7 +681,7 @@ int dada_ib_reg_buffers_partial (dada_ib_cm_t * ctx, char ** buffers, uint64_t n
   ctx->sync_to_val[0] = 0;
   ctx->sync_to_val[1] = 0;
 
-  ctx->sync_from = dada_ib_reg_buffer(ctx, ctx->sync_from_val, ctx->sync_size, 
+  ctx->sync_from = dada_ib_reg_buffer(ctx, ctx->sync_from_val, ctx->sync_size,
                                       access_flags);
   if (!ctx->sync_from)
   {
@@ -776,7 +778,7 @@ int dada_ib_accept (dada_ib_cm_t * ctx)
     multilog(log, LOG_ERR, "accept: rdma_get_cm_event failed [%d]\n", err);
     return -1;
   }
-        
+
   if (event->event != RDMA_CM_EVENT_ESTABLISHED)
   {
     multilog(log, LOG_ERR, "accept: rdma_get_cm_event returned %s event, expected "
@@ -798,7 +800,7 @@ int dada_ib_accept (dada_ib_cm_t * ctx)
   if (ctx->verbose > 1)
     multilog(log, LOG_INFO, "accept: rdma_ack_cm_event [port=%d]\n", ctx->port);
   rdma_ack_cm_event(event);
-  
+
   if (ctx->ib_connected)
   {
     if (ctx->verbose)
@@ -828,7 +830,7 @@ int dada_ib_connect (dada_ib_cm_t * ctx)
   struct rdma_cm_event * event;
   int err = 0;
 
-  memset(&conn_param, 0, sizeof(conn_param)); 
+  memset(&conn_param, 0, sizeof(conn_param));
 
   conn_param.responder_resources = 1;
   conn_param.initiator_depth = 1;
@@ -881,7 +883,7 @@ int dada_ib_connect (dada_ib_cm_t * ctx)
 
 
 /*
- *  post recv on the specified Memory Buffer (mb) and connection 
+ *  post recv on the specified Memory Buffer (mb) and connection
  */
 int dada_ib_post_recv (dada_ib_cm_t * ctx, dada_ib_mb_t *mb)
 {
@@ -896,7 +898,7 @@ int dada_ib_post_recv (dada_ib_cm_t * ctx, dada_ib_mb_t *mb)
   struct ibv_recv_wr  rcv_wr = { };
   struct ibv_recv_wr *bad_wr;
 
-  // set the buffer that will receive the data to 0 
+  // set the buffer that will receive the data to 0
   memset ( mb->buffer, 0, mb->size);
 
   sge.addr   = (uintptr_t) mb->buffer;
@@ -938,9 +940,9 @@ int dada_ib_wait_recv(dada_ib_cm_t * ctx, dada_ib_mb_t * mb)
   return dada_ib_wait_cq (ctx, mb, ctx->recv_comp_chan, ctx->recv_cq);
 }
 
-int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb, 
+int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
                      struct ibv_comp_channel * comp_chan, struct ibv_cq * cq)
-{ 
+{
   assert(ctx);
   multilog_t * log = ctx->log;
 
@@ -967,7 +969,7 @@ int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
   }
 
   while (!data_received) {
-  
+
     if (ctx->verbose > 1)
       multilog(log, LOG_INFO, "wait_cq: ibv_get_cq_event\n");
     if (ibv_get_cq_event(comp_chan, &evt_cq, &cq_context))
@@ -983,7 +985,7 @@ int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
     {
       multilog(log, LOG_ERR, "dada_ib_wait_cq: ibv_req_notify_cq() failed\n");
       return -1;
-    } 
+    }
 
     if (ctx->verbose > 1)
       multilog(log, LOG_INFO, "wait_cq: ibv_poll_cq\n");
@@ -993,15 +995,15 @@ int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
       return -1;
     }
 
-    if (wc.status != IBV_WC_SUCCESS) 
+    if (wc.status != IBV_WC_SUCCESS)
     {
       multilog(log, LOG_WARNING, "wait_cq: wc.status != IBV_WC_SUCCESS "
-               "[wc.status=%s, wc.wr_id=%"PRIu64", mb->wr_id=%"PRIu64"]\n", 
+               "[wc.status=%s, wc.wr_id=%"PRIu64", mb->wr_id=%"PRIu64"]\n",
                ibv_wc_status_str(wc.status), wc.wr_id, mb->wr_id);
       return -1;
     }
 
-    if (wc.wr_id != mb->wr_id ) 
+    if (wc.wr_id != mb->wr_id )
     {
       multilog(log, LOG_WARNING, "wait_cq: wr_id=%"PRIu64" != %"PRIu64"\n", wc.wr_id, mb->wr_id);
       uint64_t * tmpptr = (uint64_t *) mb->buffer;
@@ -1013,12 +1015,12 @@ int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
       if (ctx->buffered_cqe)
       {
         multilog(log, LOG_ERR, "wait_cq: will not buffer more than 1 CQE\n");
-        multilog(log, LOG_INFO,  "wait_cq: ibv_ack_cq_events\n"); 
+        multilog(log, LOG_INFO,  "wait_cq: ibv_ack_cq_events\n");
         ibv_ack_cq_events(cq, 1);
         return -1;
-      } 
+      }
       // save this CQE and wr_id so that it can be retrieved later
-      else 
+      else
       {
         multilog(log, LOG_WARNING, "dada_ib_wait_cq: buffering wr_id=%"PRIu64"\n", wc.wr_id);
         ctx->buffered_cqe = 1;
@@ -1034,7 +1036,7 @@ int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
     }
 
     if (ctx->verbose > 1)
-      multilog(log, LOG_INFO, "wait_cq: ibv_ack_cq_events\n"); 
+      multilog(log, LOG_INFO, "wait_cq: ibv_ack_cq_events\n");
     ibv_ack_cq_events(cq, 1);
   }
 
@@ -1045,9 +1047,9 @@ int dada_ib_wait_cq (dada_ib_cm_t * ctx, dada_ib_mb_t * mb,
 
 }
 
-/* 
+/*
  * post send key and value as 2 64 bit values on the ib_cm's sync_to
- * memory buffer, then wait for the data tp be sent 
+ * memory buffer, then wait for the data tp be sent
  */
 int dada_ib_send_message(dada_ib_cm_t * ib_cm, uint64_t key, uint64_t value)
 {
@@ -1071,7 +1073,7 @@ int dada_ib_send_message(dada_ib_cm_t * ib_cm, uint64_t key, uint64_t value)
 }
 
 /* post send key and values as 2 64 bit values on the ib_cms' sync_to
-  memory buffer, then wait for the data tp be sent 
+  memory buffer, then wait for the data tp be sent
  */
 int dada_ib_send_messages(dada_ib_cm_t ** ib_cms, unsigned n_ib_cms, uint64_t key, uint64_t value)
 {
@@ -1105,12 +1107,12 @@ int dada_ib_send_messages(dada_ib_cm_t ** ib_cms, unsigned n_ib_cms, uint64_t ke
 }
 
 /*
- *  recv a control message on the ib_cm's sync_from buffer, if key 
+ *  recv a control message on the ib_cm's sync_from buffer, if key
  *  is specified, ensure that the key matches the response
  */
 int dada_ib_recv_message (dada_ib_cm_t * ib_cm, uint64_t key)
 {
- 
+
   if (dada_ib_wait_recv (ib_cm, ib_cm->sync_from) < 0)
   {
     multilog (ib_cm->log, LOG_ERR, "recv_message: wait_recv failed\n");
@@ -1120,7 +1122,7 @@ int dada_ib_recv_message (dada_ib_cm_t * ib_cm, uint64_t key)
   // check the key matches
   if ((key > 0) && (ib_cm->sync_from_val[0] != key))
   {
-    multilog (ib_cm->log, LOG_WARNING, "recv_message: key[%"PRIu64 "] != val[%"PRIu64"]\n", 
+    multilog (ib_cm->log, LOG_WARNING, "recv_message: key[%"PRIu64 "] != val[%"PRIu64"]\n",
               key, ib_cm->sync_from_val[0]);
     return -1;
   }
@@ -1129,7 +1131,7 @@ int dada_ib_recv_message (dada_ib_cm_t * ib_cm, uint64_t key)
 }
 
 /*
- *  recv a control message on the ib_cms' sync_from buffer, if key 
+ *  recv a control message on the ib_cms' sync_from buffer, if key
  *  is specified, ensure that the key matches the response
  */
 int dada_ib_recv_messages (dada_ib_cm_t ** ib_cms, unsigned n_ib_cms, uint64_t key)
@@ -1159,7 +1161,7 @@ int dada_ib_recv_messages (dada_ib_cm_t ** ib_cms, unsigned n_ib_cms, uint64_t k
 /*
  *  post_send the specified memory buffer (ib) on the specified connection
  *
- *  Will send the data in the buffer in one transaction via the WR_SEND 
+ *  Will send the data in the buffer in one transaction via the WR_SEND
  *  mode which will require a post_recv on the remote end
  */
 int dada_ib_post_send (dada_ib_cm_t * ctx, dada_ib_mb_t * mb)
@@ -1233,7 +1235,7 @@ int dada_ib_post_sends(dada_ib_cm_t * ctx, void * buffer, uint64_t bytes, uint64
   chunks = bytes / chunk_size;
   if ( bytes % chunk_size != 0)
     chunks++;
-    
+
   for (i=0; i<chunks; i++)
   {
 
@@ -1249,16 +1251,16 @@ int dada_ib_post_sends(dada_ib_cm_t * ctx, void * buffer, uint64_t bytes, uint64
       return -1;
     }
 
-    // incremement address pointers 
-    sge.addr += chunk_size; 
+    // increment address pointers
+    sge.addr += chunk_size;
     send_wr.wr.rdma.remote_addr += chunk_size;
   }
 
   return 0;
 }
 
-int dada_ib_post_sends_gap (dada_ib_cm_t * ctx, void * buffer, 
-                            uint64_t bytes, uint64_t chunk_size, uint32_t lkey, 
+int dada_ib_post_sends_gap (dada_ib_cm_t * ctx, void * buffer,
+                            uint64_t bytes, uint64_t chunk_size, uint32_t lkey,
                             uint32_t rkey, uintptr_t raddr, uint64_t roffset,
                             uint64_t rgap)
 {
@@ -1271,11 +1273,11 @@ int dada_ib_post_sends_gap (dada_ib_cm_t * ctx, void * buffer,
   struct ibv_send_wr * bad_send_wr;
   unsigned i = 0;
   uint64_t chunks;
-  
+
   sge.addr   = (uintptr_t) buffer;
-  sge.length = chunk_size; 
+  sge.length = chunk_size;
   sge.lkey   = lkey;
-  
+
   send_wr.sg_list  = &sge;
   send_wr.num_sge  = 1;
   send_wr.next     = NULL;
@@ -1284,7 +1286,7 @@ int dada_ib_post_sends_gap (dada_ib_cm_t * ctx, void * buffer,
   send_wr.wr.rdma.remote_addr += roffset;
   send_wr.opcode     = IBV_WR_RDMA_WRITE;
   send_wr.send_flags = 0;
-  
+
   chunks = bytes / chunk_size;
   if ( bytes % chunk_size != 0)
     chunks++;
@@ -1298,23 +1300,23 @@ int dada_ib_post_sends_gap (dada_ib_cm_t * ctx, void * buffer,
     multilog(log, LOG_INFO, "post_sends_gap: send_wr.wr.rdma.remote_addr=%p\n",
               send_wr.wr.rdma.remote_addr);
   }
-    
+
   for (i=0; i<chunks; i++)
   {
-  
+
     /* first send data via RDMA */
     send_wr.wr_id = i;
-    
+
     if (ctx->verbose > 2)
       multilog(log, LOG_INFO, "post_sends_gap: ibv_post_send[%d]\n", send_wr.wr_id);
-      
+
     if (ibv_post_send(ctx->cm_id->qp, &send_wr, &bad_send_wr))
     {
       multilog(log, LOG_ERR, "post_sends_gap: ibv_post_send[%d] failed\n", send_wr.wr_id);
       return -1;
-    } 
-    
-    // incremement address pointers 
+    }
+
+    // increment address pointers
     sge.addr += chunk_size;
     send_wr.wr.rdma.remote_addr += (chunk_size + rgap);
   }
@@ -1348,7 +1350,7 @@ int dada_ib_rdma_disconnect (dada_ib_cm_t * ctx)
 }
 
 /*
- * disconnect from the server 
+ * disconnect from the server
  */
 int dada_ib_client_destroy (dada_ib_cm_t * ctx)
 {
@@ -1359,12 +1361,12 @@ int dada_ib_client_destroy (dada_ib_cm_t * ctx)
       multilog(ctx->log, LOG_ERR, "client_destroy: rdma_disconnect failed\n");
       return -1;
     }
-  } 
+  }
   return dada_ib_destroy(ctx);
 }
 
 /*
- * Disconnect the IB connection  
+ * Disconnect the IB connection
  */
 int dada_ib_disconnect (dada_ib_cm_t * ctx)
 {
@@ -1380,17 +1382,17 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx)
   {
     err = rdma_get_cm_event(ctx->cm_channel, &event);
     if (err)
-    { 
+    {
       multilog(log, LOG_ERR, "disconnect: rdma_get_cm_event failed [%d]\n", err);
       return -1;
-    } 
+    }
 
     if (event->event != RDMA_CM_EVENT_DISCONNECTED)
-    { 
+    {
       multilog(log, LOG_ERR, "disconnect: rdma_get_cm_event returned %s event, expected "
                              "RDMA_CM_EVENT_DISCONNECTED\n", rdma_event_str(event->event));
       return -1;
-    } 
+    }
 
     rdma_ack_cm_event(event);
   }
@@ -1398,7 +1400,7 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx)
   err = 0;
 
   if (ctx->verbose > 1)
-    multilog (log, LOG_INFO, "disconnect: ibv_destroy_qp\n"); 
+    multilog (log, LOG_INFO, "disconnect: ibv_destroy_qp\n");
   if (ctx->cm_id->qp)
   {
     if (ibv_destroy_qp(ctx->cm_id->qp)) {
@@ -1409,7 +1411,7 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx)
   }
 
   if (ctx->verbose > 1)
-    multilog (log, LOG_INFO, "disconnect: ibv_destroy_cq\n"); 
+    multilog (log, LOG_INFO, "disconnect: ibv_destroy_cq\n");
   if (ctx->send_cq) {
     if (ibv_destroy_cq(ctx->send_cq)) {
       multilog(log, LOG_ERR, "disconnect: failed to destroy CQ\n");
@@ -1426,7 +1428,7 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx)
   }
 
 
-  if (ctx->bufs) 
+  if (ctx->bufs)
   {
     unsigned i=0;
     for (i=0; i<ctx->nbufs; i++)
@@ -1485,11 +1487,11 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx)
     free(ctx->sync_from_val);
   ctx->sync_from_val = 0;
 
-  if (ctx->send_comp_chan) 
+  if (ctx->send_comp_chan)
   {
     if (ctx->verbose > 1)
       multilog (log, LOG_INFO, "disconnect: ibv_destroy_comp_channel()\n");
-    if (ibv_destroy_comp_channel(ctx->send_comp_chan)) 
+    if (ibv_destroy_comp_channel(ctx->send_comp_chan))
     {
       multilog(log, LOG_ERR, "disconnect: failed to destroy completion channel\n");
       err = 1;
@@ -1509,11 +1511,11 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx)
     ctx->recv_comp_chan = 0;
   }
 
-  if (ctx->pd) 
+  if (ctx->pd)
   {
     if (ctx->verbose > 1)
       multilog (log, LOG_INFO, "disconnect: ibv_dealloc_pd()\n");
-    if (ibv_dealloc_pd(ctx->pd)) 
+    if (ibv_dealloc_pd(ctx->pd))
     {
       multilog(log, LOG_ERR, "disconnect: failed to deallocate PD\n");
       err = 1;
@@ -1546,7 +1548,7 @@ int dada_ib_disconnect (dada_ib_cm_t * ctx)
 }
 
 /*
- * clean up IB resources 
+ * clean up IB resources
  */
 int dada_ib_destroy (dada_ib_cm_t * ctx)
 {
@@ -1561,8 +1563,8 @@ int dada_ib_destroy (dada_ib_cm_t * ctx)
 
   if (dada_ib_disconnect(ctx) < 0)
   {
-    multilog(log, LOG_ERR, "destroy: dada_ib_disconnect failed()\n");    
-    err = 1;    
+    multilog(log, LOG_ERR, "destroy: dada_ib_disconnect failed()\n");
+    err = 1;
   }
 
   if (ctx->local_blocks)
@@ -1581,4 +1583,3 @@ int dada_ib_destroy (dada_ib_cm_t * ctx)
 
   return err;
 }
-

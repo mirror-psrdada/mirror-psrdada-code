@@ -1,9 +1,14 @@
-#ifndef __UDP_H
-#define __UDP_H
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
-/*
- * Generic functions for udp sockets
- */
+#ifndef __DADA_UDP_H
+#define __DADA_UDP_H
+
+#include "multilog.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,8 +19,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
-#include "multilog.h"
 
 #define KERNEL_BUFFER_SIZE_MAX     67108864
 #define KERNEL_BUFFER_SIZE_DEFAULT 131071
@@ -32,7 +35,7 @@ int64_t sock_recv (int fd, char* buffer, uint64_t size, int flags)
 {
   int64_t received = 0;
   received = recvfrom (fd, buffer, size, 0, NULL, NULL);
-                                                                                                        
+
   if (received < 0) {
     perror ("sock_recv recvfrom");
     return -1;
@@ -40,7 +43,7 @@ int64_t sock_recv (int fd, char* buffer, uint64_t size, int flags)
   if (received == 0) {
     fprintf (stderr, "sock_recv received zero bytes\n");
   }
-                                                                                                        
+
   return received;
 }
 
@@ -68,7 +71,7 @@ int dada_create_udp_socket(multilog_t* log, const char* interface, int port, int
     return -1;
   }
 
-  if (verbose) 
+  if (verbose)
     multilog(log, LOG_INFO, "Created UDP socket\n");
 
   struct sockaddr_in udp_sock;
@@ -86,7 +89,7 @@ int dada_create_udp_socket(multilog_t* log, const char* interface, int port, int
     return -1;
   }
 
-  if (verbose) 
+  if (verbose)
     multilog(log, LOG_INFO, "UDP socket bound to %s:%d\n", interface, port);
 
   // try setting the buffer to the maximum, warn if we cant
@@ -150,4 +153,4 @@ int dada_create_udp_socket(multilog_t* log, const char* interface, int port, int
   return fd;
 }
 
-#endif /* __UDP_H */
+#endif // __DADA_UDP_H

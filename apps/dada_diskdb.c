@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -6,6 +13,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -78,7 +86,7 @@ static int n_files = 0;
 static int cur_file = 0;
 
 /*! Pointer to the function that transfers data to/from the target */
-int64_t file_read_function (dada_client_t* client, 
+int64_t file_read_function (dada_client_t* client,
 			    void* data, uint64_t data_size)
 {
 #ifdef _DEBUG
@@ -160,7 +168,7 @@ int file_open_function (dada_client_t* client)
 {
   /* the dada_diskdb specific data */
   dada_diskdb_t* diskdb = 0;
-  
+
   /* status and error logging facility */
   multilog_t* log;
 
@@ -189,7 +197,7 @@ int file_open_function (dada_client_t* client)
   log = client->log;
 
   /*
-  while (diskdb->filenames[cur_file][0] == '\0') 
+  while (diskdb->filenames[cur_file][0] == '\0')
   {
     if (n_files > 0)
     {
@@ -209,13 +217,13 @@ int file_open_function (dada_client_t* client)
     multilog (client->log, LOG_ERR, "Error opening %s: %s\n",
               diskdb->filenames[cur_file], strerror(errno));
     return -1;
-  } 
+  }
 
   ret = read (client->fd, client->header, client->header_size);
 
   if (ret < client->header_size) {
-    multilog (client->log, LOG_ERR, 
-	      "read %d out of %d bytes from Header: %s\n", 
+    multilog (client->log, LOG_ERR,
+	      "read %d out of %d bytes from Header: %s\n",
 	      ret, client->header_size, strerror(errno));
     file_close_function (client, 0);
     return -1;
@@ -278,7 +286,7 @@ fprintf (stderr, "read HEADER START\n%sHEADER END\n", client->header);
     multilog (log, LOG_INFO, "UTC_START=%s\n", utc_start);
 
   /* Get the observation offset */
-  if (ascii_header_get (client->header, "OBS_OFFSET", "%"PRIu64, &obs_offset) 
+  if (ascii_header_get (client->header, "OBS_OFFSET", "%"PRIu64, &obs_offset)
       != 1) {
     multilog (log, LOG_WARNING, "Header with no OBS_OFFSET\n");
     obs_offset = 0;
@@ -313,7 +321,7 @@ int open_next_contiguous_file (dada_client_t* client)
   // open next file
   client->fd = open (diskdb->filenames[cur_file], O_RDONLY);
 
-  if (client->fd < 0) 
+  if (client->fd < 0)
   {
     multilog (client->log, LOG_ERR, "Error opening %s: %s\n",
               diskdb->filenames[cur_file], strerror(errno));
@@ -347,7 +355,7 @@ int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
     fd = open (diskdb->filenames[0], O_RDONLY);
     if (fd)
     {
-      read (fd, header, hdr_size);
+      ssize_t hdr_bytes_read = read (fd, header, hdr_size);
 
       if (ascii_header_get (header, "UTC_START", "%s", prev_utc_start) != 1)
       {
@@ -365,7 +373,7 @@ int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
       {
         multilog (log, LOG_WARNING, "check_contiguity: header from %s did not contain FILE_SIZE\n", diskdb->filenames[0]);
         struct stat buf;
-        if (fstat (fd, &buf) < 0)  
+        if (fstat (fd, &buf) < 0)
         {
           multilog (log, LOG_ERR, "check_contiguity: error during fstat on %s: %s\n", diskdb->filenames[0], strerror(errno));
           return -1;
@@ -383,7 +391,7 @@ int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
     fd = open (diskdb->filenames[ifile], O_RDONLY);
     if (fd)
     {
-      read (fd, header, hdr_size);
+      ssize_t hdr_bytes_read = read (fd, header, hdr_size);
       close (fd);
 
       if (ascii_header_get (header, "UTC_START", "%s", curr_utc_start) != 1)
@@ -391,7 +399,7 @@ int check_contiguity (multilog_t * log, dada_diskdb_t * diskdb)
         multilog (log, LOG_WARNING, "check_contiguity: header from %s did not contain UTC_START\n", diskdb->filenames[ifile]);
         break;
       }
-  
+
       if (ascii_header_get (header, "OBS_OFFSET", "%"PRIu64, &curr_obs_offset) != 1)
       {
         multilog (log, LOG_WARNING, "check_contiguity: header from %s did not contain OBS_OFFSET\n", diskdb->filenames[ifile]);
@@ -512,7 +520,7 @@ int main (int argc, char **argv)
         return -1;
       }
       break;
-      
+
     case 'd':
       daemon=1;
       break;
@@ -544,7 +552,7 @@ int main (int argc, char **argv)
     case 'v':
       diskdb.verbose = 1;
       break;
-      
+
     case 's':
       quit=1;
       break;
@@ -556,7 +564,7 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-      
+
     }
 
   log = multilog_open ("dada_diskdb", daemon);

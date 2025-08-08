@@ -1,15 +1,22 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include "ipcbuf.h"
+
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <values.h>
 
+#include <sys/ipc.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
-//#define _DEBUG 1
-
-#include "ipcbuf.h"
 
 int main (int argc, char** argv)
 {
@@ -34,7 +41,7 @@ int main (int argc, char** argv)
   unsigned ntest = 16;
   unsigned itest = 0;
   unsigned twice = 0;
-  
+
   uint64_t* buf   = 0;
   uint64_t  count = 0;
 
@@ -62,7 +69,7 @@ int main (int argc, char** argv)
     switch (arg)  {
 
     case 'h':
-      fprintf (stderr, 
+      fprintf (stderr,
 	       "test_ipcbuf [options]\n"
 	       " -b block_size  Set the size of each block in ring buffer \n"
 	       " -n nblock      Set the number of blocks in ring buffer \n"
@@ -103,7 +110,7 @@ int main (int argc, char** argv)
   fprintf (stderr, "Running %u tests ...\n", ntest);
 
   if (fork()) {
-    
+
     /* this process is writing to and creates the shared memory */
     fprintf (stderr, "Creating shared memory ring buffer."
 	     " nbufs=%"PRIu64" bufsz=%"PRIu64"\n", nbufs, bufsz);
@@ -185,7 +192,7 @@ int main (int argc, char** argv)
 	    fprintf (stderr, "Enabling end-of-data buf=%"PRIu64
 		     " byte=%"PRIu64"\n",
 		     ipcbuf_get_write_count(&ringbuf), bytesio);
-	  
+
  	  if (ipcbuf_enable_eod (&ringbuf) < 0) {
 	    fprintf (stderr, "Failure to raise eod count=%"PRIu64
 		     " eod=%"PRIu64" sod=%"PRIu64" offset=%"PRIu64"\n",
@@ -211,7 +218,7 @@ int main (int argc, char** argv)
 	  if (verbose)
 	    fprintf (stderr, "Enabling start-of-data buf=%"PRIu64
 		     " byte=%"PRIu64"\n", sodbuf, sodbyte);
-	  
+
 	  if (ipcbuf_enable_sod (&ringbuf, sodbuf, sodbyte) < 0)
 	    return -1;
 
@@ -230,10 +237,10 @@ int main (int argc, char** argv)
 	    getchar();
 	  }
 	}
-	
+
       }
 
-      fprintf (stderr, "Finished %d %%\r", 
+      fprintf (stderr, "Finished %d %%\r",
 	       (int)(100*(float)itest/(float)ntest));
 
     }
@@ -256,7 +263,7 @@ int main (int argc, char** argv)
     ipcbuf_destroy (&ringbuf);
 
     fprintf (stderr,
-	     "Succesful completion!\n"
+	     "Successful completion!\n"
 	     "In %u random transfers:\n"
 	     "%u started in the same buffer as the previous transfer ended\n"
 	     "\n"
@@ -335,13 +342,13 @@ int main (int argc, char** argv)
 
 	if (verbose)
 	  fprintf (stderr, ".");
-	
+
 	if (ipcbuf_mark_cleared (&ringbuf) < 0) {
 	  fprintf (stderr, "error ipcbuf_mark_cleared\n");
 	  return -1;
 	}
 
-#ifdef _DEBUG	
+#ifdef _DEBUG
 	fprintf (stderr, "End of data: %d %d\n",
 		 ringbuf.sync->eod[ringbuf.xfer], ipcbuf_eod (&ringbuf));
 #endif
@@ -352,7 +359,7 @@ int main (int argc, char** argv)
 	fprintf (stderr, "error ipcbuf_reset\n");
 	return -1;
       }
-      
+
     }
 
   }

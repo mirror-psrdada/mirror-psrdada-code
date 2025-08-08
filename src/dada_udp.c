@@ -1,9 +1,13 @@
-/*
- * Generic functions for udp sockets
- */
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include "dada_udp.h"
 
 #include <errno.h>
-#include "dada_udp.h"
 
 #define KERNEL_BUFFER_SIZE_MAX     67108864
 #define KERNEL_BUFFER_SIZE_DEFAULT 131071
@@ -46,7 +50,7 @@ int dada_udp_sock_in(multilog_t* log, const char* iface, int port, int verbose)
     return -1;
   }
 
-  if (verbose) 
+  if (verbose)
     multilog(log, LOG_INFO, "created UDP socket\n");
 
   struct sockaddr_in udp_sock;
@@ -60,11 +64,11 @@ int dada_udp_sock_in(multilog_t* log, const char* iface, int port, int verbose)
   }
 
   if (bind(fd, (struct sockaddr *)&udp_sock, sizeof(udp_sock)) == -1) {
-    multilog (log, LOG_ERR, "dada_udp_sock_in: bind() failed [iface=%s, port=%d]: %s\n", 
+    multilog (log, LOG_ERR, "dada_udp_sock_in: bind() failed [iface=%s, port=%d]: %s\n",
               iface, port, strerror(errno));
     return -1;
   }
-  if (verbose) 
+  if (verbose)
     multilog(log, LOG_INFO, "bound UDP socket to %s:%d\n", iface, port);
 
   /* ensure the socket is reuseable without the painful timeout */
@@ -74,7 +78,7 @@ int dada_udp_sock_in(multilog_t* log, const char* iface, int port, int verbose)
               "[iface=%s, port=%d]: %s\n", iface, port, strerror(errno));
   }
 
-  if (verbose) 
+  if (verbose)
     multilog(log, LOG_INFO, "UDP socket bound to %s:%d\n", iface, port);
 
   return fd;
@@ -101,8 +105,8 @@ int dada_udp_sock_set_size (multilog_t* log, int fd, int verbose, int pref_size,
   if (retval != 0) {
     perror("setsockopt");
     return -1;
-  } 
-  
+  }
+
   // now check if it worked
   len = sizeof(value);
   value = 0;
@@ -110,8 +114,8 @@ int dada_udp_sock_set_size (multilog_t* log, int fd, int verbose, int pref_size,
   if (retval != 0) {
     perror("getsockopt");
     return -1;
-  } 
-  
+  }
+
   // Check the size. n.b. linux actually sets the size to DOUBLE the value
   if (value*2 != pref_size && value/2 != pref_size)
   {
@@ -156,7 +160,7 @@ int dada_udp_sock_set_size (multilog_t* log, int fd, int verbose, int pref_size,
 
 
 /* Creates a socket for transmitting UDP packets*/
-int dada_udp_sock_out(int *fd, struct sockaddr_in * dagram, char *client, 
+int dada_udp_sock_out(int *fd, struct sockaddr_in * dagram, char *client,
                       int port, int bcast, const char * bcast_addr) {
 
   /* Setup the socket for UDP packets */
@@ -178,14 +182,14 @@ int dada_udp_sock_out(int *fd, struct sockaddr_in * dagram, char *client,
   /* ensure the socket is reuseable without the painful timeout */
   int on = 1;
   if (setsockopt(*fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
-    fprintf(stderr, "dada_udp_sock_out: setsockopt(SO_REUSEADDR) failed: %s", 
+    fprintf(stderr, "dada_udp_sock_out: setsockopt(SO_REUSEADDR) failed: %s",
               strerror(errno));
 
   /* Setup the UDP socket parameters*/
   struct in_addr *addr;
   dagram->sin_family = AF_INET;    // host byte order
   dagram->sin_port = htons(port);  // short, network byte order
-  
+
   /* If we are broadcasting */
   if (bcast) {
     dagram->sin_addr.s_addr = inet_addr (bcast_addr);
@@ -225,11 +229,11 @@ struct in_addr *atoaddr(char *address) {
 }
 
 
-/* 
- *  receive a udp packet 
+/*
+ *  receive a udp packet
  */
 size_t dada_sock_recv (int fd, char* buffer, size_t size, int flags)
-{ 
+{
 
   size_t received = 0;
   received = recvfrom (fd, buffer, size, 0, NULL, NULL);
@@ -237,7 +241,7 @@ size_t dada_sock_recv (int fd, char* buffer, size_t size, int flags)
   if (received < 0) {
     perror ("sock_recv recvfrom");
     return -1;
-  } 
+  }
   if (received == 0) {
     fprintf (stderr, "sock_recv received zero bytes\n");
   }
@@ -245,7 +249,7 @@ size_t dada_sock_recv (int fd, char* buffer, size_t size, int flags)
   return received;
 }
 
-/* 
+/*
  *  send data in a udp packet
  */
 size_t dada_sock_send(int fd, struct sockaddr_in addr, char *data, size_t size) {
@@ -264,7 +268,7 @@ size_t dada_sock_send(int fd, struct sockaddr_in addr, char *data, size_t size) 
 /*
  * clear any packets that are buffered at the socket
  */
-size_t dada_sock_clear_buffered_packets (int fd, size_t size) 
+size_t dada_sock_clear_buffered_packets (int fd, size_t size)
 {
   size_t bytes_cleared = 0;
   size_t bytes_read = 0;
@@ -277,21 +281,21 @@ size_t dada_sock_clear_buffered_packets (int fd, size_t size)
     return -1;
   }
 
-  while ( keep_reading) 
+  while ( keep_reading)
   {
     bytes_read = recvfrom (fd, buffer, size, 0, NULL, NULL);
     if (bytes_read == size)
     {
       bytes_cleared += bytes_read;
     }
-    else if (bytes_read == -1) 
+    else if (bytes_read == -1)
     {
       keep_reading = 0;
       errsv = errno;
-      if (errsv != EAGAIN) 
+      if (errsv != EAGAIN)
         fprintf(stderr, "dada_sock_clear_buffered_packets: recvfrom failed: %s\n", strerror(errsv));
     }
-    else 
+    else
     {
       fprintf(stderr, "dada_sock_clear_buffered_packets: received %ld byte packet, expected %ld\n", bytes_read, size);
       keep_reading = 0;

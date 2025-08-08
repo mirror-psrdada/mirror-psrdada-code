@@ -1,8 +1,16 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "multilog.h"
 #include "ascii_header.h"
 #include "futils.h"
 
+#include <getopt.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,7 +80,7 @@ int main (int argc, char **argv)
     case 'H':
       header_file = optarg;
       break;
-      
+
     case 'v':
       verbose=1;
       break;
@@ -81,10 +89,10 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-      
+
     }
   }
-  
+
   log = multilog_open ("dada_write_test", 0);
   multilog_add (log, stderr);
 
@@ -106,29 +114,35 @@ int main (int argc, char **argv)
 
   header_buf = ipcbuf_get_next_write (hdu->header_block);
 
-  if (!header_buf) 
+  if (!header_buf)
   {
     multilog (log, LOG_ERR, "Could not get next header block\n");
     return EXIT_FAILURE;
   }
 
-  if (header_file) 
+  if (header_file)
   {
     if (fileread (header_file, header_buf, header_size) < 0)  {
       multilog (log, LOG_ERR, "Could not read header from %s\n", header_file);
       return EXIT_FAILURE;
     }
   }
-  else { 
+  else {
     header_strlen = strlen(header);
     memcpy (header_buf, header, header_strlen);
     memset (header_buf + header_strlen, '\0', header_size - header_strlen);
   }
 
-  /* Set the header size attribute */ 
+  /* Set the header size attribute */
   if (ascii_header_set (header_buf, "HDR_SIZE", "%"PRIu64"", header_size) < 0) {
     multilog (log, LOG_ERR, "Could not write HDR_SIZE to header\n");
-    return -1;
+    return EXIT_FAILURE;
+  }
+
+  if (ipcbuf_enable_eod (hdu->header_block) < 0)
+  {
+    multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+    return EXIT_FAILURE;
   }
 
   if (ipcbuf_mark_filled (hdu->header_block, header_size) < 0)  {
@@ -151,7 +165,7 @@ int main (int argc, char **argv)
       multilog (log, LOG_ERR, "Could not write %"PRIu64" bytes to data block\n",
                 data_size);
       return EXIT_FAILURE;
-    } 
+    }
     bytes_to_write -= data_size;
   }
 

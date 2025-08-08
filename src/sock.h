@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_SOCK_H
 #define __DADA_SOCK_H
 
@@ -35,5 +42,4 @@ int sock_nonblock (int fd);
 }
 #endif
 
-#endif /* SOCK_H */
-
+#endif // __DADA_SOCK_H

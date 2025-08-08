@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -5,6 +12,7 @@
 #include "ascii_header.h"
 #include "tmutil.h"
 
+#include <getopt.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,7 +109,7 @@ void add_to_dadatime (dada_timeval_t * time1, uint64_t psecs)
   time1->tv_sec += seconds_to_add;
   time1->tv_psec -= (seconds_to_add * 1e12);
 }
-                      
+
 int dbmergedb_init_hdu (dada_dbmergedb_t * ctx, dada_block_t * db, char reader)
 {
   db->hdu = dada_hdu_create (ctx->log);
@@ -252,7 +260,7 @@ int dbmergedb_open (dada_client_t* client)
   if (ascii_header_set (client->header, "RESOLUTION", "%lu", ctx->resolution) < 0)
     multilog (ctx->log, LOG_WARNING, "Could not write RESOLUTION=%lu"" to header\n", ctx->resolution);
 
-  //client->transfer_bytes = transfer_size; 
+  //client->transfer_bytes = transfer_size;
   client->optimal_bytes = 64*1024*1024;
 
   client->header_transfer = 0;
@@ -263,7 +271,7 @@ int dbmergedb_open (dada_client_t* client)
 int dbmergedb_close (dada_client_t* client, uint64_t bytes_written)
 {
   dada_dbmergedb_t * ctx = (dada_dbmergedb_t*) client->context;
-  
+
   multilog_t* log = client->log;
 
   // close the input
@@ -331,7 +339,7 @@ int64_t dbmergedb_write_block (dada_client_t* client, void* data, uint64_t data_
       }
       else
       {
-        ctx->pola.curr_buf = ipcio_open_block_read (ctx->pola.hdu->data_block, 
+        ctx->pola.curr_buf = ipcio_open_block_read (ctx->pola.hdu->data_block,
                                                     &(ctx->pola.bytes),
                                                     &(ctx->pola.block_id));
         ctx->pola.block_open = 1;
@@ -344,7 +352,7 @@ int64_t dbmergedb_write_block (dada_client_t* client, void* data, uint64_t data_
           ctx->pola.bytes = 0;
       }
     }
-     
+
     if (!ctx->polb.block_open)
     {
       if (ipcbuf_eod((ipcbuf_t*) ctx->polb.hdu->data_block))
@@ -354,7 +362,7 @@ int64_t dbmergedb_write_block (dada_client_t* client, void* data, uint64_t data_
       }
       else
       {
-        ctx->polb.curr_buf = ipcio_open_block_read (ctx->polb.hdu->data_block, 
+        ctx->polb.curr_buf = ipcio_open_block_read (ctx->polb.hdu->data_block,
                                                     &(ctx->polb.bytes),
                                                     &(ctx->polb.block_id));
         ctx->polb.block_open = 1;
@@ -426,7 +434,7 @@ int64_t dbmergedb_write_block (dada_client_t* client, void* data, uint64_t data_
     {
       ipcio_close_block_read (ctx->pola.hdu->data_block, ctx->pola.bufsz);
       ctx->pola.block_open = 0;
-    } 
+    }
 
     if (ctx->polb.bytes >= ctx->polb.bufsz)
     {
@@ -456,13 +464,13 @@ void input_thread (void * arg)
 
   // wait for the header to appear
   char * header = ipcbuf_get_next_read (db->hdu->header_block, &header_size);
-  if (!header) 
+  if (!header)
   {
     fprintf (stderr, "input[%x]: could not get next header block\n", db->key);
     db->error = 1;
     return;
   }
-  
+
   fprintf (stderr, "input[%x]: get_next_read returned\n", db->key);
 
   // allocate aligned memory for the header
@@ -484,7 +492,7 @@ void input_thread (void * arg)
   // read the key parameters for this header to work out the epoch of
   // the data flow
   char buffer[20];
-  if (ascii_header_get (header, "UTC_START", "%s", buffer) != 1) 
+  if (ascii_header_get (header, "UTC_START", "%s", buffer) != 1)
   {
     fprintf (stderr, "input[%x]: header did not contain UTC_START\n", db->key);
     db->error = 1;
@@ -504,15 +512,15 @@ void input_thread (void * arg)
 
   uint64_t obs_offset;
   if (ascii_header_get (header, "OBS_OFFSET", "%lu", &obs_offset) != 1)
-  {     
+  {
     fprintf (stderr, "input[%x]: header did not contain OBS_OFFSET\n", db->key);
     db->error = 1;
-    return;        
+    return;
   }
 
   uint64_t bytes_per_second;
   if (ascii_header_get (header, "BYTES_PER_SECOND", "%lu", &bytes_per_second) != 1)
-  { 
+  {
     fprintf (stderr, "input[%x]: header did not contain BYTES_PER_SECOND\n", db->key);
     db->error = 1;
     return;
@@ -570,10 +578,10 @@ void input_thread (void * arg)
   fprintf (stderr, "input[%x]: aligning\n", db->key);
   while (!both_aligned)
   {
-    // determine the next second on which this input CAN start 
+    // determine the next second on which this input CAN start
     pthread_mutex_lock (db->mutex);
 
-    // if the other thread has not yet started, we must wait for it so 
+    // if the other thread has not yet started, we must wait for it so
     // that we which know which thread needs to delay itself
     if (db->other_pol->utc_start.tv_sec == 0)
     {
@@ -595,7 +603,7 @@ void input_thread (void * arg)
     {
       // difference = other_start - this_start. If +ve this thread started first and
       // must consume some data to align with other pol
-      int64_t nsamp_diff = sample_difference (db->utc_start, db->other_pol->utc_start, tsamp_psec); 
+      int64_t nsamp_diff = sample_difference (db->utc_start, db->other_pol->utc_start, tsamp_psec);
 
       fprintf (stderr, "input[%x]: other pol started, sample diff=%ld\n", db->key, nsamp_diff);
 
@@ -682,8 +690,8 @@ void input_thread (void * arg)
     }
   }
   fprintf (stderr, "input[%x]: aligned %ld %lu\n", db->key, db->utc_start.tv_sec, db->utc_start.tv_psec);
-      
-  return; 
+
+  return;
 }
 
 int main (int argc, char **argv)
@@ -705,7 +713,7 @@ int main (int argc, char **argv)
 
   while ((arg=getopt(argc,argv,"svw")) != -1)
   {
-    switch (arg) 
+    switch (arg)
     {
       case 's':
         single_transfer = 1;
@@ -722,7 +730,7 @@ int main (int argc, char **argv)
       default:
         usage ();
         return 0;
-      
+
     }
   }
 
@@ -735,7 +743,7 @@ int main (int argc, char **argv)
     fprintf(stderr, "dada_dbmergedb: 3 arguments required, %d provided\n", num_args);
     usage();
     exit(EXIT_FAILURE);
-  } 
+  }
 
   if (sscanf (argv[optind], "%x", &(dbmergedb.pola.key)) != 1)
   {

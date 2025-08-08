@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "command_parse_server.h"
 #include "multilog.h"
 
@@ -96,11 +103,11 @@ int main ()
 		     "echo", "return arguments", NULL);
 
   fprintf (stderr, "Adding parse_float to command_parse\n");
-  command_parse_add (parser, parse_float, &test, 
+  command_parse_add (parser, parse_float, &test,
 		     "float", "parse argument as float", NULL);
 
   fprintf (stderr, "Adding parse_double to command_parse\n");
-  command_parse_add (parser, parse_double, &test, 
+  command_parse_add (parser, parse_double, &test,
 		     "double", "parse two arguments as double", NULL);
 
   fprintf (stderr, "Adding parse_reset to command_parse\n");
@@ -144,4 +151,3 @@ int main ()
 
   return 0;
 }
-

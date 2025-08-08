@@ -1,5 +1,12 @@
-#ifndef STRING_ARRAY_H
-#define STRING_ARRAY_H
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#ifndef __DADA_STRING_ARRAY_H
+#define __DADA_STRING_ARRAY_H
 
 typedef struct {
   unsigned size;
@@ -9,7 +16,7 @@ typedef struct {
 /*! Create a new array of strings */
 string_array_t* string_array_create ();
 
-/*! Destroy an exisitng array of strings */
+/*! Destroy an existing array of strings */
 void string_array_destroy (string_array_t*);
 
 /*! Return the requested string */
@@ -42,4 +49,4 @@ int string_array_filter (string_array_t*, const char* filter);
 /*! add tokens from string to list - input string is modified */
 int string_array_tok (string_array_t*, char* string, const char* whitespace);
 
-#endif
+#endif // __DADA_STRING_ARRAY_H

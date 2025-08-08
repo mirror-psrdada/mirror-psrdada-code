@@ -1,13 +1,13 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2011 by Andrew Jameson
+ *
+ *    Copyright (C) 2011-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
-#include "config.h"
 #include "dada_cuda.h"
-#include "sys/time.h"
+
+#include <sys/time.h>
 
 /*! select the specified GPU as the active device */
 int dada_cuda_select_device (int index)
@@ -27,9 +27,9 @@ int dada_cuda_get_device_count ()
 {
   int device_count = 0;
   cudaError_t error_id = cudaGetDeviceCount(&device_count);
-  if (error_id != cudaSuccess) 
+  if (error_id != cudaSuccess)
   {
-    fprintf (stderr, "dada_cuda_get_device_count: cudaGetDeviceCount failed: %s\n", 
+    fprintf (stderr, "dada_cuda_get_device_count: cudaGetDeviceCount failed: %s\n",
 	                   cudaGetErrorString(error_id) );
     return -1;
   }
@@ -63,7 +63,7 @@ int dada_cuda_dbregister (dada_hdu_t * hdu)
     return -1;
   }
 
-  // dont register buffers if they reside on the device
+  // don't register buffers if they reside on the device
   if (ipcbuf_get_device(db) >= 0)
     return 0;
 
@@ -82,7 +82,7 @@ int dada_cuda_dbregister (dada_hdu_t * hdu)
       return -1;
     }
   }
-  
+
   return 0;
 }
 
@@ -92,7 +92,7 @@ int dada_cuda_dbunregister (dada_hdu_t * hdu)
   ipcbuf_t * db = (ipcbuf_t *) hdu->data_block;
   cudaError_t error_id;
 
-  // dont unregister buffers if they reside on the device
+  // don't unregister buffers if they reside on the device
   if (ipcbuf_get_device(db) >= 0)
     return 0;
 
@@ -120,7 +120,7 @@ void * dada_cuda_device_malloc ( size_t bytes)
   error_id = cudaMalloc (&device_memory, bytes);
   if (error_id != cudaSuccess)
   {
-    fprintf (stderr, "dada_cuda_device_malloc: could not allocate %ld bytes: %s\n", 
+    fprintf (stderr, "dada_cuda_device_malloc: could not allocate %ld bytes: %s\n",
                       bytes, cudaGetErrorString(error_id));
     return 0;
   }
@@ -145,7 +145,7 @@ int dada_cuda_device_free (void * memory)
 void * dada_cuda_host_malloc (size_t bytes)
 {
   cudaError_t error_id;
-  void * host_memory; 
+  void * host_memory;
   error_id = cudaMallocHost (&host_memory, bytes);
   if (error_id != cudaSuccess)
   {
@@ -189,10 +189,10 @@ float dada_cuda_device_transfer (void * from, void * to, size_t size, memory_mod
                cudaGetErrorString(error_id));
       return -1;
     }
-    
+
     error_id = cudaStreamSynchronize (stream);
-    if (error_id != cudaSuccess)    
-    {    
+    if (error_id != cudaSuccess)
+    {
       fprintf (stderr, "dada_cuda_device_transfer: cudaStreamSynchronize failed: %s\n",
                cudaGetErrorString(error_id));
       return -1;
@@ -212,7 +212,7 @@ float dada_cuda_device_transfer (void * from, void * to, size_t size, memory_mod
   }
   gettimeofday (&end, 0);
 
-  float elapsed = (float) ((end.tv_sec - start.tv_sec) * 1000) + 
+  float elapsed = (float) ((end.tv_sec - start.tv_sec) * 1000) +
                   (float) ((end.tv_usec - start.tv_usec) / 1000);
 
   return elapsed;

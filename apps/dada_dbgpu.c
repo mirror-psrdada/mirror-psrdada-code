@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2011 by Andrew Jameson
+ *
+ *    Copyright (C) 2011-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "dada_def.h"
@@ -10,8 +10,9 @@
 #include "dada_hdu.h"
 #include "dada_cuda.h"
 
-#include <cuda.h>
+#include <cuda_runtime.h>
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -58,13 +59,10 @@ void usage ()
     " -s      process single DADA transfer then exit\n"
     " -v      verbose output\n", DADA_DEFAULT_BLOCK_KEY
   );
-
 }
 
-
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
-
   /* dbgpu contextual struct */
   dada_dbgpu_t dbgpu = DADA_DBGPU_INIT;
 
@@ -87,27 +85,27 @@ int main(int argc, char** argv)
   dbgpu.mode = PINNED;
   dbgpu.verbose = 0;
   dbgpu.device = 0;
-  
-  while ((arg = getopt(argc, argv, "d:ihk:msv")) != -1) 
+
+  while ((arg = getopt(argc, argv, "d:ihk:msv")) != -1)
   {
-    switch (arg)  
+    switch (arg)
     {
       case 'd':
         dbgpu.device = atoi(optarg);
         break;
-      
+
       case 'h':
         usage ();
         return 0;
 
       case 'k':
-        if (sscanf (optarg, "%x", &dada_key) != 1) 
+        if (sscanf (optarg, "%x", &dada_key) != 1)
         {
           fprintf (stderr, "dada_dbgpu: could not parse key from %s\n", optarg);
           return -1;
         }
         break;
-    
+
       case 'm':
         dbgpu.mode = PAGEABLE;
         break;
@@ -126,7 +124,7 @@ int main(int argc, char** argv)
     }
   }
 
-  log = multilog_open ("dada_dbgpu", 0); 
+  log = multilog_open ("dada_dbgpu", 0);
 
   multilog_add (log, stderr);
 
@@ -256,7 +254,7 @@ int dbgpu_init ( dada_dbgpu_t* ctx, multilog_t* log )
   free(device_name);
   return 0;
 }
- 
+
 
 int dbgpu_open (dada_client_t* client)
 {
@@ -300,8 +298,8 @@ int dbgpu_close (dada_client_t* client, uint64_t bytes_written)
 
   double bandwidthInMBs =  mb_transferred / seconds_elapsed;
 
-  double gbytes_transferred = mb_transferred / 1024.0; 
-  
+  double gbytes_transferred = mb_transferred / 1024.0;
+
   multilog (client->log, LOG_INFO, "   %lf\t\t%lf\n", gbytes_transferred, bandwidthInMBs);
 
   return 0;
@@ -347,7 +345,7 @@ int64_t dbgpu_transfer (dada_client_t* client, void * buffer, size_t bytes, memo
   if (mode == PINNED)
   {
     if (dbgpu->verbose)
-      multilog (client->log, LOG_INFO, "dbgpu_transfer: %ld bytes in %f mili seconds\n", bytes, msec_elapsed);
+      multilog (client->log, LOG_INFO, "dbgpu_transfer: %ld bytes in %f milliseconds\n", bytes, msec_elapsed);
     dbgpu->bytes_transferred += bytes;
     dbgpu->time_msec += (uint64_t) msec_elapsed;
   }

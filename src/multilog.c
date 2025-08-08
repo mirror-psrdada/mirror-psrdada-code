@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
 #include "multilog.h"
 #include "dada_def.h"
@@ -85,7 +91,7 @@ int multilog (multilog_t* m, int priority, const char* format, ...)
 
   for (ilog=0; ilog < m->nlog; ilog++)  {
     va_start(arguments, format);
-          
+
     if (ferror (m->logs[ilog]))  {
 #ifdef _DEBUG
       fprintf (stderr, "multilog: error on log[%d]", ilog);
@@ -107,7 +113,7 @@ int multilog (multilog_t* m, int priority, const char* format, ...)
                          (struct tm*) localtime(&now));
         fprintf(m->logs[ilog],"[%s] ",buffer);
       }
-             
+
       if (priority == LOG_ERR) fprintf(m->logs[ilog], "ERR: ");
       if (priority == LOG_WARNING) fprintf(m->logs[ilog], "WARN: ");
       //fprintf (m->logs[ilog], "%s: ", m->name);
@@ -143,7 +149,7 @@ int multilog_fprintf(FILE* stream, int priority, const char* format, ...)
 
   if (priority == LOG_ERR) fprintf(stream, "ERR: ");
   if (priority == LOG_WARNING) fprintf(stream, "WARN: ");
-  if (vfprintf (stream, format, arguments) < 0) 
+  if (vfprintf (stream, format, arguments) < 0)
     perror ("multilog: error vfprintf");
 
   va_end(arguments);

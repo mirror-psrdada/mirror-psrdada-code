@@ -1,10 +1,12 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_IPCIO_CUDA_H
 #define __DADA_IPCIO_CUDA_H
-
-/* ************************************************************************
-
-
-   ************************************************************************ */
 
 #include "ipcio.h"
 
@@ -30,4 +32,4 @@ ssize_t ipcio_zero_next_block_cuda (ipcio_t* ipc, char * dev_ptr, size_t dev_byt
 }
 #endif
 
-#endif
+#endif // __DADA_IPCIO_CUDA_H

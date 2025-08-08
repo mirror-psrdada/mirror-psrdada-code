@@ -1,9 +1,17 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
 #include "dada_generator.h"
 #include "ascii_header.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -91,12 +99,12 @@ int64_t dada_numdb_io (dada_client_t* client, void* data, uint64_t data_size)
   {
     // set the ptr to the correct place in the array
     ptr = data + i*uint64_size;
-    for (j = 0; j < 8; j++ ) 
+    for (j = 0; j < 8; j++ )
     {
-      ch = (numdb->index >> ((j & 7) << 3)) & 0xFF; 
-      ptr[8 - j - 1] = ch; 
+      ch = (numdb->index >> ((j & 7) << 3)) & 0xFF;
+      ptr[8 - j - 1] = ch;
     }
-    
+
     numdb->index++;
     if (numdb->index % numdb->interleave_num == 0)
     {
@@ -219,7 +227,7 @@ int main (int argc, char **argv)
     case 's':
       if (sscanf (optarg, "%"PRIu64, &start_num) != 1) {
         fprintf (stderr, "ERROR: could not parse start_num from %s\n", optarg);
-        usage(); 
+        usage();
         return EXIT_FAILURE;
       }
       break;
@@ -237,7 +245,7 @@ int main (int argc, char **argv)
     fprintf (stderr, "Error: a header file must be specified\n");
     usage();
     exit(EXIT_FAILURE);
-  } 
+  }
 
   header_file = strdup(argv[optind]);
 

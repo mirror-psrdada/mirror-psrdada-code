@@ -1,26 +1,28 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2012 by Andrew Jameson
+ *
+ *    Copyright (C) 2012-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 /*
  * Infiniband UD packet generator
- * 
+ *
  */
 
-#include <stdlib.h> 
-#include <stdio.h> 
+#include <getopt.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
-#include <errno.h> 
-#include <string.h> 
-#include <sys/types.h> 
-#include <netinet/in.h> 
-#include <netdb.h> 
-#include <sys/socket.h> 
-#include <sys/wait.h> 
-#include <sys/timeb.h> 
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <sys/timeb.h>
 #include <math.h>
 #include <pthread.h>
 #include <assert.h>
@@ -35,7 +37,7 @@
 
 void signal_handler(int signalValue);
 
-void usage (void) 
+void usage (void)
 {
   fprintf(stdout,
     "Usage: dada_udgen [options] hostname\n"
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
 
   // number of microseconds between packets
   double sleep_time = 0;
- 
+
   // verbosity
   int verbose = 0;
 
@@ -67,7 +69,7 @@ int main(int argc, char *argv[])
   int tcp_port = DADA_IB_DB_TCP_PORT;
 
   // total time to transmit for
-  uint64_t transmission_time = DADA_UDGEN_XMIT_TIME;   
+  uint64_t transmission_time = DADA_UDGEN_XMIT_TIME;
 
   // DADA logger
   multilog_t *log = 0;
@@ -75,7 +77,7 @@ int main(int argc, char *argv[])
   // Infiniband Service Level
   int service_level = 0;
 
-  // hostname to establish TCP connection 
+  // hostname to establish TCP connection
   char * dest_host;
 
   // data rate
@@ -122,7 +124,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  // check arguements
+  // check arguments
   if ((argc - optind) != 1)
   {
     fprintf(stderr,"no dest_host was specified\n");
@@ -193,7 +195,7 @@ int main(int argc, char *argv[])
   multilog(log, LOG_INFO, "remote address: LID 0x%04x, QPN 0x%06x, PSN 0x%06x, GID %s\n",
            remote->lid, remote->qpn, remote->psn, gid);
 
-  // intialize the IB resources
+  // initialize the IB resources
   multilog(log, LOG_INFO, "main: dada_ib_dg_activate()\n");
   if (dada_ib_dg_activate (ib_dg, local, remote, -1, service_level) < 0)
   {
@@ -207,8 +209,8 @@ int main(int argc, char *argv[])
   // initialise data rate timing library
   stopwatch_t wait_sw;
 
-  // If we have a desired data rate, then we need to set sleep time 
-  if (data_rate > 0) 
+  // If we have a desired data rate, then we need to set sleep time
+  if (data_rate > 0)
   {
     packets_ps = floor(((double) data_rate) / ((double) IB_PAYLOAD));
     sleep_time = (1.0/packets_ps);
@@ -230,7 +232,7 @@ int main(int argc, char *argv[])
   uint64_t total_bytes_sent = 0;
 
   uint64_t prev_bytes_sent = 0;
-  
+
   time_t current_time = time(0);
   time_t prev_time = time(0);
 
@@ -246,7 +248,7 @@ int main(int argc, char *argv[])
   void          *ev_ctx;
   struct ibv_wc  wcs[nbufs];
   unsigned int num_cq_received = 0;
-  
+
   int i, j;
 
   // post the WR to send WQ
@@ -275,9 +277,9 @@ int main(int argc, char *argv[])
     {
       multilog(log, LOG_ERR, "main: ibv_get_cq_event failed: %s\n", strerror(errno));
       quit = 1;
-      break; 
+      break;
     }
-    
+
     num_cq_received++;
 
     // confirm the ev_cq matches the expected cq
@@ -327,7 +329,7 @@ int main(int argc, char *argv[])
       j = wcs[i].wr_id - 100;
 
       if (verbose > 1)
-        multilog(log, LOG_INFO, "main: buffer %d recieved data\n", j);
+        multilog(log, LOG_INFO, "main: buffer %d received data\n", j);
 
       // setup pointer to data (inc 40 bytes due to some IB header thing...
       buffer = ib_dg->bufs[j]->buffer;
@@ -342,13 +344,13 @@ int main(int argc, char *argv[])
       if (verbose > 1)
         multilog(log, LOG_INFO, "main: dada_ib_dg_post_send(%p, %p) [%d]\n", ib_dg, ib_dg->bufs[j], j);
       dada_ib_dg_post_send (ib_dg, ib_dg->bufs[j], remote->qpn);
-    
-      // This is how much useful data we actaully sent
+
+      // This is how much useful data we actually sent
       bytes_sent += IB_DATAGRAM;
       total_bytes_sent += IB_PAYLOAD;
       data_counter++;
       seq_no++;
-    
+
       if (data_rate)
         DelayTimer(&wait_sw, sleep_time);
     }
@@ -363,22 +365,22 @@ int main(int argc, char *argv[])
 
     prev_time = current_time;
     current_time = time(0);
-    
-    if (prev_time != current_time) 
+
+    if (prev_time != current_time)
     {
       double useful_data_only = (double) IB_PAYLOAD;
       double complete_packet = (double) IB_DATAGRAM;
 
       double wire_ratio = complete_packet / complete_packet;
       double useful_ratio = useful_data_only / complete_packet;
-        
+
       uint64_t bytes_per_second = total_bytes_sent - prev_bytes_sent;
       prev_bytes_sent = total_bytes_sent;
       double rate = ((double) bytes_per_second) / (1024*1024);
 
       double wire_rate = rate * wire_ratio;
       double useful_rate = rate * useful_ratio;
-             
+
       multilog(log,LOG_INFO,"%5.2f MB/s  %5.2f MB/s  %"PRIu64
                             "  %5.2f, %"PRIu64"\n",
                             wire_rate, useful_rate, data_counter, sleep_time,

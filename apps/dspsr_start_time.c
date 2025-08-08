@@ -1,10 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2011 by Andrew Jameson
+ *   Copyright (C) 2011-2025 by Andrew Jameson
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
+#include "tmutil.h"
+#include "dada_def.h"
+
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,9 +18,6 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-
-#include "tmutil.h"
-#include "dada_def.h"
 
 void usage() {
   fprintf(stdout,
@@ -71,11 +72,11 @@ int main (int argc, char** argv)
   char start_time[64];
   char utc_time[64];
   char local_time[64];
-  
+
   time_t current = from_time;
   time_t start = 0;
 
-  if (verbose) 
+  if (verbose)
   {
     gettimeofday(&t_stamp, NULL);
     strftime (local_time, 64, DADA_TIMESTR, localtime(&(t_stamp.tv_sec)));
@@ -97,15 +98,15 @@ int main (int argc, char** argv)
     time_t to_add = (modulo - remainder);
 
     // we need a few seconds to be sure we start on time
-    if (to_add < 3) 
+    if (to_add < 3)
       to_add += modulo;
 
     start = current + to_add;
 
   } else {
-  
+
     start = current + 3;
- 
+
   }
 
   strftime (start_time, 64, DADA_TIMESTR, localtime(&start));

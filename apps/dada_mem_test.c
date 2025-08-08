@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 /*
  * dada_mem_test
  *
@@ -5,6 +12,7 @@
  *
  */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,7 +26,7 @@
 
 /* #define _DEBUG 1 */
 
-#define DEFAULT_WRITE_TIME 10 
+#define DEFAULT_WRITE_TIME 10
 
 void usage()
 {
@@ -54,11 +62,11 @@ int main (int argc, char **argv)
     case 'v':
       verbose=1;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
 
   char * array1 = 0;
@@ -79,7 +87,7 @@ int main (int argc, char **argv)
     exit(1);
   }
 
-  if (!array1) { 
+  if (!array1) {
     fprintf(stderr, "failed to create memory array2\n");
     exit(1);
   }

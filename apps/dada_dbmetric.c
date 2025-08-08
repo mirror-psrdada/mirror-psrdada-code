@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 
@@ -6,6 +13,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -48,7 +56,7 @@ int main (int argc, char **argv)
 
   while ((arg=getopt(argc,argv,"vk:")) != -1)
     switch (arg) {
-                                                                                
+
     case 'v':
       verbose=1;
       break;
@@ -63,9 +71,9 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-                                                                                
+
   }
-  
+
   log = multilog_open ("dada_dbmetric", 0);
   multilog_add (log, stderr);
 
@@ -91,7 +99,7 @@ int main (int argc, char **argv)
   ipcbuf_t *db = (ipcbuf_t *) hdu->data_block;
 
   n_readers = db->sync->n_readers;
-          
+
   uint64_t ndbufs = ipcbuf_get_nbufs (db);
 
   uint64_t read_data[n_readers];
@@ -124,7 +132,7 @@ int main (int argc, char **argv)
     if (cleared_data[iread] < min_cleared_data)
       min_cleared_data = cleared_data[iread];
   }
-    
+
   bufs_written_header = ipcbuf_get_write_count (hb);
   max_read_header = 0;
   max_full_header = 0;

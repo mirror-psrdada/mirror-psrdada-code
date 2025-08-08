@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002-2008 by Willem van Straten
+ *   Copyright (C) 2002-2025 by Willem van Straten and Andrew Jameson
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -31,7 +31,7 @@ char* ascii_header_find (const char* header, const char* keyword)
     // fprintf (stderr, "found=%s", key);
 
     // if preceded by a new line, return the found key
-    if ( ((*(key-1) == '\n') || (*(key-1) == '\\')) && 
+    if ( ((*(key-1) == '\n') || (*(key-1) == '\\')) &&
          ((*(key+strlen(keyword)) == '\t') || (*(key+strlen(keyword)) == ' ')))
       break;
 
@@ -53,7 +53,7 @@ int ascii_header_set (char* header, const char* keyword,
   int ret = 0;
 
   /* find the keyword (also the insertion point) */
-  char* key = ascii_header_find (header, keyword);  
+  char* key = ascii_header_find (header, keyword);
 
   if (key) {
     /* if the keyword is present, find the first '#' or '\n' to follow it */
@@ -131,14 +131,14 @@ int ascii_header_del (char * header, const char * keyword)
   char * key = ascii_header_find (header, keyword);
 
   /* if the keyword is present, find the first '#' or '\n' to follow it */
-  if (key) 
+  if (key)
   {
     char * eol = key + strcspn (key, "\n") + 1;
 
     // make a copy of everything after the end of the key we are deleting
     char * dup = strdup (eol);
 
-    if (dup) 
+    if (dup)
     {
       key[0] = '\0';
       strcat (header, dup);
@@ -182,7 +182,7 @@ size_t ascii_header_get_size_fd (int fd)
     // seek to start of file
     lseek (fd, 0, SEEK_SET);
 
-    // read the header 
+    // read the header
     ssize_t ret = read (fd, header, default_header_size);
     if (ret != default_header_size)
     {
@@ -203,4 +203,3 @@ size_t ascii_header_get_size_fd (int fd)
   }
   return hdr_size;
 }
-

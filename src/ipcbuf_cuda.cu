@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include "tmutil.h"
+#include "ipcbuf_cuda.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,10 +16,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 
-#include "tmutil.h"
-#include "ipcbuf_cuda.h"
-
-/* zero bytes in an ipcbuf, by reading from previously zerod device memory */
+/*! zero bytes in an ipcbuf, by reading from previously zeroed device memory */
 extern "C"
 ssize_t ipcbuf_zero_next_block_cuda (ipcbuf_t* id, char * dev_ptr, size_t dev_bytes, cudaStream_t stream)
 {

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -5,6 +12,7 @@
 #include "ascii_header.h"
 #include "futils.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -19,7 +27,7 @@
 /* #define _DEBUG 1 */
 
 #define DEFAULT_DATA_RATE 64.000
-#define DEFAULT_WRITE_TIME 10 
+#define DEFAULT_WRITE_TIME 10
 
 void usage()
 {
@@ -84,7 +92,7 @@ int64_t transfer_data (dada_client_t* client, void* data, uint64_t data_size)
 
   bzero (data, data_size);
 
-#ifdef _DEBUG 
+#ifdef _DEBUG
   multilog (client->log, LOG_INFO, "transfer_data: copied %"PRIu64" bytes\n", bytes_copied);
 #endif
 
@@ -122,7 +130,7 @@ int dada_zero_open (dada_client_t* client)
   assert (zerodb != 0);
 
   uint64_t hdr_size = 0;
-  
+
   // read the header
   if (fileread (zerodb->header_file, client->header, client->header_size) < 0) {
     multilog (client->log, LOG_ERR, "Could not read header from %s\n", zerodb->header_file);
@@ -248,7 +256,7 @@ int main (int argc, char **argv)
     case 'z':
       zero_copy = 1;
       break;
-      
+
     default:
       usage ();
       return EXIT_FAILURE;
@@ -258,7 +266,7 @@ int main (int argc, char **argv)
     fprintf (stderr, "Error: a header file must be specified\n");
     usage();
     exit(EXIT_FAILURE);
-  } 
+  }
 
   header_file = strdup(argv[optind]);
 

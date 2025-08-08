@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "command_parse_server.h"
 #include "sock.h"
 
@@ -10,7 +17,7 @@
 // #define _DEBUG 1
 
 /* create a new command parse server */
-command_parse_server_t* 
+command_parse_server_t*
 command_parse_server_create (command_parse_t* parser)
 {
   command_parse_server_t* server = 0;
@@ -37,7 +44,7 @@ command_parse_server_create (command_parse_t* parser)
   server -> quit = 0;
 
   pthread_mutex_init(&(server->mutex), NULL);
-  
+
   return server;
 }
 
@@ -128,7 +135,7 @@ static void* command_parser (void * arg)
 #endif
 
   /* if the server has been asked to quit, kludgily close the socket */
-  if (server->quit) 
+  if (server->quit)
     sock_close(server->listen_fd);
 
   fclose (parser->input);
@@ -157,15 +164,15 @@ static void* command_parse_server (void * arg)
 #endif
 
   // attempt to open create socket
-  while (server->listen_fd < 0) 
+  while (server->listen_fd < 0)
   {
     port = server->port;
     server->listen_fd = sock_create (&port);
 
-    if (server->listen_fd < 0) 
+    if (server->listen_fd < 0)
     {
       fprintf (stderr, "command_parse_server: sock_create failed: %s\n", strerror(errno));
-      if (errno == EADDRINUSE) 
+      if (errno == EADDRINUSE)
       {
         fprintf (stderr, "command_parse_server: Address In Use, sleeping 5 seconds for retry\n");
         sleep(5);
@@ -186,9 +193,9 @@ static void* command_parse_server (void * arg)
 
     comm_fd = sock_accept (server->listen_fd);
 
-    if (comm_fd < 0)  
+    if (comm_fd < 0)
     {
-      if (!server->quit) 
+      if (!server->quit)
       {
         perror ("command_parse_server: Error accepting connection");
         sleep(1);
@@ -299,7 +306,7 @@ int command_parse_server_set_prompt (command_parse_server_t* s, const char* p)
 int command_parse_serve (command_parse_server_t* server, int port)
 {
 #if 0
-  sighandler_t handler = 
+  sighandler_t handler =
 #endif
 
   signal (SIGPIPE, SIG_IGN);

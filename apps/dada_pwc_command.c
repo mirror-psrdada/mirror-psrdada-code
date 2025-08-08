@@ -1,6 +1,14 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_pwc_nexus.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -40,7 +48,7 @@ int main (int argc, char **argv)
 
   while ((arg=getopt(argc,argv,"d:vh")) != -1)
     switch (arg) {
-      
+
     case 'd':
       daemon=1;
       break;
@@ -48,7 +56,7 @@ int main (int argc, char **argv)
     case 'v':
       verbose=1;
       break;
-      
+
     case 'h':
       usage();
       return 0;
@@ -56,7 +64,7 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-      
+
     }
 
   if ((argc - optind) != 1) {
@@ -72,7 +80,7 @@ int main (int argc, char **argv)
   if (daemon)
   {
     if (verbose)
-      fprintf (stderr, "daemonizing\n");
+      fprintf (stderr, "becoming a daemon\n");
     be_a_daemon ();
     multilog_serve (log, 123);
   }
@@ -82,7 +90,7 @@ int main (int argc, char **argv)
   multilog_fprintf (stderr, LOG_INFO, "Configuring DADA PWC nexus\n");
   if (dada_pwc_nexus_configure (nexus, dada_config) < 0)
   {
-    multilog_fprintf (stderr, LOG_ERR, 
+    multilog_fprintf (stderr, LOG_ERR,
 		      "Error while configuring the DADA nexus\n");
     return -1;
   }

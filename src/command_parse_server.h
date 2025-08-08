@@ -1,5 +1,12 @@
-#ifndef __DADA_command_parse_server_h
-#define __DADA_command_parse_server_h
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#ifndef __DADA_COMMAND_PARSE_SERVER_H
+#define __DADA_COMMAND_PARSE_SERVER_H
 
 #include "command_parse.h"
 #include <pthread.h>
@@ -50,4 +57,4 @@ int command_parse_server_set_welcome (command_parse_server_t*, const char*);
 /*! Start another thread to receive incoming command socket connections */
 int command_parse_serve (command_parse_server_t* server, int port);
 
-#endif
+#endif // __DADA_COMMAND_PARSE_SERVER_H

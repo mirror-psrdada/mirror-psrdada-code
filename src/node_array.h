@@ -1,9 +1,12 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_NODE_ARRAY_H
 #define __DADA_NODE_ARRAY_H
-
-/* ************************************************************************
-
-   ************************************************************************ */
 
 #include <pthread.h>
 #include <inttypes.h>
@@ -21,14 +24,14 @@ extern "C" {
   } node_t;
 
   typedef struct {
-    
+
     node_t*  nodes;    /* nodes to which data will be written */
     unsigned nnode;    /* number of nodes */
     unsigned cnode;    /* the current node */
 
     /* for multi-threaded use of the dbnode struct */
     pthread_mutex_t mutex;
-    
+
   } node_array_t;
 
   /*! Create a new node array */
@@ -65,4 +68,4 @@ extern "C" {
 }
 #endif
 
-#endif
+#endif // __DADA_NODE_ARRAY_H

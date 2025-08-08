@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "dada_client.h"
@@ -11,6 +11,7 @@
 #include "dada_generator.h"
 #include "ascii_header.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -91,7 +92,7 @@ int64_t dada_dbnum_io (dada_client_t* client, void* data, uint64_t data_size)
 
   for (i=0; i<uint64_count; i++)
   {
-    // decode the uint64_t 
+    // decode the uint64_t
     ptr = (unsigned char *) data + i*uint64_size;
     seq = UINT64_C (0);
     for (j = 0; j < 8; j++ )
@@ -102,7 +103,7 @@ int64_t dada_dbnum_io (dada_client_t* client, void* data, uint64_t data_size)
     }
 
     //fprintf(stderr, "seq=%"PRIu64", index=%"PRIu64": ",  seq, dbnum->index);
-    if (seq != dbnum->index) 
+    if (seq != dbnum->index)
     {
       fprintf(stderr, "seq [%"PRIu64"] != index [%"PRIu64"]\n", seq, dbnum->index);
       exit(0);
@@ -139,7 +140,7 @@ int dada_dbnum_close (dada_client_t* client, uint64_t bytes_written)
   dbnum = (dada_dbnum_t*) client->context;
   assert (dbnum != 0);
 
-  if (dbnum->xfer_skip_num) 
+  if (dbnum->xfer_skip_num)
   {
     fprintf(stderr, "incrementing index from %"PRIu64" to ", dbnum->index);
     dbnum->index += dbnum->xfer_skip_num;
@@ -192,7 +193,7 @@ int main (int argc, char **argv)
   /* interleave bytes */
   uint64_t interleave_skip_bytes = 8192;
 
-  /* number to skip index by betweeen xfers */
+  /* number to skip index by between xfers */
   uint64_t xfer_skip_num = 0;
 
   /* hexadecimal shared memory key */
@@ -234,7 +235,7 @@ int main (int argc, char **argv)
     case 's':
       if (sscanf (optarg, "%"PRIu64, &start_num) != 1) {
         fprintf (stderr, "ERROR: could not parse start_num from %s\n", optarg);
-        usage(); 
+        usage();
         return EXIT_FAILURE;
       }
       break;
@@ -252,7 +253,7 @@ int main (int argc, char **argv)
     fprintf (stderr, "no command line arguments expected\n");
     usage();
     exit(EXIT_FAILURE);
-  } 
+  }
 
   log = multilog_open ("dada_dbnum", 0);
 
@@ -287,7 +288,7 @@ int main (int argc, char **argv)
 
   client->context = &dbnum;
 
-  while (!client->quit) 
+  while (!client->quit)
   {
     if (dada_client_read (client) < 0) {
       multilog (log, LOG_ERR, "Error during transfer\n");

@@ -1,8 +1,16 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "multilog.h"
 #include "ascii_header.h"
 #include "futils.h"
 
+#include <getopt.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,7 +78,7 @@ int main (int argc, char **argv)
     case 'H':
       header_file = optarg;
       break;
-      
+
     case 'v':
       verbose=1;
       break;
@@ -79,10 +87,10 @@ int main (int argc, char **argv)
     default:
       usage ();
       return 0;
-      
+
     }
   }
-  
+
   log = multilog_open ("dada_write_block_test", 0);
   multilog_add (log, stderr);
 
@@ -101,13 +109,13 @@ int main (int argc, char **argv)
 
   header_buf = ipcbuf_get_next_write (hdu->header_block);
 
-  if (!header_buf) 
+  if (!header_buf)
   {
     multilog (log, LOG_ERR, "Could not get next header block\n");
     return EXIT_FAILURE;
   }
 
-  if (header_file) 
+  if (header_file)
   {
     multilog (log, LOG_INFO, "reading header file\n");
     if (fileread (header_file, header_buf, header_size) < 0)  {
@@ -115,18 +123,25 @@ int main (int argc, char **argv)
       return EXIT_FAILURE;
     }
   }
-  else { 
+  else {
     header_strlen = strlen(header);
     memcpy (header_buf, header, header_strlen);
     memset (header_buf + header_strlen, '\0', header_size - header_strlen);
   }
 
-  /* Set the header size attribute */ 
+  /* Set the header size attribute */
   if (verbose)
     multilog (log, LOG_INFO, "setting HDR_SIZE=%"PRIu64"\n", header_size);
   if (ascii_header_set (header_buf, "HDR_SIZE", "%"PRIu64"", header_size) < 0) {
     multilog (log, LOG_ERR, "Could not write HDR_SIZE to header\n");
-    return -1;
+    return EXIT_FAILURE;
+  }
+
+  // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+  if (ipcbuf_enable_eod(hdu->header_block) < 0)
+  {
+    multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+    return EXIT_FAILURE;
   }
 
   if (verbose)
@@ -168,7 +183,7 @@ int main (int argc, char **argv)
 
       if (bytess[i] > 0)
       {
-        //if (verbose)
+        if (verbose)
           multilog (log, LOG_INFO, "ipcio_open_block_write() opened=%lu closed=%lu\n", n_opened, n_closed);
         buf = ipcio_open_block_write (hdu->data_block, &bufid);
         n_opened++;
@@ -177,7 +192,7 @@ int main (int argc, char **argv)
           if (verbose)
             multilog (log, LOG_INFO, "buf=%p id=%"PRIu64"\n", buf, bufid);
 
-          // data_size is the number of bytes to write, uint64_size is the 
+          // data_size is the number of bytes to write, uint64_size is the
           // number of uint64s to write
           uint64_t uint64_count = bufsz / sizeof(uint64_t);
 
@@ -219,7 +234,7 @@ int main (int argc, char **argv)
     {
       if (bytess[i] > 0)
       {
-        //if (verbose)
+        if (verbose)
           multilog (log, LOG_INFO, "ipcio_close_block_write(%"PRIu64")\n", bytess[i]);
         ipcio_close_block_write (hdu->data_block, bytess[i]);
         n_closed++;

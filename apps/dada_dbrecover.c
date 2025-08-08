@@ -1,3 +1,11 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,9 +44,9 @@ void usage()
      " -d         run as daemon\n");
 }
 
-void signal_handler(int signalValue) 
+void signal_handler(int signalValue)
 {
-  if (quit) 
+  if (quit)
   {
     fprintf(stderr, "received signal %d twice, hard exit\n", signalValue);
     exit(EXIT_FAILURE);
@@ -86,7 +94,7 @@ int main (int argc, char **argv)
     usage();
     return (EXIT_FAILURE);
   }
-  
+
   key_t in_key;
   key_t out_key;
 
@@ -135,7 +143,7 @@ int main (int argc, char **argv)
 
   uint64_t header_size = ipcbuf_get_bufsz (out_hdu->header_block);
   char * header = ipcbuf_get_next_write (out_hdu->header_block);
-  if (!header) 
+  if (!header)
   {
     multilog (log, LOG_ERR, "could not get next header block\n");
     return -1;
@@ -147,6 +155,13 @@ int main (int argc, char **argv)
     {
       multilog (log, LOG_ERR, "Could not read header from %s\n", header_file);
     }
+  }
+
+  // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+  if (ipcbuf_enable_eod (out_hdu->header_block) < 0)
+  {
+    multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+    return -1;
   }
 
   if (ipcbuf_mark_filled (out_hdu->header_block, header_size) < 0)
@@ -201,7 +216,7 @@ int main (int argc, char **argv)
   ipcbuf_t * db = (ipcbuf_t *) hdu->data_block;
   ipcio_t * ipc = hdu->data_block;
 
-  if (ipc ->rdwrt != 'R') 
+  if (ipc ->rdwrt != 'R')
   {
     multilog_fprintf(stderr, LOG_ERR, "not a designated reader\n");
     quit = 1;
@@ -225,8 +240,8 @@ int main (int argc, char **argv)
 
   block_id = ipcbuf_get_read_index (db);
 
-  // whilst we are not at the EOD 
-  while (!quit && !ipcbuf_eod(db)) 
+  // whilst we are not at the EOD
+  while (!quit && !ipcbuf_eod(db))
   {
     if (!ipc->curbuf)
     {
@@ -243,7 +258,7 @@ int main (int argc, char **argv)
         return -1;
       }
 
-      // write a full block of input data to the output 
+      // write a full block of input data to the output
       ipcio_write (out_hdu->data_block, ipc->curbuf, ipc->curbufsz);
 
       // this is where the data in the buffer is "read"

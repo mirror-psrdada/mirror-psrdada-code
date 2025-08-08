@@ -1,7 +1,17 @@
-/* To enable the use of O_DIRECT */
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+// To enable the use of O_DIRECT
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -20,7 +30,6 @@
 
 void stats_thread(void * arg);
 double diff_time ( struct timeval time1, struct timeval time2 );
-
 
 /* #define _DEBUG 1 */
 int quit_threads = 0;
@@ -53,12 +62,12 @@ typedef struct {
   int file_size_gbytes;
 
   /* file name of the file */
-  char * file_name; 
+  char * file_name;
 
-  /* O_DIRECT flag */ 
+  /* O_DIRECT flag */
   int o_direct;
 
-  /* size of each write operation */ 
+  /* size of each write operation */
   long chunk_size;
 
   /* read/write flag */
@@ -130,7 +139,7 @@ int file_open_function (dada_diskperf_t* diskperf)
     int status = 0;
     status = fstat(diskperf->fd, &filestat);
     if (status != 0) {
-      fprintf(stderr, "Failed to stat '%s': %s\n", 
+      fprintf(stderr, "Failed to stat '%s': %s\n",
                 diskperf->file_name, strerror(errno));
       close (diskperf->fd);
       return -1;
@@ -152,7 +161,7 @@ int file_open_function (dada_diskperf_t* diskperf)
                   "a multiple of the chunk size\n", diskperf->total_bytes);
       }
     }
-      
+
     if (diskperf->verbose) {
       fprintf(stderr, "%s opened for writing %"PRIu64" bytes in "
                 "%ld byte chunks\n", diskperf->file_name, diskperf->total_bytes,
@@ -209,7 +218,7 @@ int64_t file_io_function (dada_diskperf_t* diskperf)
       }
     }
 
-  } else { 
+  } else {
 
     while ( diskperf->bytes < diskperf->total_bytes ) {
 
@@ -219,7 +228,7 @@ int64_t file_io_function (dada_diskperf_t* diskperf)
 
       if (bytes_iod == bytes_to_io) {
         diskperf->bytes += bytes_iod;
-  
+
       } else if (bytes_iod < 0) {
         fprintf(stderr, "failed to write %ld bytes: %s\n",
                   bytes_to_io, strerror(errno));
@@ -293,7 +302,7 @@ int main (int argc, char **argv)
     case 'v':
       verbose = 1;
       break;
-      
+
     default:
       usage ();
       return 0;
@@ -357,7 +366,7 @@ int main (int argc, char **argv)
   return EXIT_SUCCESS;
 }
 
-/* 
+/*
  *  Thread to print simple capture statistics
  */
 void stats_thread(void * arg) {
@@ -372,7 +381,7 @@ void stats_thread(void * arg) {
   double pc_done = 0.0;
 
   while (!quit_threads)
-  { 
+  {
     /* get a snapshot of the data as quickly as possible */
     b_io_curr    = ctx->bytes;
 
@@ -392,7 +401,7 @@ void stats_thread(void * arg) {
   }
 }
 
-/* 
+/*
  *  Compute difference in timeval
  */
 double diff_time ( struct timeval time1, struct timeval time2 )

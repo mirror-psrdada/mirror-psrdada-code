@@ -1,18 +1,20 @@
 /***************************************************************************
  *  
- *    Copyright (C) 2017 by Andrew Jameson
+ *    Copyright (C) 2017-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
  * 
  ****************************************************************************/
 
-/*
- * example_dada_writer
- */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+// DADA includes for this example
+#include "futils.h"
+#include "dada_def.h"
+#include "dada_hdu.h"
+#include "multilog.h"
+#include "ipcio.h"
+#include "ascii_header.h"
 
+#include <getopt.h>
 #include <time.h>
 #include <sys/socket.h>
 #include <math.h>
@@ -24,14 +26,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-// DADA includes for this example
-#include "futils.h"
-#include "dada_def.h"
-#include "dada_hdu.h"
-#include "multilog.h"
-#include "ipcio.h"
-#include "ascii_header.h"
 
 void usage()
 {
@@ -73,7 +67,6 @@ int main (int argc, char **argv)
       default:
         usage ();
         return 0;
-        
     }
   }
 
@@ -133,7 +126,14 @@ int main (int argc, char **argv)
     char * header = ipcbuf_get_next_write (hdu->header_block);
     memcpy (header, obs_header, header_size);
 
-    // flag the header block for this "obsevation" as filled
+    // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+    if (ipcbuf_enable_eod (hdu->header_block) < 0)
+    {
+      multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+      return EXIT_FAILURE;
+    }
+
+    // flag the header block for this "observation" as filled
     if (ipcbuf_mark_filled (hdu->header_block, header_size) < 0)
     {
       multilog (log, LOG_ERR, "could not mark filled Header Block\n");

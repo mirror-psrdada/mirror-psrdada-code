@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 
@@ -6,6 +13,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -82,7 +90,7 @@ int main (int argc, char **argv)
   /* Set the particular dada key */
   dada_hdu_set_key(hdu, dada_key);
 
-  if (verbose) 
+  if (verbose)
     fprintf(stderr,"Connecting to header block\n");
 
   if (dada_hdu_connect (hdu) < 0)
@@ -102,7 +110,7 @@ int main (int argc, char **argv)
   uint64_t header_size = 0;
   char* header = 0;
 
-  if (verbose) 
+  if (verbose)
     fprintf(stderr,"Waiting for next filled header\n");
 
   char interrupt = 0;

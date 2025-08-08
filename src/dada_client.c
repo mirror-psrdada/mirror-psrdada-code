@@ -1,3 +1,14 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
+#include "dada_client.h"
+#include "dada_def.h"
+#include "ascii_header.h"
+#include "diff_time.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -6,10 +17,6 @@
 #include <errno.h>
 
 #include "config.h"
-#include "dada_client.h"
-#include "dada_def.h"
-#include "ascii_header.h"
-#include "diff_time.h"
 
 #ifdef HAVE_CUDA
 #include <cuda_runtime.h>
@@ -65,7 +72,7 @@ int64_t dada_client_io_loop (dada_client_t* client)
 
   /* counters */
   uint64_t bytes_to_transfer = 0;
-  uint64_t bytes_transfered = 0;
+  uint64_t bytes_transferred  = 0;
   int64_t bytes = 0;
 
   multilog_t* log = 0;
@@ -92,18 +99,18 @@ int64_t dada_client_io_loop (dada_client_t* client)
   assert (client->direction==dada_client_reader ||
           client->direction==dada_client_writer);
 
-  while (!client->transfer_bytes || bytes_transfered < client->transfer_bytes)
+  while (!client->transfer_bytes || bytes_transferred  < client->transfer_bytes)
   {
-          
+
     if (!client->transfer_bytes)
       bytes = buffer_size;
     else
     {
-      bytes_to_transfer = client->transfer_bytes - bytes_transfered;
+      bytes_to_transfer = client->transfer_bytes - bytes_transferred ;
 #ifdef _DEBUG
-      fprintf(stderr,"transfer_bytes = %"PRIu64", bytes_transfered = %"PRIu64
+      fprintf(stderr,"transfer_bytes = %"PRIu64", bytes_transferred  = %"PRIu64
                       ", bytes_to_transfer = %"PRIu64"\n",
-                      client->transfer_bytes,bytes_transfered,bytes_to_transfer);
+                      client->transfer_bytes,bytes_transferred ,bytes_to_transfer);
 #endif
 
       if (buffer_size > bytes_to_transfer)
@@ -162,28 +169,28 @@ int64_t dada_client_io_loop (dada_client_t* client)
         return -1;
       }
     }
-    bytes_transfered += bytes;
+    bytes_transferred  += bytes;
   }
 
-  return bytes_transfered;
+  return bytes_transferred ;
 }
 
 
-/*! transfer data between the Data Block and the transfer target in a 
+/*! transfer data between the Data Block and the transfer target in a
  *  block by block fashion operating directly on shared memory */
 int64_t dada_client_io_loop_block (dada_client_t* client)
 {
 
   /* counters */
   uint64_t bytes_to_transfer = 0;
-  uint64_t bytes_transfered = 0;
-  
+  uint64_t bytes_transferred  = 0;
+
   assert (client != 0);
 
   multilog_t* log = 0;
   log = client->log;
   assert (log != 0);
-  
+
   assert (client->direction==dada_client_reader ||
           client->direction==dada_client_writer);
 
@@ -217,26 +224,26 @@ int64_t dada_client_io_loop_block (dada_client_t* client)
     }
   }
 #endif
-       
-  while (!client->transfer_bytes || bytes_transfered < client->transfer_bytes)
+
+  while (!client->transfer_bytes || bytes_transferred  < client->transfer_bytes)
   {
 #ifdef _DEBUG
-    fprintf(stderr, "io_loop_block: bytes_transferred=%"PRIu64", client->transfer_bytes=%"PRIu64"\n", 
-            bytes_transfered, client->transfer_bytes);
+    fprintf(stderr, "io_loop_block: bytes_transferred=%"PRIu64", client->transfer_bytes=%"PRIu64"\n",
+            bytes_transferred , client->transfer_bytes);
 #endif
-   
+
     if (!client->transfer_bytes)
       bytes = block_size;
     else
     {
-      bytes_to_transfer = client->transfer_bytes - bytes_transfered;
+      bytes_to_transfer = client->transfer_bytes - bytes_transferred ;
 
       if (block_size > bytes_to_transfer)
         bytes = bytes_to_transfer;
       else
         bytes = block_size;
     }
-    
+
     buffer = 0;
 
     if (client->direction == dada_client_reader) {
@@ -273,7 +280,7 @@ int64_t dada_client_io_loop_block (dada_client_t* client)
         // if the client supports cuda block transfers
         if (client->io_block_function_cuda)
         {
-          bytes_operated = client->io_block_function_cuda (client, buffer, bytes, block_id); 
+          bytes_operated = client->io_block_function_cuda (client, buffer, bytes, block_id);
         }
         // the client does not support cuda block transfers, use a host buffer for staging
         else
@@ -329,7 +336,7 @@ int64_t dada_client_io_loop_block (dada_client_t* client)
       break;
     }
 
-    if (client->direction == dada_client_reader) 
+    if (client->direction == dada_client_reader)
     {
       if (ipcio_close_block_read (client->data_block, (uint64_t) bytes_operated) < 0)
       {
@@ -337,9 +344,9 @@ int64_t dada_client_io_loop_block (dada_client_t* client)
       }
     }
 
-    if (client->direction == dada_client_writer) 
+    if (client->direction == dada_client_writer)
     {
-      if (bytes_operated == 0) 
+      if (bytes_operated == 0)
         multilog (log, LOG_INFO, "io_loop_block: end of input\n");
 #ifdef _DEBUG
       multilog (log, LOG_INFO, "io_loop_block: ipcio_close_block_write (%ld)\n", bytes_operated);
@@ -348,18 +355,18 @@ int64_t dada_client_io_loop_block (dada_client_t* client)
         multilog (log, LOG_ERR, "io_loop_block: ipcio_close_block_write error %s\n", strerror(errno));
         return -1;
       }
-      
+
       if (bytes_operated < block_size)
       {
 #ifdef _DEBUG
         multilog (log, LOG_INFO, "io_loop_block: end of data\n");
 #endif
-        bytes_transfered += bytes_operated;
+        bytes_transferred  += bytes_operated;
         break;
       }
     }
 
-    bytes_transfered += bytes_operated;
+    bytes_transferred  += bytes_operated;
   }
 
 #ifdef HAVE_CUDA
@@ -370,10 +377,10 @@ int64_t dada_client_io_loop_block (dada_client_t* client)
 #endif
 
 #ifdef DEBUG
-  multilog (log, LOG_INFO, "io_loop_block: transferred %"PRIi64" bytes\n", bytes_transfered);
+  multilog (log, LOG_INFO, "io_loop_block: transferred %"PRIi64" bytes\n", bytes_transferred );
 #endif
 
-  return bytes_transfered;
+  return bytes_transferred ;
 
 }
 
@@ -383,7 +390,7 @@ int64_t dada_client_transfer (dada_client_t* client)
   multilog_t* log = 0;
 
   /* Byte count */
-  int64_t bytes_transfered = 0;
+  int64_t bytes_transferred = 0;
 
   /* the size of the header buffer */
   uint64_t header_size = 0;
@@ -424,11 +431,10 @@ int64_t dada_client_transfer (dada_client_t* client)
 
   if (client->header_transfer)
   {
-    bytes_transfered = client->io_function (client, client->header,
-              header_size);
-    if (bytes_transfered < header_size) 
+    bytes_transferred = client->io_function (client, client->header, header_size);
+    if (bytes_transferred < header_size)
     {
-      multilog (log, LOG_ERR, "Error transfering header: %s\n", 
+      multilog (log, LOG_ERR, "Error transfering header: %s\n",
                 strerror(errno));
       return -1;
     }
@@ -440,10 +446,17 @@ int64_t dada_client_transfer (dada_client_t* client)
     fprintf (stderr, "dada_client_writer HEADER START\n%sHEADER END\n", client->header);
 #endif
 
+    // Enable EOD so that subsequent transfers will move to the next buffer in the header block
+    if (ipcbuf_enable_eod (client->header_block) < 0)
+    {
+      multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+      return -1;
+    }
+
     header_size = ipcbuf_get_bufsz (client->header_block);
     if (ipcbuf_mark_filled (client->header_block, header_size) < 0)  {
       multilog (log, LOG_ERR, "Could not mark filled Header Block\n");
-      return EXIT_FAILURE;
+      return -1;
     }
   }
 
@@ -452,24 +465,24 @@ int64_t dada_client_transfer (dada_client_t* client)
 
   /* Transfer data until the end of the transfer */
   if (client->io_block_function)
-    bytes_transfered = dada_client_io_loop_block (client);
+    bytes_transferred  = dada_client_io_loop_block (client);
   else
-    bytes_transfered = dada_client_io_loop (client);
+    bytes_transferred  = dada_client_io_loop (client);
 
 #ifdef _DEBUG
-  multilog (log, LOG_INFO, "dada_client_transfer: io_loop transferred %"PRIu64" bytes\n", bytes_transfered);
+  multilog (log, LOG_INFO, "dada_client_transfer: io_loop transferred %"PRIu64" bytes\n", bytes_transferred );
 #endif
 
-  if (client->close_function (client, bytes_transfered) < 0) {
+  if (client->close_function (client, bytes_transferred ) < 0) {
     multilog (log, LOG_ERR, "Error calling close function\n");
     return -1;
   }
 
 #ifdef _DEBUG
-  multilog (log, LOG_INFO, "dada_client_transfer: end of function, returning  %"PRIu64"\n", bytes_transfered);
+  multilog (log, LOG_INFO, "dada_client_transfer: end of function, returning  %"PRIu64"\n", bytes_transferred );
 #endif
- 
-  return bytes_transfered;
+
+  return bytes_transferred ;
 }
 
 
@@ -556,7 +569,7 @@ int dada_client_read (dada_client_t* client)
 
   /* Duplicate the header */
   if (header_size > client->header_size) {
-    
+
     if (client->header)
       free (client->header);
     int rval = posix_memalign ( (void **) &(client->header), 512, header_size);
@@ -585,9 +598,9 @@ int dada_client_read (dada_client_t* client)
             " byte blocks\n", client->transfer_bytes, client->optimal_bytes);
 
   gettimeofday (&start_loop, NULL);
-  
+
   // Transfer data until the end of the data stream
-  while (!ipcbuf_eod((ipcbuf_t*)client->data_block)) 
+  while (!ipcbuf_eod((ipcbuf_t*)client->data_block))
   {
 
 #ifdef _DEBUG
@@ -618,11 +631,11 @@ int dada_client_read (dada_client_t* client)
 
   transfer_time = diff_time (start_loop, end_loop);
 
-  if (!client->quiet) 
+  if (!client->quiet)
     multilog (log, LOG_INFO, "%"PRIu64" bytes transferred in %lfs "
                              "(%lg MB/s)\n", total_bytes_written, transfer_time,
                              total_bytes_written/(1024*1024*transfer_time));
-    
+
   ipcbuf_reset ((ipcbuf_t*)client->data_block);
 
   return 0;

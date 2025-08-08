@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_client.h"
 #include "dada_hdu.h"
 #include "dada_def.h"
@@ -7,6 +14,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -69,7 +77,7 @@ int64_t sock_recv (int fd, char* buffer, uint64_t size, int flags)
 static uint64_t total_received = 0;
 
 /*! Pointer to the function that transfers data to/from the target */
-int64_t sock_recv_function (dada_client_t* client, 
+int64_t sock_recv_function (dada_client_t* client,
 			    void* data, uint64_t data_size)
 {
 #ifdef _DEBUG
@@ -114,9 +122,9 @@ int sock_close_function (dada_client_t* client, uint64_t bytes_written)
 
   total_received = 0;
 
-  if (send (client->fd, client->header, client->header_size, 
+  if (send (client->fd, client->header, client->header_size,
 	    DADA_MSG_FLAGS) < client->header_size) {
-    multilog (client->log, LOG_ERR, 
+    multilog (client->log, LOG_ERR,
 	      "Could not send acknowledgment Header: %s\n", strerror(errno));
     return -1;
   }
@@ -153,8 +161,8 @@ int sock_open_function (dada_client_t* client)
 
   if (ret < client->header_size)
   {
-    multilog (client->log, LOG_ERR, 
-	      "recv %d out of %d peek at the Header: %s\n", 
+    multilog (client->log, LOG_ERR,
+	      "recv %d out of %d peek at the Header: %s\n",
 	      ret, client->header_size, strerror(errno));
     return -1;
   }
@@ -232,7 +240,7 @@ int main (int argc, char **argv)
         return -1;
       }
       break;
-      
+
     case 'd':
       daemon=1;
       break;
@@ -248,11 +256,11 @@ int main (int argc, char **argv)
     case 'v':
       verbose=1;
       break;
-      
+
     default:
       usage ();
       return 0;
-      
+
     }
 
   log = multilog_open ("dada_nicdb", daemon);

@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2010 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "ipcio.h"
@@ -37,7 +37,7 @@ int main (int argc, char** argv)
   unsigned ntest = 64;
   unsigned itest = 0;
   unsigned twice = 0;
-  
+
   // uint64_t* buf   = 0;
   uint64_t  count = 0;
   uint64_t offset = 0;
@@ -62,7 +62,7 @@ int main (int argc, char** argv)
     switch (arg)
     {
       case 'h':
-        fprintf (stderr, 
+        fprintf (stderr,
           "test_ipcio [options]\n"
           " -b block_size  Set the size of each block in ring buffer\n"
           " -n nblock      Set the number of blocks in ring buffer\n"
@@ -108,7 +108,7 @@ int main (int argc, char** argv)
   fprintf (stderr, "Running %u tests ...\n", ntest);
 
   if (fork()) {
-    
+
     /* this process is writing to and creates the shared memory */
     fprintf (stderr, "Creating shared memory ring buffer."
              " nbufs=%"PRIu64" bufsz=%"PRIu64"\n", nbufs, bufsz);
@@ -122,7 +122,7 @@ int main (int argc, char** argv)
 
     for (itest=0; itest < ntest; itest++)  {
 
-      // offset the start of data by 
+      // offset the start of data by
       raise_sod = raise_eod + rand()%(4 * nbufs * n64);
 
       if (raise_sod%n64 == raise_eod%n64)
@@ -184,7 +184,7 @@ int main (int argc, char** argv)
         if (count == raise_eod) {
           if (verbose)
             fprintf (stderr, "WRITER: calling ipcio_stop for count=%lu offset=%lu raise_eod=%lu\n", count, offset, raise_eod);
-            
+
           if (ipcio_stop (&ringbuf) < 0) {
             fprintf (stderr, "Failure to raise eod count=%"PRIu64
                      " eod=%"PRIu64" sod=%"PRIu64" offset=%"PRIu64"\n",
@@ -199,7 +199,7 @@ int main (int argc, char** argv)
           if (verbose)
             fprintf (stderr, "Enabling start-of-data"
                      " %lu byte=%"PRIu64"\n", sodbyte/sizeof(uint64_t), sodbyte);
-          
+
           if (ipcio_start (&ringbuf, sodbyte) < 0)
             return -1;
 
@@ -209,7 +209,7 @@ int main (int argc, char** argv)
 
       }
 
-      // fprintf (stderr, "Finished %d %%\r", 
+      // fprintf (stderr, "Finished %d %%\r",
       //          (int)(100*(float)itest/(float)ntest));
 
     }
@@ -261,7 +261,7 @@ int main (int argc, char** argv)
 
       ipcio_open (&ringbuf, 'R');
 
-      while ( (int) (bytesio = ipcio_read (&ringbuf, (char*)smbuf, 
+      while ( (int) (bytesio = ipcio_read (&ringbuf, (char*)smbuf,
                                            smbufsz * sizeof(uint64_t))) > 0) {
 
         check64 = bytesio / sizeof(uint64_t);
@@ -297,6 +297,5 @@ int main (int argc, char** argv)
     }
 
   }
-
   return 0;
 }

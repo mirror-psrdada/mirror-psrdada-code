@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_NI_H
 #define __DADA_NI_H
 
@@ -25,11 +32,11 @@ extern "C" {
     /* the size of the header */
     unsigned header_size;
 
-    /* total number of bytes of data to be transfered over network interface */
+    /* total number of bytes of data to be transferred over network interface */
     uint64_t total_data;
 
-    /* total number of bytes already transfered */
-    uint64_t total_transfered;
+    /* total number of bytes already transferred */
+    uint64_t total_transferred;
 
     /* flag: -1=recv, 0=idle, 1=send */
     int state;
@@ -58,4 +65,4 @@ extern "C" {
 	   }
 #endif
 
-#endif
+#endif // __DADA_NI_H

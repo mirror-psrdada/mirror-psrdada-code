@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
- *    Copyright (C) 2024 by Andrew Jameson and Willem van Straten
+ *
+ *    Copyright (C) 2024-2025 by Andrew Jameson and Willem van Straten
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 #include "ipcio.h"
@@ -19,8 +19,6 @@
 #include <sys/wait.h>
 #include <assert.h>
 
-//#define _DEBUG 1
-
 int main (int argc, char** argv)
 {
   key_t key = DADA_DEFAULT_BLOCK_KEY;
@@ -36,7 +34,7 @@ int main (int argc, char** argv)
     switch (arg)
     {
       case 'h':
-        fprintf (stderr, 
+        fprintf (stderr,
           "test_ipcio_lifecycle [options]\n"
           " -v             verbose mode\n"
         );

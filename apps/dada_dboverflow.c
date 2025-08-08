@@ -1,9 +1,17 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 
 #include "node_array.h"
 #include "multilog.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -37,11 +45,11 @@ void usage()
      " -d         run as daemon\n", DADA_DEFAULT_BLOCK_KEY);
 }
 
-void signal_handler(int signalValue) 
+void signal_handler(int signalValue)
 {
-  if (quit) 
+  if (quit)
   {
-    fprintf(stderr, "dada_dboverlfow: repeated SIGINT/TERM, exiting\n");
+    fprintf(stderr, "dada_dboverflow: repeated SIGINT/TERM, exiting\n");
     exit(EXIT_FAILURE);
   }
   if (signalValue == SIGINT)
@@ -67,7 +75,7 @@ int main (int argc, char **argv)
 
   int arg = 0;
 
-  /* TODO the amount to conduct a busy sleep inbetween clearing each sub
+  /* TODO the amount to conduct a busy sleep in between clearing each sub
    * block */
   while ((arg=getopt(argc,argv,"vk:")) != -1)
     switch (arg) {
@@ -82,7 +90,7 @@ int main (int argc, char **argv)
         return -1;
       }
       break;
-      
+
     default:
       usage ();
       return 0;
@@ -100,7 +108,7 @@ int main (int argc, char **argv)
   hdu = dada_hdu_create (log);
 
   dada_hdu_set_key(hdu, dada_key);
-  
+
   if (verbose)
     multilog_fprintf (stderr, LOG_INFO, "connecting to hdu\n");
 
@@ -137,7 +145,7 @@ int main (int argc, char **argv)
 
   unsigned wait_count = 5;
 
-  while (!quit) 
+  while (!quit)
   {
 
     // use a semctl GETVAL operation to test for DB existence
@@ -146,7 +154,7 @@ int main (int argc, char **argv)
       fprintf(stderr, "dada_dboverflow: datablock destroyed, exiting\n");
       quit = DBOVERFLOW_DB_DESTROYED;
     }
-    else 
+    else
     {
       bufs_read_last = bufs_read;
       bufs_written = ipcbuf_get_write_count (db);
@@ -156,10 +164,10 @@ int main (int argc, char **argv)
 
       if (verbose)
         multilog_fprintf (stderr, LOG_INFO, "free=%"PRIu64", full=%"PRIu64
-                          " written=%"PRIu64", read=%"PRIu64"\n", available_bufs, 
+                          " written=%"PRIu64", read=%"PRIu64"\n", available_bufs,
                           full_bufs, bufs_written, bufs_read);
 
-      // since we can often be stuck with 1 free buffer 
+      // since we can often be stuck with 1 free buffer
       if ((available_bufs <= 1) && (bufs_read_last == bufs_read))
       {
         fprintf (stderr, "dada_dboverflow: no free blocks, %d seconds remaining\n", wait_count);

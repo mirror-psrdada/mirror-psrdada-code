@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "sock.h"
 
 #include <stdio.h>
@@ -24,14 +31,13 @@
 static pthread_mutex_t sock_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-char* sock_herrstr (h_error)
-     int h_error;
+char* sock_herrstr (int h_error)
 {
   switch (h_error) {
   case HOST_NOT_FOUND:
     return ("HOST_NOT_FOUND");
-  case NO_ADDRESS:
-    return ("NO_ADDRESS");
+  case NO_DATA:
+    return ("NO_DATA");
   case NO_RECOVERY:
     return ("NO_RECOVERY");
   case TRY_AGAIN:
@@ -41,11 +47,7 @@ char* sock_herrstr (h_error)
   }
 }
 
-
-int sock_getname (self, length, alias)
-     char* self;
-     int length;
-     int alias;
+int sock_getname (char* self, int length, int alias)
 {
   int ret;
   struct hostent *hp;
@@ -75,8 +77,7 @@ int sock_getname (self, length, alias)
 #endif
 
     if (!hp) {
-      fprintf (stderr, "sock_getname: gethostbyname: %s\n",
-	       sock_herrstr(h_errno));
+      fprintf (stderr, "sock_getname: gethostbyname: %s\n", sock_herrstr(h_errno));
       return -1;
     }
 
@@ -85,27 +86,26 @@ int sock_getname (self, length, alias)
   return 0;
 }
 
-int sock_create (port)
-     int  *port;
+int sock_create (int* port)
 {
   struct sockaddr_in server;
   int fd;
   socklen_t length;
-  int on = 1; 
-  
+  int on = 1;
+
   if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)  {
     perror ("sock_create: (err) socket");
     return -1;
   }
-  
+
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = INADDR_ANY;
   server.sin_port = htons(*port);
-  
-  /* redwards -- trying following to prevent the dreaded 
+
+  /* redwards -- trying following to prevent the dreaded
      bind() address already in use */
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)); 
-       
+  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+
   if (bind(fd, (struct sockaddr*) &server, sizeof(server))) {
     perror ("sock_create: (err) bind");
     return -1;
@@ -116,7 +116,7 @@ int sock_create (port)
     return -1;
   }
   *port = ntohs(server.sin_port);
-  
+
   /* listen for up to ten queued connection requests */
   if (listen(fd, 10) < 0)  {
     perror ("sockCreate: (err) listen");
@@ -126,8 +126,7 @@ int sock_create (port)
 }
 
 
-int sock_accept (fd)
-     int fd;
+int sock_accept (int fd)
 {
   int new_fd;
 
@@ -143,9 +142,7 @@ int sock_accept (fd)
 }
 
 /* opens an existing socket connection */
-int sock_open (host, port)
-     const char* host;
-     int   port;
+int sock_open (const char* host, int port)
 {
   struct hostent *hp;
   struct sockaddr_in server;
@@ -165,10 +162,10 @@ int sock_open (host, port)
     memset((char *)&server, 0, sizeof(server));
     memcpy(&server.sin_addr, hp->h_addr, hp->h_length);
 #else
-    memcpy(&(server.sin_addr.s_addr), hp->h_addr, hp->h_length);
+    memcpy(&(server.sin_addr.s_addr), hp->h_addr_list[0], hp->h_length);
 #endif
     server.sin_port = htons(port);
-  
+
   }
 
 #ifdef _REENTRANT
@@ -208,7 +205,6 @@ int sock_close (int fd)
   }
   return 0;
 }
-
 
 int sock_ready (int fd, int* to_read, int* to_write, float timeout)
 {
@@ -259,8 +255,6 @@ int sock_ready (int fd, int* to_read, int* to_write, float timeout)
   return ret;
 }
 
-
-
 /* returns a value of zero if no bytes were read before timeout seconds
 // have passed, -1 on error. */
 int sock_tm_read (int fd, void* buf, size_t size, float timeout)
@@ -279,7 +273,6 @@ int sock_tm_read (int fd, void* buf, size_t size, float timeout)
   return 0;
 }
 
-
 int sock_tm_write (int fd, void* buf, size_t size, float timeout)
 
      /* (fd, buf, size, timeout)
@@ -297,11 +290,7 @@ int sock_tm_write (int fd, void* buf, size_t size, float timeout)
   return 0;
 }
 
-
-int sock_read (fd, buf, size)
-     int   fd;
-     void* buf;
-     size_t   size;
+int sock_read (int fd, void* buf, size_t size)
 {
   int ret;
 
@@ -326,10 +315,7 @@ int sock_read (fd, buf, size)
   return ret;
 }
 
-int sock_write (fd, buf, size)
-     int   fd;
-     const void* buf;
-     size_t   size;
+int sock_write (int fd, const void* buf, size_t size)
 {
   int ret;
 
@@ -350,13 +336,12 @@ int sock_write (fd, buf, size)
 #endif
 	      ret = 0;
     }
-    
+
   return ret;
 }
 
 #ifdef _OSK
-int sock_block (fd)
-     int fd;
+int sock_block (int fd)
 {
   struct sgbuf buf;
   _gs_opt(fd,&buf);
@@ -364,8 +349,7 @@ int sock_block (fd)
   _ss_opt(fd,&buf);
 }
 
-int sock_nonblock (fd)
-     int fd;
+int sock_nonblock (int fd)
 {
   struct sgbuf buf;
   _gs_opt(fd,&buf);
@@ -376,8 +360,7 @@ int sock_nonblock (fd)
 
 #else
 
-int sock_block (fd)
-     int fd;
+int sock_block (int fd)
 {
   int flags;
   flags = fcntl(fd,F_GETFL);
@@ -385,13 +368,12 @@ int sock_block (fd)
   return fcntl(fd,F_SETFL,flags);
 }
 
-int sock_nonblock (fd)
-     int fd;
+int sock_nonblock (int fd)
 {
   int flags;
   flags = fcntl(fd,F_GETFL);
   flags |= O_NONBLOCK;
   return fcntl(fd,F_SETFL,flags);
 }
-  
+
 #endif

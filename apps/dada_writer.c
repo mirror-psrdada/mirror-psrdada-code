@@ -49,7 +49,7 @@ int main (int argc, char **argv)
 
   log = multilog_open ("dada_writer", daemon);
 
-  /* set up for daemon usage */	  
+  /* set up for daemon usage */
   if (daemon) {
     be_a_daemon ();
     multilog_serve (log, log_port);

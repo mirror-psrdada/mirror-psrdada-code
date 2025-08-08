@@ -1,9 +1,12 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_DISK_ARRAY_H
 #define __DADA_DISK_ARRAY_H
-
-/* ************************************************************************
-
-   ************************************************************************ */
 
 #include <pthread.h>
 #include <sys/types.h>
@@ -22,7 +25,7 @@ extern "C" {
   } disk_t;
 
   typedef struct {
-    
+
     disk_t*  disks;    /* disks to which data will be written */
     unsigned ndisk;    /* number of disks */
     uint64_t space;    /* number of bytes total */
@@ -31,7 +34,7 @@ extern "C" {
 
     /* for multi-threaded use of the dbdisk struct */
     pthread_mutex_t mutex;
-    
+
   } disk_array_t;
 
   /*! Create a new disk array */
@@ -62,4 +65,4 @@ extern "C" {
 }
 #endif
 
-#endif
+#endif // __DADA_DISK_ARRAY_H

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "command_parse.h"
 
 #include <string.h>
@@ -10,7 +17,7 @@ int command_parse_help (void* context, FILE* fptr, char* arg)
 {
   command_parse_t* parser = (command_parse_t*) context;
   unsigned icmd;
-  
+
   fprintf (fptr, "Available commands:\n\n");
 
   for (icmd=0; icmd < parser->ncmd; icmd++)
@@ -65,7 +72,7 @@ int command_parse_reply (command_parse_t* parser, FILE* fptr)
 }
 
 /* add a command to the list of available commands */
-int command_parse_add (command_parse_t* parser, 
+int command_parse_add (command_parse_t* parser,
 		       command cmd, void* context,
 		       const char* command_name,
 		       const char* short_help,
@@ -112,14 +119,14 @@ int command_parse_remove (command_parse_t* parser, const char* key)
 #ifdef _DEBUG
   fprintf (stderr, "command_parse_remove: '%s'\n", key);
 #endif
-  
+
   for (icmd=0; icmd < parser->ncmd; icmd++) {
-    
+
 #ifdef _DEBUG
     fprintf (stderr, "command_parse_remove: compare '%s'\n",
 	     parser->cmds[icmd].name);
 #endif
-    
+
     if (strcmp (key, parser->cmds[icmd].name) == 0) {
 #ifdef _DEBUG
       fprintf (stderr, "command_parse: match %d\n", icmd);
@@ -175,13 +182,13 @@ int command_parse_output (command_parse_t* parser, char* raw_cmd, FILE* out)
 #ifdef _DEBUG
   fprintf (stderr, "command_parse: key '%s'\n", key);
 #endif
-  
+
   for (icmd=0; icmd < parser->ncmd; icmd++) {
-    
+
 #ifdef _DEBUG
     fprintf (stderr, "command_parse: compare '%s'\n", parser->cmds[icmd].name);
 #endif
-    
+
     if (strcmp (key, parser->cmds[icmd].name) == 0) {
 #ifdef _DEBUG
       fprintf (stderr, "command_parse: match %d\n", icmd);

@@ -1,11 +1,19 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
 
 #include "config.h"
 #include "dada_def.h"
 #include "ipcbuf.h"
 
+#include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/ipc.h>  // for key_t
 #include <unistd.h>
 
 #ifdef HAVE_HWLOC
@@ -32,8 +40,8 @@ void usage ()
           " -l          lock the shared memory in RAM\n"
           " -n nbufs    number of buffers in ring      [default: %"PRIu64"]\n"
           " -p          page all blocks into RAM\n"
-          " -r nread     number of readers             [default: 1]\n"
-          " -w          persistance mode, wait for signal before destroying db\n",
+          " -r nread    number of readers              [default: 1]\n"
+          " -w          persistence mode, wait for signal before destroying db\n",
           DADA_DEFAULT_HEADER_SIZE,
           DADA_DEFAULT_BLOCK_SIZE,
           DADA_DEFAULT_BLOCK_KEY,
@@ -100,7 +108,7 @@ int main (int argc, char** argv)
         return -1;
       }
       break;
-        
+
     case 'b':
       if (sscanf (optarg, "%"PRIu64"", &bufsz) != 1) {
         fprintf (stderr, "dada_db: could not parse bufsz from %s\n", optarg);
@@ -142,7 +150,7 @@ int main (int argc, char** argv)
 #endif
 
     case 'k':
-      if (sscanf (optarg, "%x", &dada_key) != 1) 
+      if (sscanf (optarg, "%x", &dada_key) != 1)
       {
         fprintf (stderr, "dada_db: could not parse key from %s\n", optarg);
         return -1;
@@ -226,7 +234,7 @@ int main (int argc, char** argv)
 #endif
 
     // create data ring buffer
-    if (ipcbuf_create_work (&data_block, dada_key, nbufs, bufsz, num_readers, device_id) < 0) 
+    if (ipcbuf_create_work (&data_block, dada_key, nbufs, bufsz, num_readers, device_id) < 0)
     {
       fprintf (stderr, "Could not create DADA data block\n");
       return -1;
@@ -235,7 +243,7 @@ int main (int argc, char** argv)
             " nbufs=%"PRIu64" bufsz=%"PRIu64" nread=%d\n", nbufs, bufsz, num_readers);
 
     // create header ring buffer
-    if (ipcbuf_create (&header, dada_key + 1, nhdrs, hdrsz, num_readers) < 0) 
+    if (ipcbuf_create (&header, dada_key + 1, nhdrs, hdrsz, num_readers) < 0)
     {
       fprintf (stderr, "Could not create DADA header block\n");
       return -1;
@@ -251,7 +259,7 @@ int main (int argc, char** argv)
         fprintf (stderr, "Could not lock DADA data block into RAM\n");
         return -1;
       }
-      if (ipcbuf_lock (&header) < 0) 
+      if (ipcbuf_lock (&header) < 0)
       {
         fprintf (stderr, "Could not lock DADA header block into RAM\n");
         return -1;
@@ -261,7 +269,7 @@ int main (int argc, char** argv)
     // paging of memory buffers
     if (page)
     {
-      if (ipcbuf_page (&header) < 0) 
+      if (ipcbuf_page (&header) < 0)
       {
         fprintf (stderr, "Could not page DADA header block into RAM\n");
         return -1;
@@ -281,15 +289,15 @@ int main (int argc, char** argv)
         usleep(100000);
       }
     }
-
-#ifdef HAVE_HWLOC
-    // Destroy topology object.
-    hwloc_topology_destroy(topology);
-#endif
   }
 
+#ifdef HAVE_HWLOC
+  // Destroy topology object.
+  hwloc_topology_destroy(topology);
+#endif
+
   // if the data block is to be destroyed at the end of this program
-  if (destroy || persist) 
+  if (destroy || persist)
   {
     if (!persist)
     {
@@ -319,9 +327,8 @@ int main (int argc, char** argv)
   return 0;
 }
 
-void signal_handler(int signalValue) 
+void signal_handler(int signalValue)
 {
   quit = 1;
   return;
 }
-

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #ifndef __DADA_AFFINITY_H
 #define __DADA_AFFINITY_H
 
@@ -26,5 +33,4 @@ int dada_bind_thread_to_core(int core);
 }
 #endif
 
-
-#endif /* __DADA_AFFINITY_H */
+#endif // __DADA_AFFINITY_H

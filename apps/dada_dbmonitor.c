@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_hdu.h"
 #include "dada_def.h"
 
@@ -6,6 +13,7 @@
 #include "ascii_header.h"
 #include "daemon.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -78,7 +86,7 @@ int main (int argc, char **argv)
           return -1;
         }
         break;
-        
+
       default:
         usage ();
         return 0;
@@ -98,7 +106,7 @@ int main (int argc, char **argv)
   hdu = dada_hdu_create (log);
 
   dada_hdu_set_key(hdu, dada_key);
- 
+
   if (verbose)
     fprintf (stderr, "main: connecting to HDU\n");
   if (dada_hdu_connect (hdu) < 0)
@@ -107,7 +115,7 @@ int main (int argc, char **argv)
   // pointers to header and data blocks
   ipcbuf_t *hb = hdu->header_block;
   ipcbuf_t *db = (ipcbuf_t *) hdu->data_block;
-          
+
   uint64_t hdr_bufsz = ipcbuf_get_bufsz (hb);
   uint64_t hdr_nbufs = ipcbuf_get_nbufs (hb);
   uint64_t hdr_bytes = hdr_nbufs * hdr_bufsz;
@@ -145,15 +153,15 @@ int main (int argc, char **argv)
     fprintf(stderr,"    FRE FUL CLR     W     R");
   fprintf(stderr, "\n");
 
-  
-  while (!quit) 
+
+  while (!quit)
   {
     bufs_written = ipcbuf_get_write_count (hb);
     bufs_read = ipcbuf_get_read_count (hb);
     full_bufs = ipcbuf_get_nfull (hb);
     clear_bufs = ipcbuf_get_nclear (hb);
     available_bufs = (hdr_nbufs - full_bufs);
-    
+
     fprintf(stderr,"%3"PRIi64" %3"PRIu64" %3"PRIu64" %2"PRIu64" %2"PRIu64,
                     available_bufs, full_bufs, clear_bufs, bufs_written, bufs_read);
 
@@ -164,7 +172,7 @@ int main (int argc, char **argv)
       full_bufs = ipcbuf_get_nfull_iread (db, iread);
       clear_bufs = ipcbuf_get_nclear_iread (db, iread);
       available_bufs = (data_nbufs - full_bufs);
-    
+
       fprintf(stderr,"    %3"PRIi64" %3"PRIu64" %3"PRIu64" %5"PRIu64" %5"PRIu64,
                     available_bufs, full_bufs, clear_bufs, bufs_written, bufs_read);
     }

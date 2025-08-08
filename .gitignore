@@ -107,3 +107,5 @@ src/tests/test_command_parse_server
 src/tests/test_ipcio
 src/tests/test_multilog_server
 
+# VSCODE
+.vscode/c_cpp_properties.json

@@ -1,3 +1,10 @@
+/***************************************************************************
+ *
+ *    Copyright (C) 2010-2025 by Andrew Jameson and Willem van Straten
+ *    Licensed under the Academic Free License version 2.1
+ *
+ ****************************************************************************/
+
 #include "dada_ni.h"
 #include "sock.h"
 
@@ -15,7 +22,7 @@ dada_ni_t* dada_ni_create (int fd)
   net->header = 0;
   net->header_size = 0;
   net->total_data = 0;
-  net->total_transfered = 0;
+  net->total_transferred = 0;
   net->state = 0;
 
   return net;
@@ -46,7 +53,7 @@ int dada_ni_open_send (dada_ni_t* net, uint64_t total_data)
 
   net->state = 1;
   net->total_data = total_data;
-  net->total_transfered = 0;
+  net->total_transferred = 0;
 
   return 0;
 }
@@ -58,10 +65,10 @@ int dada_ni_check_xfer (dada_ni_t* net, int s, uint64_t size, const char* dir)
     return -1;
   }
 
-  if (net->total_transfered + size > net->total_data) {
-    fprintf (stderr, "dada_ni_%s: transfered=%"PRIu64
+  if (net->total_transferred + size > net->total_data) {
+    fprintf (stderr, "dada_ni_%s: transferred=%"PRIu64
 	     " + buffer=%"PRIu64" > total=%"PRIu64"\n", dir,
-	     net->total_transfered, size, net->total_data);
+	     net->total_transferred, size, net->total_data);
     return -1;
   }
 
@@ -94,7 +101,7 @@ int dada_ni_open_recv (dada_ni_t* net)
 
   net->state = -1;
   net->total_data = total_data;
-  net->total_transfered = 0;
+  net->total_transferred = 0;
 
   return 0;
 }
@@ -109,5 +116,3 @@ int dada_ni_recv (dada_ni_t* net, void* data, uint64_t data_size)
 
   return 0;
 }
-
-
