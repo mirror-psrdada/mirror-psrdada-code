@@ -1,12 +1,12 @@
 #
 # LIB_RDMACM([ACTION-IF-FOUND [,ACTION-IF-NOT-FOUND]])
 #
-# This m4 macro checks availablity of the RDMA CM library
+# This m4 macro checks availability of the RDMA CM library
 #
 # RDMACM_CFLAGS - autoconfig variable with flags required for compiling
 # RDMACM_LIBS   - autoconfig variable with flags required for linking
-# HAVE_RDMADM   - automake conditional
-# HAVE_RDMADM   - pre-processor macro in config.h
+# HAVE_RDMACM   - automake conditional
+# HAVE_RDMACM   - pre-processor macro in config.h
 #
 # This macro tries to get RDMACM CFLAGS and LIBS using the
 # pkg-config program.  If that is not available, it
@@ -25,7 +25,7 @@ AC_DEFUN([LIB_RDMACM],
   AC_MSG_CHECKING([for RDMACM Library (Infiniband) installation])
 
   RDMACM_CFLAGS=""
-  RDMACM_LIBS="-lrdmacm -libverbs"
+  RDMACM_LIBS="-rdmacm -libverbs"
 
   ac_save_CFLAGS="$CFLAGS"
   ac_save_LIBS="$LIBS"

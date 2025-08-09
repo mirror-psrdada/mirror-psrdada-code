@@ -17,6 +17,11 @@
 
    ************************************************************************ */
 
+/* version specification of the PSRDADA library */
+#define DADA_MAJOR_VERSION 1
+#define DADA_MINOR_VERSION 1
+#define DADA_PATCH_VERSION 0
+
 /* base key number used to identify DATA header and data block */
 #define DADA_DEFAULT_BLOCK_KEY 0x0000dada
 

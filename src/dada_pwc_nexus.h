@@ -73,7 +73,7 @@ extern "C" {
   int dada_pwc_nexus_serve (dada_pwc_nexus_t* nexus);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_PWC_NEXUS_H

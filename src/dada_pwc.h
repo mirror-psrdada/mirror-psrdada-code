@@ -204,7 +204,7 @@ extern "C" {
   const char * dada_pwc_cmd_code_string(int command_code);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_PWC_H

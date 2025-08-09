@@ -101,7 +101,7 @@ extern "C" {
   int dada_client_close (dada_client_t* client);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif

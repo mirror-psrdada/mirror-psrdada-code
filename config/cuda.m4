@@ -1,10 +1,10 @@
 #
 # LIB_CUDA([ACTION-IF-FOUND [,ACTION-IF-NOT-FOUND]])
 #
-# cuda_nvcc   - autoconfig variable with path to nvcc compier
-# CUDA_CFLAGS - autoconfig varibale with flags for compiling
+# cuda_nvcc   - autoconfig variable with path to nvcc compiler
+# CUDA_CFLAGS - autoconfig variable with flags for compiling
 # CUDA_LIBS   - autoconfig variable with flags for linking
-# HAVE_CUDA   - automake conditional for prescense of CUDA
+# HAVE_CUDA   - automake conditional for presence of CUDA
 # ----------------------------------------------------------
 #
 AC_DEFUN([LIB_CUDA],

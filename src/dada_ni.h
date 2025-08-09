@@ -62,7 +62,7 @@ extern "C" {
   int dada_ni_recv (dada_ni_t* net, void* data, uint64_t data_size);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_NI_H

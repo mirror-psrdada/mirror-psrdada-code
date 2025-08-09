@@ -1,0 +1,11 @@
+
+# CHANGE LOG
+
+## 1.1.0
+
+* Enable EOD on header block buffers before marking them filled, ensuring header block xfers are aligned with data block xfers.
+* Fix numerous spelling, whitespace, linting and syntax issues.
+
+## 1.0.0
+
+* Initial versioned library release

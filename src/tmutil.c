@@ -31,7 +31,6 @@ time_t str2utctime (const char* str)
   return str2utctm (&time, str);
 }
 
-
 time_t str2tm (struct tm* time, const char* str)
 {
   char* temp = 0;         /* duplicate of input */
@@ -83,7 +82,6 @@ time_t str2tm (struct tm* time, const char* str)
   if (endstr < 0)
     return -1;
   temp [endstr+1] = '\0';
-
 
   /* parse UTC seconds */
   trav = endstr - 1;
@@ -225,7 +223,6 @@ time_t mjd2utctm (double mjd)
   time_t date = mktime (&gregdate);
 
   return date;
-
 }
 
 void float_sleep (float seconds)

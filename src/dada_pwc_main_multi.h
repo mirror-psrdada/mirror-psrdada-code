@@ -81,7 +81,7 @@ extern "C" {
 
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_PWC_MAIN_MULTI_H

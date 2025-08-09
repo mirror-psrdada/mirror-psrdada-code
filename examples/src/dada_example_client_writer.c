@@ -1,8 +1,8 @@
 /***************************************************************************
- *  
+ *
  *    Copyright (C) 2017-2025 by Andrew Jameson
  *    Licensed under the Academic Free License version 2.1
- * 
+ *
  ****************************************************************************/
 
 // DADA includes for this example
@@ -32,7 +32,7 @@ int64_t example_dada_client_write (dada_client_t* client, void* data, uint64_t d
 int64_t example_dada_client_writer_write_block (dada_client_t* client, void* data, uint64_t data_size, uint64_t block_id);
 int example_dada_client_writer_close (dada_client_t* client, uint64_t bytes_written);
 
-typedef struct 
+typedef struct
 {
   dada_hdu_t * hdu;
   multilog_t * log;      // logging interface
@@ -68,7 +68,7 @@ int example_dada_client_writer_open (dada_client_t* client)
   if (fileread (ctx->header_file, ctx->obs_header, DADA_DEFAULT_HEADER_SIZE) < 0)
   {
     free (ctx->obs_header);
-    multilog (ctx->log, LOG_ERR, "could not read ASCII header from %s\n", ctx->header_file); 
+    multilog (ctx->log, LOG_ERR, "could not read ASCII header from %s\n", ctx->header_file);
     return (EXIT_FAILURE);
   }
   ctx->header_written = 0;
@@ -93,7 +93,7 @@ int64_t example_dada_client_writer_write (dada_client_t* client, void* data, uin
     // Enable EOD so that subsequent transfers will move to the next buffer in the header block
     if (ipcbuf_enable_eod (ctx->hdu->header_block) < 0)
     {
-      multilog (log, LOG_ERR, "Could not enable EOD on Header Block\n");
+      multilog (ctx->log, LOG_ERR, "Could not enable EOD on Header Block\n");
       return -1;
     }
 
@@ -108,7 +108,7 @@ int64_t example_dada_client_writer_write (dada_client_t* client, void* data, uin
   else
   {
     // write data to the data_size bytes to the data_block
-    memset (data, 0, data_size); 
+    memset (data, 0, data_size);
   }
   return data_size;
 }
@@ -147,14 +147,14 @@ int main (int argc, char **argv)
   // DADA Primary Read Client main loop
   dada_client_t* client = 0;
 
-  // dada key for SHM 
+  // dada key for SHM
   key_t dada_key = DADA_DEFAULT_BLOCK_KEY;
 
   int arg = 0;
 
   while ((arg=getopt(argc,argv,"hk:")) != -1)
   {
-    switch (arg) 
+    switch (arg)
     {
       case 'k':
         if (sscanf (optarg, "%x", &dada_key) != 1) {
@@ -166,12 +166,12 @@ int main (int argc, char **argv)
       default:
         usage ();
         return 0;
-      
+
     }
   }
 
   // check the header file was supplied
-  if ((argc - optind) != 1) 
+  if ((argc - optind) != 1)
   {
     fprintf (stderr, "ERROR: header must be specified\n");
     usage();

@@ -12,7 +12,7 @@ if autoreconf --install --force; then
 else
 
   echo
-  echo "An error occured while running the GNU autotools."
+  echo "An error occurred while running the GNU autotools."
   echo "Please see http://psrchive.sourceforge.net/third/autotools"
   echo
   exit -1

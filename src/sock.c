@@ -357,7 +357,6 @@ int sock_nonblock (int fd)
   _ss_opt(fd,&buf);
 }
 
-
 #else
 
 int sock_block (int fd)

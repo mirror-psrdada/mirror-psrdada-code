@@ -130,7 +130,7 @@ extern "C" {
   int ipcio_zero_next_block (ipcio_t *ipc);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_IPCIO_H

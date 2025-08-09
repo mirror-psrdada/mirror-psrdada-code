@@ -23,7 +23,7 @@ AC_DEFUN([LIB_HWLOC],
               AC_HELP_STRING([--with-hwloc-dir=DIR],
                              [HWLOC is installed in DIR]))
 
-  AC_MSG_CHECKING([for HWLOC libary installation])
+  AC_MSG_CHECKING([for HWLOC library installation])
 
   HWLOC_CFLAGS=`pkg-config --cflags hwloc`
   HWLOC_LIBS=`pkg-config --libs hwloc`

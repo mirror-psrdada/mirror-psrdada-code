@@ -51,7 +51,7 @@ extern "C" {
   int multilog_fprintf(FILE* stream, int priority, const char* format, ...);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_MULTILOG_H

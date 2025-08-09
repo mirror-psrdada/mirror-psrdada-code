@@ -95,7 +95,7 @@ extern "C" {
   char ** dada_hdu_hb_addresses(dada_hdu_t * hdu, uint64_t * nbufs, uint64_t * bufsz);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_HDU_H

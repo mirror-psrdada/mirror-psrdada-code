@@ -31,7 +31,7 @@ extern "C" {
   int ipc_zero_buffer_cuda (void * devPtr, size_t nbytes);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // _DADA_IPCUTIL_CUDA_H

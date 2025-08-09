@@ -49,7 +49,7 @@ extern "C" {
   int monitor_launch (monitor_t* monitor);
 
 #ifdef __cplusplus
-	   }
+}
 #endif
 
 #endif // __DADA_MONITOR_H
