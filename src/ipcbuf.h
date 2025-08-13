@@ -132,6 +132,9 @@ extern "C" {
   /*! Unlock this process in as the data writer */
   int ipcbuf_unlock_write (ipcbuf_t*);
 
+  /*! Relock this process in as the data writer, without releasing the IPCBUF_WRITE semaphore */
+  int ipcbuf_relock_write (ipcbuf_t*);
+
   /*! Disable the start-of-data flag */
   int ipcbuf_disable_sod (ipcbuf_t*);
 

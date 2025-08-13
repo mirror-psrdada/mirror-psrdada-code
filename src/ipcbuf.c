@@ -564,6 +564,24 @@ int ipcbuf_unlock_write (ipcbuf_t* id)
   return 0;
 }
 
+int ipcbuf_relock_write (ipcbuf_t* id)
+{
+  if (!ipcbuf_is_writer (id))
+  {
+    fprintf (stderr, "ipcbuf_relock_write: state != WRITER || WCHANGE || WRITING\n");
+    return -1;
+  }
+
+  /* WCHANGE is a special state that means the process will change into the
+     WRITING state on the first call to get_next_write */
+  id->state = IPCBUF_WCHANGE;
+  id->sync->w_state = IPCBUF_WCHANGE;
+
+  id->xfer = id->sync->w_xfer % IPCBUF_XFERS;
+
+  return 0;
+}
+
 char ipcbuf_is_writing (ipcbuf_t* id)
 {
   return id->state == IPCBUF_WRITING;
@@ -900,7 +918,7 @@ int ipcbuf_mark_filled (ipcbuf_t* id, uint64_t nbytes)
 
   sync = id->sync;
 
-  // end of a transfers, mark end of data on this transfer
+  // end of a transfer, mark end of data on this transfer
   if (id->state == IPCBUF_WCHANGE || nbytes < sync->bufsz)
   {
 #ifdef _DEBUG
@@ -1045,7 +1063,7 @@ int ipcbuf_lock_read (ipcbuf_t* id)
     fprintf (stderr, "ipcbuf_lock_read: BEFORE decrement [%d] READER_CONN=%d\n",
                       oldest_iread, semctl (id->semid_data[oldest_iread], IPCBUF_READER_CONN, GETVAL));
 #endif
-    //  try to decrement the reader connected semaphore for this reader
+    // try to decrement the reader connected semaphore for this reader
     if (ipc_semop (id->semid_data[oldest_iread], IPCBUF_READER_CONN, -1, IPC_NOWAIT | SEM_UNDO) < 0)
     {
       if ( errno == EAGAIN )
@@ -1805,7 +1823,6 @@ uint64_t ipcbuf_get_read_count_iread (ipcbuf_t* id, unsigned iread)
 {
   return id->sync->r_bufs[iread];
 }
-
 
 uint64_t ipcbuf_get_read_index (ipcbuf_t* id)
 {
