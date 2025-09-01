@@ -873,7 +873,7 @@ ssize_t ipcio_read (ipcio_t* ipc, char* ptr, size_t bytes)
       ipc->curbuf = ipcbuf_get_next_read ((ipcbuf_t*)ipc, &(ipc->curbufsz));
 
 #ifdef _DEBUG
-      fprintf (stderr, "ipcio_read buffer:%"PRIu64" %"PRIu64" bytes. buf[0]=%p\n",
+      fprintf (stderr, "ipcio_read: buffer:%"PRIu64" %"PRIu64" bytes. buf[0]=%p\n",
                ipc->buf.sync->r_bufs[0], ipc->curbufsz, (void *) (ipc->curbuf));
 #endif
 
@@ -907,7 +907,7 @@ ssize_t ipcio_read (ipcio_t* ipc, char* ptr, size_t bytes)
             fprintf (stderr, "ipcio_read: cudaMemcpy failed %s\n", cudaGetErrorString(err));
           }
 #ifdef _DEBUG
-          fprintf (stderr, "ipcio_write: cudaDeviceSynchronize()\n");
+          fprintf (stderr, "ipcio_read: cudaDeviceSynchronize()\n");
 #endif
           cudaDeviceSynchronize();
         }
@@ -915,7 +915,7 @@ ssize_t ipcio_read (ipcio_t* ipc, char* ptr, size_t bytes)
 #endif
         {
 #ifdef _DEBUG
-        fprintf (stderr, "ipcio_read: memcpy (%p, %p, ,%"PRIu64")\n",
+          fprintf (stderr, "ipcio_read: memcpy (%p, %p, %"PRIu64")\n",
                          (void *) ptr, (void *) ipc->curbuf + ipc->bytes, space);
 #endif
           memcpy (ptr, ipc->curbuf + ipc->bytes, space);
@@ -938,7 +938,7 @@ ssize_t ipcio_read (ipcio_t* ipc, char* ptr, size_t bytes)
       ipc->curbuf = 0;
       ipc->bytes = 0;
     }
-    else if (!bytes)
+    if (!bytes)
       break;
   }
 
