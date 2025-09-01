@@ -12,7 +12,6 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <ctype.h>
 
 string_array_t* string_array_create ()
 {

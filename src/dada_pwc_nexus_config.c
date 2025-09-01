@@ -6,9 +6,7 @@
  ****************************************************************************/
 
 #include "dada_pwc_nexus.h"
-#include "futils.h"
 
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 

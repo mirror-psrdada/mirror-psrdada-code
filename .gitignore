@@ -110,3 +110,6 @@ src/tests/test_multilog_server
 
 # VSCODE
 .vscode/c_cpp_properties.json
+
+# CLANG
+.clangd

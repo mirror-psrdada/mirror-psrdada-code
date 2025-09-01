@@ -9,6 +9,7 @@
 #define __DADA_IPCIO_CUDA_H
 
 #include "ipcio.h"
+#include <cuda_runtime.h>
 
 // if zeroing buffers from a pointer is permitted
 #define DADA_IPCIO_READ_ZERO_CUDA

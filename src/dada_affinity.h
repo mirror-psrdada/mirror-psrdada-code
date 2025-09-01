@@ -16,9 +16,6 @@
 #define _GNU_SOURCE 1
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
 #include <sys/syscall.h>
 #include <sys/mman.h>
 #include <sched.h>

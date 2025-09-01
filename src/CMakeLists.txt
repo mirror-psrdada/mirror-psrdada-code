@@ -23,7 +23,6 @@ set(public_headers
     ipcio.h
     ipcutil.h
     mach_gettime.h
-    median_smooth_zap.h
     monitor.h
     multilog.h
     nexus.h

@@ -19,7 +19,6 @@ extern "C" {
 #endif
 
 #include "dada_hdu.h"
-#include "ipcbuf.h"
 
 typedef enum {
   PINNED,

@@ -14,7 +14,7 @@
 
 #include <inttypes.h>
 #include <math.h>
-#include <stdio.h>
+#include <stdlib.h>
 
 /*
  * prints the binary representation of a char
@@ -23,7 +23,7 @@ char * char_to_binary_string(char value)
 {
   char * string = (char *) malloc(sizeof(char)*9);
   char c;
-  char displayMask = 1 << 7;
+  char displayMask = (char) (1 << 7);
 
   for (c=1; c<= 8; c++) {
     string[c-1] = value & displayMask ? '1' : '0';
@@ -36,7 +36,7 @@ char * char_to_binary_string(char value)
 void char_to_bstring (char * string, char value)
 {
   char c;
-  char displayMask = 1 << 7;
+  char displayMask = (char) (1 << 7);
 
   for (c=1; c<= 8; c++)
   {

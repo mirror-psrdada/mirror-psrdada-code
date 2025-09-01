@@ -4,7 +4,6 @@ set(tests
     test_command_parser.c
     test_disk_array.c
     test_ipcbuf.c
-    test_median_smooth_zap.c
     test_multilog.c
     test_uint64_t.c
     test_ipcio.c

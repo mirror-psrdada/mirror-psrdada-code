@@ -2027,4 +2027,5 @@ const char * _ipcbuf_get_state_name(int state)
     return "VIEWING";
   if (state == IPCBUF_VSTOP)
     return "VSTOP";
+  return "UNKNOWN";
 }

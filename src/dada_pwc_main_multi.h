@@ -18,7 +18,6 @@
 #include "dada_pwc.h"
 #include "multilog.h"
 #include "dada_hdu.h"
-#include "ipcio.h"
 
 #ifdef __cplusplus
 extern "C" {

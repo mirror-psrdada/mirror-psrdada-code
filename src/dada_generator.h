@@ -12,9 +12,7 @@
  * Functions for generating 2/4/8 bit signals
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <inttypes.h>
 
 #ifdef __cplusplus
 extern "C" {

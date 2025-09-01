@@ -8,7 +8,6 @@ TESTS = \
   test_command_parser \
   test_disk_array \
   test_ipcbuf \
-  test_median_smooth_zap \
   test_multilog \
   test_uint64_t \
   test_ipcio \

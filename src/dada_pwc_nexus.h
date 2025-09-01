@@ -18,7 +18,6 @@
 #include "dada_pwc.h"
 #include "nexus.h"
 #include "monitor.h"
-#include "string_array.h"
 
 #ifdef __cplusplus
 extern "C" {
